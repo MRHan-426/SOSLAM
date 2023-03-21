@@ -2,6 +2,15 @@
 
 ## log  
 
+### 20230321  Ziqi Han
+
+If you want to modify gtsam_quadric code (C++), you can run:
+
+```shell
+python setup.py build_ext --inplace
+pip install -e .
+```
+
 ### 20230320  Ziqi Han
 
 please name as PlaneSupportingFactor, SemanticScaleFactor. I need Factors between Gtsam::Pose3() 
