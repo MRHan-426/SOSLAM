@@ -12,6 +12,12 @@ python setup.py build_ext --inplace
 pip install -e .
 ```
 
+If you want to modify quadricslam code (Python), you can run:
+
+```shell
+pip install .
+```
+
 ### 20230320  Ziqi Han
 
 please name as PlaneSupportingFactor, SemanticScaleFactor. I need Factors between Gtsam::Pose3() 
