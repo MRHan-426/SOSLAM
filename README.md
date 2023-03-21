@@ -11,6 +11,7 @@ If you want to modify gtsam_quadric code (C++), you can run:
 python setup.py build_ext --inplace
 pip install -e .
 ```
+But this one is relatively slow, because it will compile all files. I don't know how to deal with it.
 
 If you want to modify quadricslam code (Python), you can run:
 
