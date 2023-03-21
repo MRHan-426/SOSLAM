@@ -8,10 +8,23 @@
 If you want to modify gtsam_quadric code (C++), you can run:
 
 ```shell
-python setup.py build_ext --inplace
-pip install -e .
+pip install .
 ```
-But this one is relatively slow, because it will compile all files. I don't know how to deal with it.
+
+Be aware to delete the following code in "setup.py"
+
+```shell
+shutil.rmtree(os.path.join(build_lib_dir, 'gtsam'), ignore_errors=True)
+shutil.copytree(os.path.join(build_dir, 'gtsam', 'python', 'gtsam'),
+                os.path.join(build_lib_dir, 'gtsam'))
+shutil.copy(os.path.join(build_dir, gtsam_quadrics_so),
+            os.path.join(build_lib_dir, gtsam_quadrics_so))
+shutil.copy(os.path.join(build_lib_dir, "gtsam", gtsam_so),
+            os.path.join(source_dir, gtsam_so))
+shutil.copy(os.path.join(build_lib_dir, gtsam_quadrics_so),
+            os.path.join(source_dir, gtsam_quadrics_so))
+
+```
 
 If you want to modify quadricslam code (Python), you can run:
 
