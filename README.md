@@ -11,7 +11,7 @@ If you want to modify gtsam_quadric code (C++), you can run:
 pip install .
 ```
 
-Be aware to delete the following code in "setup.py"
+Be aware to delete the following code in "setup.py". Otherwise it will be relatively slow, because you will recompile gtsam.
 
 ```shell
 shutil.rmtree(os.path.join(build_lib_dir, 'gtsam'), ignore_errors=True)
