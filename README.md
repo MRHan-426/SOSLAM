@@ -2,6 +2,21 @@
 
 ## log  
 
+### 20230322  Ziqi Han
+
+Finish initialization, which create a new graph and add factors to optimize.
+
+```shell
+ConstrainedDualQuadric ConstrainedDualQuadric::initialize(
+    const AlignedBox2 &measured,
+    const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
+    const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
+    const gtsam::SharedNoiseModel &model,
+    const gtsam::Pose3 &pose,
+    const MeasurementModel &errorType = STANDARD)
+```
+
+TODO: How to get camera pose in a easy way?
 
 ### 20230321  Ziqi Han
 
