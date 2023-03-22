@@ -20,10 +20,12 @@ shutil.rmtree(os.path.join(build_lib_dir, 'gtsam'), ignore_errors=True)
 
 If you fail, please check and set virtual memory:
 
+
 ```shell
 c++: fatal error: Killed signal terminated program cc1plus
   compilation terminated.
 ```
+
 
 If you want to modify quadricslam code (Python), you can run:
 
