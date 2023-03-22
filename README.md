@@ -4,6 +4,14 @@
 
 ### 20230322  Ziqi Han
 
+Finish semantic scale constraint, TODO: design full semantic table.
+
+```shell
+SemanticTable.h
+SemanticScaleFactor.cpp
+SemanticScaleFactor.h
+```
+
 Finish initialization, which create a new graph and add factors to optimize.
 
 ```shell
