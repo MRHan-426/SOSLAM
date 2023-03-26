@@ -44,7 +44,7 @@ sudo make install
 cmake_minimum_required(VERSION 3.18)
 project(gtsam_soslam)
 set(GTSAM_SOSLAM_VERSION 0.0.1)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra")
 
 # Find packages
 find_package(Eigen3 REQUIRED)
