@@ -12,8 +12,8 @@ SoSlam::SoSlam(
     // DummyData data_source,
     // DummyDetector detector,
     // DummyAssociator associator,
-    const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
-    const bool& optimizer_batch = true
+    const gtsam::Pose3& initial_pose,
+    const bool& optimizer_batch
     ):
     // data_source_(data_source),
     // detector_(detector),
