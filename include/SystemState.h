@@ -1,5 +1,6 @@
 #ifndef SYSTEMSTATE_H
 #define SYSTEMSTATE_H
+#include "Constants.h"
 
 #include <vector>
 #include <map>
