@@ -3,7 +3,7 @@
 #include "ConstrainedDualQuadric.h"
 #include "AlignedBox2.h"
 #include "BoundingBoxFactor.h"
-#include "DummyExample.h"
+// #include "DummyExample.h"
 
 #include <optional>
 #include <functional>
@@ -17,28 +17,29 @@ namespace gtsam_soslam{
 class SoSlam {
 public:
     // TODO：Class Associator, DataSource, DummyDetector
-    DummyData data_source_;
-    DummyAssociator associator_;
-    DummyDetector detector_;
+    // DummyData data_source_;
+    // DummyAssociator associator_;
+    // DummyDetector detector_;
     // VisualOdometry visual_odometry_;
     gtsam::Pose3 initial_pose_;
     bool optimizer_batch_;
-    SoSlamState state_;
 
 
     SoSlam(
-        DummyData data_source,
-        DummyDetector detector,
-        DummyAssociator associator,
+        // DummyData data_source,
+        // DummyDetector detector,
+        // DummyAssociator associator,
         //VisualOdometry visual_odometry = std::nullptr, //Optional
-        gtsam::Pose3 initial_pose,
-        bool optimizer_batch = true
+        const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
+        const bool& optimizer_batch = true
     );
 
-    void guess_initial_values();
-    void spin();
-    void step();
-    void reset();
+private:
+    SoSlamState state_; 
+    // void guess_initial_values();
+    // void spin();
+    // void step();
+    // void reset();
 
 };
 }//namespace gtsam_soslam

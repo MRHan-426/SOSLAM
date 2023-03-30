@@ -10,7 +10,7 @@ find_package(Boost REQUIRED)
 
 # Set include directories
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include
     ${EIGEN3_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${GTSAM_INCLUDE_DIR}
@@ -20,16 +20,16 @@ link_directories(${Boost_LIBRARY_DIR})
 
 # Add library
 add_library(${PROJECT_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/AlignedBox2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/AlignedBox3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/BoundingBoxFactor.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConstrainedDualQuadric.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DualConic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/QuadricAngleFactor.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/QuadricCamera.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/SoSlam.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Constants.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Utilities.cpp
+    ${PROJECT_SOURCE_DIR}/src/AlignedBox2.cpp
+    ${PROJECT_SOURCE_DIR}/src/AlignedBox3.cpp
+    ${PROJECT_SOURCE_DIR}/src/BoundingBoxFactor.cpp
+    ${PROJECT_SOURCE_DIR}/src/ConstrainedDualQuadric.cpp
+    ${PROJECT_SOURCE_DIR}/src/DualConic.cpp
+    ${PROJECT_SOURCE_DIR}/src/QuadricAngleFactor.cpp
+    ${PROJECT_SOURCE_DIR}/src/QuadricCamera.cpp
+    ${PROJECT_SOURCE_DIR}/src/SoSlam.cpp
+    ${PROJECT_SOURCE_DIR}/src/Constants.cpp
+    ${PROJECT_SOURCE_DIR}/src/Utilities.cpp
     )
 target_link_libraries(${PROJECT_NAME}
     ${EIGEN3_LIBS}

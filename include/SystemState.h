@@ -1,6 +1,5 @@
 #ifndef SYSTEMSTATE_H
 #define SYSTEMSTATE_H
-#include "SoSlam.h"
 
 #include <vector>
 #include <map>
@@ -51,7 +50,7 @@ public:
     }
 };
 
-class SystemState {
+class SoSlamState {
 public:
 
     gtsam::Pose3 initial_pose_;
@@ -69,7 +68,9 @@ public:
     gtsam::NonlinearFactorGraph graph_;
     gtsam::Values estimates_;
     double calib_depth_;
-    gtsam::Cal3_S2 calib_rgb_;
+    boost::optional<gtsam::Matrix> calib_rgb_;
+    StepState prev_step;
+    StepState this_step;
     SystemState(const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()), const bool& optimizer_batch = true)
         : initial_pose_(initial_pose),
           noise_prior_(gtsam::noiseModel::Diagonal::Variances((gtsam::Vector(6) << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0).finished())),
@@ -89,12 +90,12 @@ public:
 };
 
 
-class SoSlamState {
-public:
-    SystemState system;
-    StepState prev_step;
-    StepState this_step;
-    SoSlamState(SystemState& system){};
-};
+// class SoSlamState {
+// public:
+//     SystemState system;
+//     StepState prev_step;
+//     StepState this_step;
+//     SoSlamState(SystemState& system){};
+// };
 } //gtsam_soslam
 #endif // SYSTEMSTATE_H
