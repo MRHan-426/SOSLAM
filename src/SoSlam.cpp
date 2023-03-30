@@ -165,21 +165,21 @@ SoSlam::SoSlam(
 // }
 
 
-// void SoSlam::reset() {
+void SoSlam::reset() {
 
-//     data_source_.restart();
-//     auto& s = state_.system;
-//     s.associated_.clear();
-//     s.unassociated_.clear();
-//     s.labels_.clear();
-//     s.graph_ = gtsam::NonlinearFactorGraph();
-//     s.estimates_ = gtsam::Values();
-//     s.optimizer_params_ = std::monostate{};
-//     s.optimizer_ = std::monostate{};
-//     s.calib_depth_ = data_source_.calib_depth();
-//     s.calib_rgb_ = data_source_.calib_rgb();
-//     StepState new_step;
-//     state_.prev_step = new_step;
-//     state_.this_step = new_step;
-// }
+    data_source_.restart();
+    auto& s = state_;
+    s.associated_.clear();
+    s.unassociated_.clear();
+    s.labels_.clear();
+    s.graph_ = gtsam::NonlinearFactorGraph();
+    s.estimates_ = gtsam::Values();
+    s.optimizer_params_ = gtsam::ISAM2Params();
+    s.optimizer_ = gtsam::ISAM2();
+    // s.calib_depth_ = data_source_.calib_depth();
+    s.calib_rgb_ = data_source_.calib_rgb();
+    StepState new_step;
+    state_.prev_step = new_step;
+    state_.this_step = new_step;
+}
 }

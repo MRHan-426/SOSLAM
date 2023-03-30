@@ -19,14 +19,15 @@ public:
         restart();
     }
 
-    gtsam::Cal3_S2 calib_rgb() {
+    gtsam::Vector5 calib_rgb() {
         double fx = 525.0;
         double fy = 525.0;
         double s = 0.0;
         double u0 = 160.0;
         double v0 = 120.0;
         
-        gtsam::Cal3_S2 result(fx, fy, s, u0, v0);
+        gtsam::Vector5 result;
+        result<<fx, fy, s, u0, v0;
         return result;
     }
 

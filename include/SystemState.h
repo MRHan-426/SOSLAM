@@ -75,7 +75,7 @@ public:
     std::map<int, std::string> labels_;
     gtsam::NonlinearFactorGraph graph_;
     gtsam::Values estimates_;
-    double calib_depth_;
+    // double calib_depth_;
     gtsam::Vector5 calib_rgb_;
     StepState prev_step;
     StepState this_step;

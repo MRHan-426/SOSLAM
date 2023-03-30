@@ -41,7 +41,7 @@ public:
     // void guess_initial_values();
     // void spin();
     // void step();
-    // void reset();
+    void reset();
 
 };
 }//namespace gtsam_soslam
