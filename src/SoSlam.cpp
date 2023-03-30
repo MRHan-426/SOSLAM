@@ -21,7 +21,7 @@ SoSlam::SoSlam(
     optimizer_batch_(optimizer_batch)
 {
     state_ = SoSlamState(initial_pose, optimizer_batch);
-    // reset();
+    reset();
 }
 
 // void SoSlam::guess_initial_values() {
