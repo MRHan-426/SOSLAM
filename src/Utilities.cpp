@@ -147,23 +147,23 @@ ConstrainedDualQuadric initialize_quadric_ray_intersection(
     SoSlamState& state
 ) {
     // Get each observation point
-    Eigen::MatrixXd ps(obs_poses.size(), 3);
+    gtsam::Matrix ps(obs_poses.size(), 3);
     for (size_t i = 0; i < obs_poses.size(); ++i) {
-        ps.row(i) = obs_poses[i].translation().vector();
+        ps.row(i) = obs_poses[i].translation();
     }
 
     // Get each observation direction
-    Eigen::MatrixXd vs(obs_poses.size(), 3);
+    gtsam::Matrix vs(obs_poses.size(), 3);
     for (size_t i = 0; i < obs_poses.size(); ++i) {
         vs.row(i) = obs_poses[i].rotation().matrix().col(0);
     }
-
+    
     // Apply this to compute point closest to where all rays converge
-    Eigen::MatrixXd i_minus_vs = Eigen::MatrixXd::Identity(3, 3) - vs * vs.transpose();
-    Eigen::VectorXd b = i_minus_vs * ps;
-    Eigen::VectorXd A_sum = i_minus_vs.colwise().sum();
-    Eigen::VectorXd x = A_sum.fullPivHouseholderQr().solve(b);
-    Eigen::Vector3d quadric_centroid = x.transpose();
+    gtsam::Matrix i_minus_vs = Eigen::MatrixXd::Identity(3, 3) - vs * vs.transpose();
+    gtsam::Vector b = i_minus_vs * ps;
+    gtsam::Vector A_sum = i_minus_vs.colwise().sum();
+    gtsam::Vector x = A_sum.fullPivHouseholderQr().solve(b);
+    gtsam::Vector3 quadric_centroid = x.transpose();
 
     // Fudge the rest for now
     return ConstrainedDualQuadric(
@@ -171,10 +171,10 @@ ConstrainedDualQuadric initialize_quadric_ray_intersection(
 }
 
 void visualize(SoSlamState& state){
-  auto values = state.system.estimates_;
-  auto labels = state.system.labels_;
-  auto block = state.system.optimizer_batch_;
-  std::cout<<values<<std::endl<<labels<<std::endl<<block<<std::endl;
+  auto values = state.estimates_;
+  auto labels = state.labels_;
+  auto block = state.optimizer_batch_;
+  // std::cout<< values <<std::endl<<labels<<std::endl<<block<<std::endl;
 }
 
 std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values& values) {
@@ -182,7 +182,7 @@ std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDu
     std::map<gtsam::Key, ConstrainedDualQuadric> qs;
     
     for (const auto& key_value_pair : values) {
-        gtsam::Key key = key_value_pair.first;
+        gtsam::Key key = key_value_pair.key;
         char symbol_char = gtsam::Symbol(key).chr();
         
         if (symbol_char == 'x') {
@@ -241,7 +241,8 @@ gtsam::Values new_values(const gtsam::Values& current, const gtsam::Values& prev
     gtsam::Values out;
     for (const auto& key_value_pair : vs) {
         if (key_value_pair.second.type() == typeid(ConstrainedDualQuadric)) {
-            boost::get<ConstrainedDualQuadric>(key_value_pair.second).addToValues(out, key_value_pair.first);
+            auto q = boost::get<ConstrainedDualQuadric>(key_value_pair.second);
+            q.addToValues(out, key_value_pair.first);
         } else {
             out.insert(key_value_pair.first, boost::get<gtsam::Pose3>(key_value_pair.second));
         }
