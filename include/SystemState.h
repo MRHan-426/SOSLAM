@@ -71,7 +71,7 @@ public:
     boost::optional<gtsam::Matrix> calib_rgb_;
     StepState prev_step;
     StepState this_step;
-    SystemState(const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()), const bool& optimizer_batch = true)
+    SoSlamState(const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()), const bool& optimizer_batch = true)
         : initial_pose_(initial_pose),
           noise_prior_(gtsam::noiseModel::Diagonal::Variances((gtsam::Vector(6) << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0).finished())),
           noise_odom_(gtsam::noiseModel::Diagonal::Variances((gtsam::Vector(6) << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01).finished())),
