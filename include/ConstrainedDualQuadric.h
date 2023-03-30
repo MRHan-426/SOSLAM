@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtsam/geometry/Cal3_S2.h>
+// #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/nonlinear/Values.h>
 #include <AlignedBox2.h>

@@ -8,22 +8,19 @@ using namespace std;
 namespace gtsam_soslam{
 
 SoSlam::SoSlam(
-    // DummyData data_source,
-    // DummyDetector detector,
-    // DummyAssociator associator,
+    DummyData data_source,
+    DummyDetector detector,
+    DummyAssociator associator,
     const gtsam::Pose3& initial_pose,
     const bool& optimizer_batch
     ):
-    // data_source_(data_source),
-    // detector_(detector),
-    // associator_(associator),
+    data_source_(data_source),
+    detector_(detector),
+    associator_(associator),
     initial_pose_(initial_pose),
     optimizer_batch_(optimizer_batch)
 {
-    // Setup the system state, and perform a reset
-    // SystemState system_state(initial_pose, optimizer_batch);
     state_ = SoSlamState(initial_pose, optimizer_batch);
-
     // reset();
 }
 

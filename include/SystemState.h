@@ -29,7 +29,14 @@ public:
     gtsam::Vector4 bounds;
     int pose_key;
     int quadric_key;
-
+    
+    // TODO: Not sure if it will work eventually
+    bool operator==(const Detection& other) const {
+        if (label == other.label && bounds == other.bounds && pose_key == other.pose_key && quadric_key == other.quadric_key)
+        {return true;}
+        else
+        {return false;}
+    }
     Detection(std::string label, gtsam::Vector4 bounds, int pose_key, int quadric_key=-1) :
         label(label), bounds(bounds), pose_key(pose_key), quadric_key(quadric_key) {}
 };
@@ -69,7 +76,9 @@ public:
     gtsam::NonlinearFactorGraph graph_;
     gtsam::Values estimates_;
     double calib_depth_;
-    gtsam::Matrix calib_rgb_;
+    gtsam::Vector5 calib_rgb_;
+    StepState prev_step;
+    StepState this_step;
 
     SoSlamState(const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()), const bool& optimizer_batch = true)
         : initial_pose_(initial_pose),
