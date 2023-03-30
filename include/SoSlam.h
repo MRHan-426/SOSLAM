@@ -38,7 +38,7 @@ public:
     );
 
 // private:
-    // void guess_initial_values();
+    void guess_initial_values();
     // void spin();
     // void step();
     void reset();

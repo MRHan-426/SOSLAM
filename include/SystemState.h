@@ -91,16 +91,6 @@ public:
         noise_odom_ = 0.01 * noise_odom_.setIdentity();
         noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
     }
-
 };
-
-
-// class SoSlamState {
-// public:
-//     SystemState system;
-//     StepState prev_step;
-//     StepState this_step;
-//     SoSlamState(SystemState& system){};
-// };
 } //gtsam_soslam
 #endif // SYSTEMSTATE_H

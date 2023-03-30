@@ -2,6 +2,7 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
+#include <gtsam/inference/Factor.h>
 
 using namespace std;
 
@@ -24,66 +25,75 @@ SoSlam::SoSlam(
     reset();
 }
 
-// void SoSlam::guess_initial_values() {
-//     SystemState& s = state_.system;
-//     std::vector<gtsam::Factor::shared_ptr> fs(s.graph_.nrFactors());
-//     std::transform(fs.begin(), fs.end(), fs.begin(),
-//                    [&](decltype(*fs.begin()) f) { return s.graph_.at(f - fs.begin()); });
-//     for (auto f : fs) {
-//         if (auto pf = dynamic_cast<gtsam::PriorFactor<gtsam::Pose3>*>(f.get())) {
-//             auto key = pf->keys().at(0);
-//             if (!s.estimates_.exists(key)) {
-//                 s.estimates_.insert(key, pf->prior());
-//             }
-//         }
-//     }
-//     std::vector<gtsam::gtsam::BetweenFactor<gtsam::Pose3>*> bfs;
-//     for (auto f : fs) {
-//         if (auto bf = dynamic_cast<gtsam::gtsam::BetweenFactor<gtsam::Pose3>*>(f.get())) {
-//             bfs.push_back(bf);
-//         }
-//     }
-//     bool done = false;
-//     while (!done) {
-//         gtsam::gtsam::BetweenFactor<gtsam::Pose3>* bf = std::nullptr;
-//         for (auto f : bfs) {
-//             if (s.estimates_.exists(f->keys().at(0)) && !s.estimates_.exists(f->keys().at(1))) {
-//                 bf = f;
-//                 break;
-//             }
-//         }
-//         if (bf == std::nullptr) {
-//             done = true;
-//             continue;
-//         }
-//         s.estimates_.insert(bf->keys().at(1), s.estimates_.at<gtsam::Pose3>(bf->keys().at(0)) * bf->measured());
-//         bfs.erase(std::remove(bfs.begin(), bfs.end(), bf), bfs.end());
-//     }
-//     for (auto f : bfs) {
-//         bool all_keys_exist = std::all_of(f->keys().begin(), f->keys().end(),
-//                                           [&](const gtsam::Key& key) { return s.estimates_.exists(key); });
-//         if (!all_keys_exist) {
-//             s.estimates_.insert(f->keys().at(1), gtsam::Pose3());
-//         }
-//     }
-//     auto _ok = [](const BoundingBoxFactor& x) { return x.objectKey(); };
-//     std::vector<BoundingBoxFactor*> bbs;
-//     for (auto f : fs) {
-//         if (auto bb = dynamic_cast<BoundingBoxFactor*>(f.get())) {
-//             bbs.push_back(bb);
-//         }
-//     }
-//     std::sort(bbs.begin(), bbs.end(), [&](auto a, auto b) { return _ok(*a) < _ok(*b); });
-//     for (auto qbbs : groupby(bbs, _ok)) {
-//         std::vector<gtsam::Pose3> poses;
-//         std::vector<gtsam::Point3> points;
-//         for (auto bb : qbbs.second) {
-//             poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
-//             points.push_back(bb->measurement());
-//         }
-//         utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, qbbs.second.front()->objectKey());
-//     }
-// }
+void SoSlam::guess_initial_values() {
+    auto& s = state_;
+    std::vector<boost::shared_ptr<gtsam::NonlinearFactor>> fs(s.graph_.nrFactors());
+    std::transform(fs.begin(), fs.end(), fs.begin(),
+               [&](decltype(fs.begin())::value_type f) 
+               { return s.graph_.at(std::distance(fs.begin(), std::find(fs.begin(), fs.end(), f))); });
+
+    for (auto f : fs) {
+        if (auto pf = dynamic_cast<gtsam::PriorFactor<gtsam::Pose3>*>(f.get())) {
+            auto key = pf->keys().at(0);
+            if (!s.estimates_.exists(key)) {
+                s.estimates_.insert(key, pf->prior());
+            }
+        }
+    }
+    std::vector<gtsam::BetweenFactor<gtsam::Pose3>*> bfs;
+    for (auto f : fs) {
+        if (auto bf = dynamic_cast<gtsam::BetweenFactor<gtsam::Pose3>*>(f.get())) {
+            bfs.push_back(bf);
+        }
+    }
+
+    bool done = false;
+    while (!done) {
+        gtsam::BetweenFactor<gtsam::Pose3>* bf = nullptr;
+        for (auto f : bfs) {
+            if (s.estimates_.exists(f->keys().at(0)) && !s.estimates_.exists(f->keys().at(1))) {
+                bf = f;
+                break;
+            }
+        }
+        if (bf == nullptr) {
+            done = true;
+            continue;
+        }
+        s.estimates_.insert(bf->keys().at(1), s.estimates_.at<gtsam::Pose3>(bf->keys().at(0)) * bf->measured());
+        bfs.erase(std::remove(bfs.begin(), bfs.end(), bf), bfs.end());
+    }
+    for (auto f : bfs) {
+        bool all_keys_exist = std::all_of(f->keys().begin(), f->keys().end(),
+                                          [&](const gtsam::Key& key) { return s.estimates_.exists(key); });
+        if (!all_keys_exist) {
+            s.estimates_.insert(f->keys().at(1), gtsam::Pose3());
+        }
+    }
+    auto _ok = [](const BoundingBoxFactor& x) { return x.objectKey(); };
+    std::vector<BoundingBoxFactor*> bbs;
+    for (auto f : fs) {
+        if (auto bb = dynamic_cast<BoundingBoxFactor *>(f.get())) {
+            bbs.push_back(bb);
+        }
+    }
+
+    std::map<int, std::vector<BoundingBoxFactor*>> grouped_bbs;
+    for (auto bb : bbs) {
+        grouped_bbs[_ok(*bb)].push_back(bb);
+    }
+
+    for (const auto& kv : grouped_bbs) {
+        std::vector<gtsam::Pose3> poses;
+        std::vector<AlignedBox2> points;
+        for (auto bb : kv.second) {
+            poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
+            points.push_back(bb->measurement());
+        }
+        utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
+    }
+
+}
 
 
 // void SoSlam::spin() {
