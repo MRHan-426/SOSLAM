@@ -1,3 +1,5 @@
+#pragma once
+
 #include "SystemState.h"
 #include "Utilities.h"
 #include "ConstrainedDualQuadric.h"
