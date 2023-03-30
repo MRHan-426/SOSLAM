@@ -1,5 +1,4 @@
 #include "SoSlam.h"
-#include "SystemState.h"
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
@@ -24,6 +23,7 @@ SoSlam::SoSlam(
     // Setup the system state, and perform a reset
     // SystemState system_state(initial_pose, optimizer_batch);
     state_ = SoSlamState(initial_pose, optimizer_batch);
+
     // reset();
 }
 
@@ -184,5 +184,5 @@ SoSlam::SoSlam(
 //     StepState new_step;
 //     state_.prev_step = new_step;
 //     state_.this_step = new_step;
-}
+// }
 }

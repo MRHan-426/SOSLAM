@@ -25,7 +25,9 @@ public:
     // VisualOdometry visual_odometry_;
     gtsam::Pose3 initial_pose_;
     bool optimizer_batch_;
-
+    SoSlamState state_; 
+    StepState prev_step;
+    StepState this_step;
 
     SoSlam(
         // DummyData data_source,
@@ -36,8 +38,7 @@ public:
         const bool& optimizer_batch = true
     );
 
-private:
-    SoSlamState state_; 
+// private:
     // void guess_initial_values();
     // void spin();
     // void step();
