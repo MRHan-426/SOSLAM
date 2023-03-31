@@ -8,16 +8,16 @@
     - [ ] Get correct answer.
 - [ ] New Constraints and quadric Initialization.
     - [ ] Finish writing constraints.
-         - [ ] Semantic Scale constraint.
-          - [ ] Plane Support constraint.
-          - [ ] Symmetry Texture constraint.
-          - [ ] Bounding Box Constraint.    
+         - [x] Semantic Scale constraint.
+         - [ ] Plane Support constraint.
+         - [ ] Symmetry Texture constraint.
+         - [ ] Bounding Box Constraint.    
     - [ ] Finish writing Quadric Initialization.
     - [ ] Add Constraints into "c++ core".
-          - [ ] Debug Semantic Scale constraint.
-          - [ ] Debug Plane Support constraint.
-          - [ ] Debug Symmetry Texture constraint.
-          - [ ] Debug Bounding Box Constraint.  
+         - [ ] Debug Semantic Scale constraint.
+         - [ ] Debug Plane Support constraint.
+         - [ ] Debug Symmetry Texture constraint.
+         - [ ] Debug Bounding Box Constraint.  
     - [ ] Add Quadric Initialization part into "c++ core".
 - [ ] Add visualization part.
 - [ ] Doing experiments, Record Video.
