@@ -2,26 +2,26 @@
 
 ## TODO
 
-- [ ] **Get dataset ready. Label and associate data by hand.
-- [ ] **Rewrite quardicslam in C++, called "c++ core".
-    - [x] Finish compiling.
-    - [ ] Get correct answer.
-- [ ] **New Constraints and quadric Initialization.
-    - [ ] Finish writing constraints.
-         - [ ] Semantic Scale constraint.
-         - [ ] Plane Support constraint.
-         - [ ] Symmetry Texture constraint.
-         - [ ] Bounding Box Constraint.    
-    - [ ] Finish writing Quadric Initialization.
-    - [ ] Add Constraints into "c++ core".
-         - [ ] Debug Semantic Scale constraint.
-         - [ ] Debug Plane Support constraint.
-         - [ ] Debug Symmetry Texture constraint.
-         - [ ] Debug Bounding Box Constraint.  
-    - [ ] Add Quadric Initialization part into "c++ core".
-- [ ] **Add visualization part.
-- [ ] **Doing experiments, Record Video.
-- [ ] **Write final report.
+- [ ] 1. Get dataset ready. Label and associate data by hand.
+- [ ] 2. Rewrite quardicslam in C++, called "c++ core".
+    - [x] 2.1 Finish compiling.
+    - [ ] 2.2 Get correct answer.
+- [ ] 3.New Constraints and quadric Initialization.
+    - [ ] 3.1 Finish writing constraints.
+         - [ ] 3.1.1 Semantic Scale constraint.
+         - [ ] 3.1.2 Plane Support constraint.
+         - [ ] 3.1.3 Symmetry Texture constraint.
+         - [ ] 3.1.4 Bounding Box Constraint.    
+    - [ ] 3.2 Finish writing Quadric Initialization.
+    - [ ] 3.3 Add Constraints into "c++ core".
+         - [ ] 3.3.1 Debug Semantic Scale constraint.
+         - [ ] 3.3.2 Debug Plane Support constraint.
+         - [ ] 3.3.3 Debug Symmetry Texture constraint.
+         - [ ] 3.3.4 Debug Bounding Box Constraint.  
+    - [ ] 3.4 Add Quadric Initialization part into "c++ core".
+- [ ] 4. Add visualization part.
+- [ ] 5. Doing experiments, Record Video.
+- [ ] 6. Write final report.
  
 
 
