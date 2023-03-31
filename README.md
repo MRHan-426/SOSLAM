@@ -11,7 +11,7 @@
          - [ ] 3.1.1 Semantic Scale constraint.
          - [ ] 3.1.2 Plane Support constraint.
          - [ ] 3.1.3 Symmetry Texture constraint.
-         - [ ] 3.1.4 Bounding Box Constraint.    
+         - [ ] 3.1.4 Bounding Box constraint.    
     - [ ] 3.2 Finish writing Quadric Initialization.
     - [ ] 3.3 Add Constraints into "c++ core".
          - [ ] 3.3.1 Debug Semantic Scale constraint.
