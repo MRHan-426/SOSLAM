@@ -40,7 +40,7 @@ public:
 // private:
     void guess_initial_values();
     // void spin();
-    // void step();
+    void step();
     void reset();
 
 };

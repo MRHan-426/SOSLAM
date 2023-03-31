@@ -111,68 +111,81 @@ void SoSlam::guess_initial_values() {
 // }
 
 
-// void SoSlam::step()
-// {
-//     // Setup state for the current step
-//     auto& s = state_.system;
-//     auto& p = state_.prev_step;
-//     auto n = StepState((p == std::nullptr) ? 0 : p->i + 1);
-//     state_.this_step = n;
+void SoSlam::step() {
+    // Setup state for the current step
+    auto& s = state_;
 
-//     // Get latest data from the scene (odom, images, and detections)
-//     std::tie(n.odom, n.rgb, n.depth) = data_source_ -> next(state_);
-//     // if (visual_odometry)
-//     //     n.odom = visual_odometry -> odom(state_);
-//     n.detections = (detector_ == std::nullptr) ? std::vector<Detection>() : detector_->detect(state_);
-//     std::tie(n.new_associated, s.associated, s.unassociated) = associator_->associate(state_);
+    auto p = state_.prev_step;
+    
+    //initialize with zero
+    int new_step_index = p.i + 1;
+    StepState* n;
+    n = &(s.this_step);
+    n->i = new_step_index;
 
-//     // Extract some labels
-//     s.labels_.clear();
-//     for (const auto& d : s.associated_)
-//     {
-//         if (d.quadric_key != gtsam::Symbol('Q', 0))
-//             s.labels_[d.quadric_key] = d.label;
-//     }
+    // Get latest data from the scene (odom, images, and detections)
+    std::tie(n->odom, n->depth,n->rgb) = data_source_.next(s);
 
-//     // Add new pose to the factor graph
-//     if (p == std::nullptr)
-//         s.graph_.emplace_shared<gtsam::PriorFactor<gtsam::Pose3>>(n.pose_key, s.initial_pose_, s.noise_prior_);
-//     else
-//         s.graph_.emplace_shared<gtsam::BetweenFactor<gtsam::Pose3>>(p->pose_key, n.pose_key,
-//             // TODO:Some Bugs here
-//             gtsam::Pose3(((p->odom == std::nullptr) ? gtsam::Pose3() : p->odom->inverse()) *
-//                          ((n.odom == std::nullptr) ? gtsam::Pose3() : n.odom)).matrix(),
-//             s.noise_odom_);
+    n->detections = detector_.detect(s); // be aware to deal with the situation that detector is none
 
-//     // Add any newly associated detections to the factor graph
-//     for (const auto& d : n.new_associated)
-//     {
-//         if (d.quadric_key == gtsam::Symbol('Q', 0))
-//         {
-//             std::cerr << "WARN: skipping associated detection with quadric_key == None" << std::endl;
-//             continue;
-//         }
-//         s.graph_.emplace_shared<BoundingBoxFactor>(AlignedBox2(d.bounds), 
-//             gtsam::Cal3_S2(s.calib_rgb_), d.pose_key, d.quadric_key, s.noise_boxes_);
-//     }
+    std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
 
-//     // Optimise if we're in iterative mode
-//     if (!s.optimizer_batch_)
-//     {
-//         guess_initial_values();
+    // Extract some labels
+    // TODO handle cases where different labels used for a single quadric???
+    s.labels_.clear();
+    for (const auto& d : s.associated_) {
+        if (d.quadric_key != -1) {
+            s.labels_[d.quadric_key] = d.label;
+        }
+    }
 
-//         if (!s.optimizer_.has_value())
-//             s.optimizer_ = std::make_shared<gtsam::LevenbergMarquardtOptimizer>(s.graph_, s.estimates_, s.optimizer_params_);
-//         try
-//         {
-//             // gtsam::ISAM2 
-//             s.optimizer_-> update(utils::new_factors(s.graph_, s.optimizer_->getFactorsUnsafe()), utils::new_values(s.estimates_, s.optimizer_->getLinearizationPoint()));
-//             s.estimates_ = s.optimizer_->optimize();
-//         }
-//         utils::visualize(state_);
-//     }
-//     state_.prev_step = std::make_shared<StepState>(n);
-// }
+    // Add new pose to the factor graph
+    if (!p.isValid()) {
+        s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, s.noise_prior_));
+    } else {
+
+        gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+        // gtsam::SharedNoiseModel noiseodomPtr(new gtsam::noiseModel::Diagonal(s.noise_odom_));
+        gtsam::Vector6 temp;
+        temp <<  0.01, 0.01, 0.01, 0.01,0.01,0.01;
+        gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
+        gtsam::noiseModel::Diagonal::Sigmas(temp);
+        s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
+    }
+
+    // Add any newly associated detections to the factor graph
+    for (const auto& d : n->new_associated) {
+        if (d.quadric_key == -1) {
+            std::cerr << "WARN: skipping associated detection with quadric_key == -1" << std::endl;
+            continue;
+        }
+        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(s.calib_rgb_));
+        // gtsam::SharedNoiseModel noiseboxPtr(new gtsam::Matrix(s.noise_boxes_));
+        gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
+        s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
+    }
+
+    // Optimise if we're in iterative mode
+    // if (!s.optimiser_batch_) {
+    //     guess_initial_values();
+    //     if (s.optimiser == nullptr) {
+    //         s.optimiser = std::make_shared<s.optimiser_type>(s.optimiser_params);
+    //     }
+    //     try {
+    //         s.optimiser->update(new_factors(s.graph, s.optimiser->getFactorsUnsafe()), new_values(s.estimates, s.optimiser->getLinearizationPoint()));
+    //         s.estimates = s.optimiser->calculateEstimate();
+    //     } catch (const std::runtime_error& e) {
+    //         // Handle the exception if necessary
+    //     }
+    //     if (on_new_estimate) {
+    //         on_new_estimate(state);
+    //     }
+    // }
+
+    s.prev_step = *n;
+}
+
 
 
 void SoSlam::reset() {

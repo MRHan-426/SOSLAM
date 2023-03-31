@@ -27,8 +27,8 @@ class Detection {
 public:
     std::string label;
     gtsam::Vector4 bounds;
-    int pose_key;
-    int quadric_key;
+    gtsam::Key pose_key;
+    gtsam::Key quadric_key;
     
     // TODO: Not sure if it will work eventually
     bool operator==(const Detection& other) const {
@@ -37,14 +37,14 @@ public:
         else
         {return false;}
     }
-    Detection(std::string label, gtsam::Vector4 bounds, int pose_key, int quadric_key=-1) :
+    Detection(std::string label, gtsam::Vector4 bounds, gtsam::Key pose_key, gtsam::Key quadric_key=-1) :
         label(label), bounds(bounds), pose_key(pose_key), quadric_key(quadric_key) {}
 };
 
 class StepState {
 public:
     int i;
-    int pose_key;
+    gtsam::Key pose_key;
     gtsam::Vector3 rgb;
     gtsam::Matrix3 depth;
     gtsam::Pose3 odom;
@@ -76,7 +76,8 @@ public:
     gtsam::NonlinearFactorGraph graph_;
     gtsam::Values estimates_;
     // double calib_depth_;
-    gtsam::Vector5 calib_rgb_;
+    // boost::shared_ptr<gtsam::Cal3_S2> calib_rgb_;
+    gtsam::Cal3_S2 calib_rgb_;
     StepState prev_step;
     StepState this_step;
 
@@ -88,7 +89,7 @@ public:
         noise_odom_ = gtsam::Matrix(6,6);
         noise_boxes_ = gtsam::Matrix(4,4);
         noise_prior_ = 0.00 * noise_prior_.setIdentity();
-        noise_odom_ = 0.01 * noise_odom_.setIdentity();
+        noise_odom_ = 0.01 * noise_prior_.setIdentity();
         noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
     }
 };

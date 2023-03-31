@@ -36,10 +36,12 @@ public:
         return i == POSES.size();
     }
 
-    std::tuple<std::optional<gtsam::Pose3>, std::optional<Eigen::MatrixXd>, std::optional<Eigen::MatrixXd>> next(SoSlamState& state) 
+    std::tuple<gtsam::Pose3, gtsam::Matrix3 , gtsam::Vector3> next(SoSlamState& state) 
     {
         ++i;
-        return std::make_tuple(std::optional<gtsam::Pose3>(gtsam::Pose3(POSES[i - 1].matrix())), std::nullopt, std::nullopt);
+        gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
+        gtsam::Vector3 vec = gtsam::Vector3::Zero();
+        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, vec);
     }
 
 
