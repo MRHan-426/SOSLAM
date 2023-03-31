@@ -8,7 +8,7 @@
     - [ ] Get correct answer.
 - [ ] New Constraints and quadric Initialization.
     - [ ] Finish writing constraints.
-          - [ ] Semantic Scale constraint.
+         - [ ] Semantic Scale constraint.
           - [ ] Plane Support constraint.
           - [ ] Symmetry Texture constraint.
           - [ ] Bounding Box Constraint.    
