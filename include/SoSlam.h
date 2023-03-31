@@ -39,7 +39,7 @@ public:
 
 // private:
     void guess_initial_values();
-    // void spin();
+    void spin();
     void step();
     void reset();
 

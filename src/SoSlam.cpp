@@ -96,19 +96,19 @@ void SoSlam::guess_initial_values() {
 }
 
 
-// void SoSlam::spin() {
-//     while (!data_source_.done()) {
-//         step();
-//     }
-//     if (state_.system.optimizer_batch_) {
-//         guess_initial_values();
-//         auto& s = state_.system;
-//         s.optimizer_ = gtsam::LevenbergMarquardtOptimizer(s.graph_, s.estimates_, s.optimizer_params_);
-//         s.estimates_ = s.optimizer_.optimize();
-
-//         utils::visualize(state_);
-//     }
-// }
+void SoSlam::spin() {
+    while (!data_source_.done()) {
+        step();
+    }
+    if (state_.optimizer_batch_) {
+        guess_initial_values();
+        auto& s = state_;
+        gtsam::ISAM2 a(s.optimizer_params_);
+        s.optimizer_ = a;
+        s.optimizer_.update(s.graph_, s.estimates_);
+        utils::visualize(s);
+    }
+}
 
 
 void SoSlam::step() {
