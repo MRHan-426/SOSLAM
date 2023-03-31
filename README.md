@@ -2,13 +2,13 @@
 
 ## TODO
 
-- [ ] Get dataset ready. Label and associate data by hand.
+- [ ] ## Get dataset ready. Label and associate data by hand.
 - [ ] Rewrite quardicslam in C++, called "c++ core".
     - [x] Finish compiling.
     - [ ] Get correct answer.
 - [ ] New Constraints and quadric Initialization.
     - [ ] Finish writing constraints.
-         - [x] Semantic Scale constraint.
+         - [ ] Semantic Scale constraint.
          - [ ] Plane Support constraint.
          - [ ] Symmetry Texture constraint.
          - [ ] Bounding Box Constraint.    
