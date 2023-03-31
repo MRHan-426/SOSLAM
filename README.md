@@ -2,11 +2,11 @@
 
 ## TODO
 
-- [ ] Get dataset ready. Label and associate data by hand.
-- [ ] Rewrite quardicslam in C++, called "c++ core".
+- [ ] **Get dataset ready. Label and associate data by hand.
+- [ ] **Rewrite quardicslam in C++, called "c++ core".
     - [x] Finish compiling.
     - [ ] Get correct answer.
-- [ ] New Constraints and quadric Initialization.
+- [ ] **New Constraints and quadric Initialization.
     - [ ] Finish writing constraints.
          - [ ] Semantic Scale constraint.
          - [ ] Plane Support constraint.
@@ -19,9 +19,9 @@
          - [ ] Debug Symmetry Texture constraint.
          - [ ] Debug Bounding Box Constraint.  
     - [ ] Add Quadric Initialization part into "c++ core".
-- [ ] Add visualization part.
-- [ ] Doing experiments, Record Video.
-- [ ] Write final report.
+- [ ] **Add visualization part.
+- [ ] **Doing experiments, Record Video.
+- [ ] **Write final report.
  
 
 
