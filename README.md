@@ -2,13 +2,12 @@
 ---
 ```shell
 cmake 3.26.0
-libboost 1.71.0
+libboost 1.71.0  # make sure to compile C++ version for source code.
 eigen 3.3.7
 ```
 
 ```shell
 sudo apt install libeigen3-dev
-sudo apt install libboost-all-dev
 sudo apt install libtbb-dev
 ```
 
