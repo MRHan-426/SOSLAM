@@ -34,13 +34,31 @@ public:
     
     // TODO: Not sure if it will work eventually
     bool operator==(const Detection& other) const {
+
         if (label == other.label && bounds == other.bounds && pose_key == other.pose_key && quadric_key == other.quadric_key)
-        {return true;}
+        {
+//            std::cout<<"true"<<std::endl;
+            return true;
+        }
         else
-        {return false;}
+        {
+//            std::cout<<"false"<<std::endl;
+            return false;
+        }
     }
-    Detection(std::string label, gtsam::Vector4 bounds, gtsam::Key pose_key, gtsam::Key quadric_key = std::numeric_limits<gtsam::Key>::max()) :
-        label(label), bounds(bounds), pose_key(pose_key), quadric_key(quadric_key) {}
+
+    Detection& operator=(const Detection& other) {
+        if (this != &other) {
+            label = other.label;
+            bounds << other.bounds[0], other.bounds[1], other.bounds[2], other.bounds[3];
+            pose_key = other.pose_key;
+            quadric_key = other.quadric_key;
+        }
+        return *this;
+    }
+
+    explicit Detection(std::string label = "", gtsam::Vector4 bounds = gtsam::Vector4::Zero(), gtsam::Key pose_key = 0, gtsam::Key quadric_key = 0) :
+            label(std::move(label)), bounds(std::move(bounds)), pose_key(pose_key), quadric_key(quadric_key) {}
 };
 
 class StepState {
@@ -53,9 +71,24 @@ public:
     std::vector<Detection> detections;
     std::vector<Detection> new_associated;
 
-    StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i)) {}
-    // TODO:Some Issues
-    bool isValid() {
+    explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i)) {
+    }
+
+    StepState& operator=(const StepState& other) {
+        if (this != &other) {
+            i = other.i;
+            pose_key = other.pose_key;
+            rgb = other.rgb;
+            depth = other.depth;
+            odom = other.odom;
+            detections = other.detections;
+            new_associated = other.new_associated;
+        }
+        return *this;
+    }
+
+    bool isValid() const {
+        // TODO:Some Issues
         return i != 0;
     }
 };
@@ -74,7 +107,7 @@ public:
     // std::variant<gtsam::ISAM2Params, gtsam::LevenbergMarquardtParams> optimizer_params_;
     std::vector<Detection> associated_;
     std::vector<Detection> unassociated_;
-    std::map<int, std::string> labels_;
+    std::map<gtsam::Key, std::string> labels_;
     gtsam::NonlinearFactorGraph graph_;
     gtsam::Values estimates_;
     // double calib_depth_;
@@ -83,7 +116,7 @@ public:
     StepState prev_step;
     StepState this_step;
 
-    SoSlamState(const gtsam::Pose3& initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()), const bool& optimizer_batch = true)
+    explicit SoSlamState(const gtsam::Pose3& initial_pose = Constants::POSES[0], const bool& optimizer_batch = true)
         : initial_pose_(initial_pose),
           optimizer_batch_(optimizer_batch)
     {

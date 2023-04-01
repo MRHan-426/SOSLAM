@@ -53,7 +53,7 @@ class ConstrainedDualQuadric {
    * and constrain manually if it is not.
    * @param dQ
    */
-  ConstrainedDualQuadric(const gtsam::Matrix44& dQ);
+  explicit ConstrainedDualQuadric(const gtsam::Matrix44& dQ);
 
   /**
    * Constructor pose and radii
@@ -84,13 +84,13 @@ class ConstrainedDualQuadric {
   /// @{
 
   /** Get pose, avoid computation with it */
-  gtsam::Pose3 pose(void) const { return pose_; }
+  gtsam::Pose3 pose() const { return pose_; }
 
   /** Get quadric radii, avoid computation with it */
-  gtsam::Vector3 radii(void) const { return radii_; }
+  gtsam::Vector3 radii() const { return radii_; }
 
   /** Get quadric centroid */
-  gtsam::Point3 centroid(void) const { return pose_.translation(); }
+  gtsam::Point3 centroid() const { return pose_.translation(); }
 
   /// @}
   /// @name Class methods
@@ -108,7 +108,7 @@ class ConstrainedDualQuadric {
   gtsam::Matrix44 matrix(gtsam::OptionalJacobian<16, 9> H = boost::none) const;
 
   /** Returns the normalized dual quadric in matrix form */
-  gtsam::Matrix44 normalizedMatrix(void) const;
+  gtsam::Matrix44 normalizedMatrix() const;
 
   /**
    * Calculates the AlignedBox3 bounds of the ellipsoid

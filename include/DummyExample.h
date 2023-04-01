@@ -35,6 +35,7 @@ public:
 
 
     bool done() const {
+        std::cout<< "POSES.size = " << POSES.size() <<std::endl;
         return static_cast<std::vector<gtsam::Pose3>::size_type>(i)  == POSES.size();
     }
 
@@ -71,8 +72,9 @@ public:
             auto bounds = QuadricCamera::project(q, POSES[current_i], calibPtr).bounds().vector();
 
             detections.emplace_back(
-                Detection{symbol.string(), bounds, state.this_step.pose_key}
+            symbol.string(), bounds, state.this_step.pose_key
             );
+
         }
 
         return detections;

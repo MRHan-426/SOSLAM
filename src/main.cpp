@@ -6,7 +6,7 @@ void run() {
     DummyData data_source;
     DummyAssociator associator;
     DummyDetector detector;
-    gtsam::Pose3 initial_pose = Constants::POSES[0];
+    const gtsam::Pose3& initial_pose = Constants::POSES[0];
 
     SoSlam q(
             data_source, //DummyData data_source,
@@ -15,6 +15,7 @@ void run() {
             initial_pose,//gtsam::Pose3 initial_pose
             true //bool optimizer_batch
     );
+
     q.spin();
 }
 }

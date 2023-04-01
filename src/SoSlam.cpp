@@ -14,9 +14,9 @@ SoSlam::SoSlam(
     const gtsam::Pose3& initial_pose,
     const bool& optimizer_batch
     ):
-    data_source_(data_source),
+    data_source_(std::move(data_source)),
     associator_(associator),
-    detector_(detector),
+    detector_(std::move(detector)),
     initial_pose_(initial_pose),
     optimizer_batch_(optimizer_batch)
 {
@@ -27,11 +27,12 @@ SoSlam::SoSlam(
 void SoSlam::guess_initial_values() {
     auto& s = state_;
     std::vector<boost::shared_ptr<gtsam::NonlinearFactor>> fs(s.graph_.nrFactors());
-    std::transform(fs.begin(), fs.end(), fs.begin(),
-               [&](decltype(fs.begin())::value_type f) 
-               { return s.graph_.at(std::distance(fs.begin(), std::find(fs.begin(), fs.end(), f))); });
 
-    for (auto f : fs) {
+    std::transform(fs.begin(), fs.end(), fs.begin(),
+                   [&](decltype(fs.begin())::value_type const& f)
+                   { return s.graph_.at(std::distance(fs.begin(), std::find(fs.begin(), fs.end(), f))); });
+
+    for (const auto& f : fs) {
         if (auto pf = dynamic_cast<gtsam::PriorFactor<gtsam::Pose3>*>(f.get())) {
             auto key = pf->keys().at(0);
             if (!s.estimates_.exists(key)) {
@@ -40,7 +41,7 @@ void SoSlam::guess_initial_values() {
         }
     }
     std::vector<gtsam::BetweenFactor<gtsam::Pose3>*> bfs;
-    for (auto f : fs) {
+    for (const auto& f : fs) {
         if (auto bf = dynamic_cast<gtsam::BetweenFactor<gtsam::Pose3>*>(f.get())) {
             bfs.push_back(bf);
         }
@@ -71,7 +72,7 @@ void SoSlam::guess_initial_values() {
     }
     auto _ok = [](const BoundingBoxFactor& x) { return x.objectKey(); };
     std::vector<BoundingBoxFactor*> bbs;
-    for (auto f : fs) {
+    for (const auto& f : fs) {
         if (auto bb = dynamic_cast<BoundingBoxFactor *>(f.get())) {
             bbs.push_back(bb);
         }
@@ -79,7 +80,7 @@ void SoSlam::guess_initial_values() {
 
     std::map<int, std::vector<BoundingBoxFactor*>> grouped_bbs;
     for (auto bb : bbs) {
-        grouped_bbs[_ok(*bb)].push_back(bb);
+        grouped_bbs[static_cast<int>(_ok(*bb))].push_back(bb);
     }
 
     for (const auto& kv : grouped_bbs) {
@@ -97,8 +98,10 @@ void SoSlam::guess_initial_values() {
 
 void SoSlam::spin() {
     while (!data_source_.done()) {
+        // should run five times
         step();
     }
+
     if (state_.optimizer_batch_) {
         guess_initial_values();
         auto& s = state_;
@@ -113,9 +116,8 @@ void SoSlam::spin() {
 void SoSlam::step() {
     // Setup state for the current step
     auto& s = state_;
-
     auto p = state_.prev_step;
-    
+
     //initialize with zero
     int new_step_index = p.i + 1;
     StepState* n;
@@ -127,13 +129,14 @@ void SoSlam::step() {
 
     n->detections = detector_.detect(s); // be aware to deal with the situation that detector is none
 
+
     std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
 
     // Extract some labels
     // TODO handle cases where different labels used for a single quadric???
     s.labels_.clear();
     for (const auto& d : s.associated_) {
-        if (d.quadric_key != std::numeric_limits<gtsam::Key>::max()) {
+        if (d.quadric_key != 0) {
             s.labels_[d.quadric_key] = d.label;
         }
     }
@@ -154,8 +157,8 @@ void SoSlam::step() {
 
     // Add any newly associated detections to the factor graph
     for (const auto& d : n->new_associated) {
-        if (d.quadric_key == std::numeric_limits<gtsam::Key>::max()) {
-            std::cerr << "WARN: skipping associated detection with quadric_key == -1" << std::endl;
+        if (d.quadric_key == 0) {
+            std::cerr << "WARN: skipping associated detection with quadric_key == 0, which means None" << std::endl;
             continue;
         }
         boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(s.calib_rgb_));
@@ -165,26 +168,9 @@ void SoSlam::step() {
         s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
     }
 
-    // Optimise if we're in iterative mode
-    // if (!s.optimiser_batch_) {
-    //     guess_initial_values();
-    //     if (s.optimiser == nullptr) {
-    //         s.optimiser = std::make_shared<s.optimiser_type>(s.optimiser_params);
-    //     }
-    //     try {
-    //         s.optimiser->update(new_factors(s.graph, s.optimiser->getFactorsUnsafe()), new_values(s.estimates, s.optimiser->getLinearizationPoint()));
-    //         s.estimates = s.optimiser->calculateEstimate();
-    //     } catch (const std::runtime_error& e) {
-    //         // Handle the exception if necessary
-    //     }
-    //     if (on_new_estimate) {
-    //         on_new_estimate(state);
-    //     }
-    // }
-
     s.prev_step = *n;
+    std::cout<<"888"<<std::endl;
 }
-
 
 
 void SoSlam::reset() {
