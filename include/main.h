@@ -3,8 +3,8 @@
 
 #include "DummyExample.h"
 #include "SoSlam.h"
-namespace gtsam_soslam{
-    void run();
-}
+
+void run();
+
 
 #endif // MAIN_H

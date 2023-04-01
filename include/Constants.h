@@ -7,7 +7,7 @@
 #include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Cal3_S2.h>
 
-
+namespace gtsam_soslam{
 namespace Constants {
     // Function to initialize POSES
     std::vector<gtsam::Pose3> initPoses();
@@ -19,3 +19,4 @@ namespace Constants {
     extern const std::vector<gtsam::Pose3> POSES;
     extern const std::vector<gtsam_soslam::ConstrainedDualQuadric> QUADRICS;
 }
+} //namespace gtsam_soslam

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 project(gtsam_soslam)
 set(GTSAM_SOSLAM_VERSION 0.0.1)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -std=c++11 -Wall -Wextra")
 
 # Find packages
 find_package(Eigen3 REQUIRED)
@@ -17,10 +17,11 @@ include_directories(
     ${GTSAM_INCLUDE_DIR}
     ${TBB_INCLUDE_DIRS} # Add this line
 )
-link_directories(${Boost_LIBRARY_DIR})
+#link_directories(${Boost_LIBRARY_DIR})
+
 
 # Add library
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/AlignedBox2.cpp
     ${PROJECT_SOURCE_DIR}/src/AlignedBox3.cpp
     ${PROJECT_SOURCE_DIR}/src/BoundingBoxFactor.cpp
@@ -31,19 +32,21 @@ add_library(${PROJECT_NAME} SHARED
     ${PROJECT_SOURCE_DIR}/src/SoSlam.cpp
     ${PROJECT_SOURCE_DIR}/src/Constants.cpp
     ${PROJECT_SOURCE_DIR}/src/Utilities.cpp
-    )
-target_link_libraries(${PROJECT_NAME}
-    ${EIGEN3_LIBS}
-    ${GTSAM_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${TBB_LIBRARIES} # Add this line
 )
+target_link_libraries(${PROJECT_NAME}
+        gtsam
+        ${EIGEN3_LIBS}
+        ${Boost_LIBRARIES}
+        ${TBB_LIBRARIES} # Add this line
+        )
 
 # Add executable
-# add_executable(soslam_exe src/main.cpp)
-# target_link_libraries(soslam_exe
-#     ${PROJECT_NAME}
-#     ${GTSAM_LIBRARIES}
-#     ${Boost_LIBRARIES}
-#     ${TBB_LIBRARIES} # Add this line
-# )
+add_executable(soslam_exe src/main.cpp)
+target_link_libraries(soslam_exe
+        gtsam
+        ${EIGEN3_LIBS}
+        ${Boost_LIBRARIES}
+        ${TBB_LIBRARIES}
+        ${PROJECT_NAME}
+)
+

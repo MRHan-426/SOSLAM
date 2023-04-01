@@ -193,9 +193,9 @@ namespace gtsam_soslam
 
     void visualize(SoSlamState &state)
     {
-      auto values = state.estimates_;
-      auto labels = state.labels_;
-      auto block = state.optimizer_batch_;
+//      auto values = state.estimates_;
+//      auto labels = state.labels_;
+//      auto block = state.optimizer_batch_;
 
       /* values need to be:
       Values:Values with 7 values:

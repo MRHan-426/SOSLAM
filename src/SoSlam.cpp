@@ -2,7 +2,6 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
-#include <gtsam/inference/Factor.h>
 
 using namespace std;
 
@@ -10,14 +9,14 @@ namespace gtsam_soslam{
 
 SoSlam::SoSlam(
     DummyData data_source,
-    DummyDetector detector,
     DummyAssociator associator,
+    DummyDetector detector,
     const gtsam::Pose3& initial_pose,
     const bool& optimizer_batch
     ):
     data_source_(data_source),
-    detector_(detector),
     associator_(associator),
+    detector_(detector),
     initial_pose_(initial_pose),
     optimizer_batch_(optimizer_batch)
 {
@@ -134,7 +133,7 @@ void SoSlam::step() {
     // TODO handle cases where different labels used for a single quadric???
     s.labels_.clear();
     for (const auto& d : s.associated_) {
-        if (d.quadric_key != -1) {
+        if (d.quadric_key != std::numeric_limits<gtsam::Key>::max()) {
             s.labels_[d.quadric_key] = d.label;
         }
     }
@@ -155,7 +154,7 @@ void SoSlam::step() {
 
     // Add any newly associated detections to the factor graph
     for (const auto& d : n->new_associated) {
-        if (d.quadric_key == -1) {
+        if (d.quadric_key == std::numeric_limits<gtsam::Key>::max()) {
             std::cerr << "WARN: skipping associated detection with quadric_key == -1" << std::endl;
             continue;
         }

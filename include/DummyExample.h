@@ -35,7 +35,7 @@ public:
 
 
     bool done() const {
-        return i == POSES.size();
+        return static_cast<std::vector<gtsam::Pose3>::size_type>(i)  == POSES.size();
     }
 
     std::tuple<gtsam::Pose3, gtsam::Matrix3 , gtsam::Vector3> next(SoSlamState& state) 

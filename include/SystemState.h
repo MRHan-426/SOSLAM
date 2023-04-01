@@ -9,6 +9,7 @@
 #include <iostream>
 #include <optional>
 #include <Eigen/Dense>
+#include <limits>
 
 #include <gtsam/base/Vector.h>
 #include <gtsam/base/Matrix.h>
@@ -19,6 +20,7 @@
 #include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 #include <gtsam/nonlinear/ISAM2.h>
 #include <gtsam/nonlinear/Values.h>
+#include <gtsam/geometry/Cal3.h>
 
 
 namespace gtsam_soslam{
@@ -37,7 +39,7 @@ public:
         else
         {return false;}
     }
-    Detection(std::string label, gtsam::Vector4 bounds, gtsam::Key pose_key, gtsam::Key quadric_key=-1) :
+    Detection(std::string label, gtsam::Vector4 bounds, gtsam::Key pose_key, gtsam::Key quadric_key = std::numeric_limits<gtsam::Key>::max()) :
         label(label), bounds(bounds), pose_key(pose_key), quadric_key(quadric_key) {}
 };
 
