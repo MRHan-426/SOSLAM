@@ -1,6 +1,8 @@
 #pragma once
 #include "Constants.h"
 #include "QuadricCamera.h"
+#include "SystemState.h"
+
 #include <vector>
 #include <optional>
 #include <Eigen/Dense>
