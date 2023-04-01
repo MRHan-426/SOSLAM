@@ -6,6 +6,7 @@ dist/
 *.egg-info/
 
 .vscode/
+.idea/
 gtsam/
 graveyard.txt
 
