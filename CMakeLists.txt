@@ -3,7 +3,7 @@ project(gtsam_soslam)
 set(GTSAM_SOSLAM_VERSION 0.0.1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra")
 
-# Find packages  1
+# Find packages
 find_package(Eigen3 REQUIRED)
 find_package(GTSAM 4.1.1 REQUIRED)
 find_package(Boost REQUIRED)
