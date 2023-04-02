@@ -101,8 +101,8 @@ public:
     gtsam::Matrix noise_odom_;
     gtsam::Matrix noise_boxes_;
     bool optimizer_batch_;
-    gtsam::ISAM2 optimizer_;
-    gtsam::ISAM2Params optimizer_params_;
+//    gtsam::LevenbergMarquardtOptimizer optimizer_;
+    gtsam::LevenbergMarquardtParams optimizer_params_;
     // std::variant<gtsam::ISAM2, gtsam::LevenbergMarquardtOptimizer> optimizer_;
     // std::variant<gtsam::ISAM2Params, gtsam::LevenbergMarquardtParams> optimizer_params_;
     std::vector<Detection> associated_;
@@ -120,6 +120,7 @@ public:
         : initial_pose_(initial_pose),
           optimizer_batch_(optimizer_batch)
     {
+        optimizer_params_ = gtsam::LevenbergMarquardtParams();
         noise_prior_ = gtsam::Matrix(6,6);
         noise_odom_ = gtsam::Matrix(6,6);
         noise_boxes_ = gtsam::Matrix(4,4);

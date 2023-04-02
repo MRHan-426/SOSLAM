@@ -35,7 +35,6 @@ public:
 
 
     bool done() const {
-        std::cout<< "POSES.size = " << POSES.size() <<std::endl;
         return static_cast<std::vector<gtsam::Pose3>::size_type>(i)  == POSES.size();
     }
 
@@ -123,8 +122,6 @@ public:
             if (associated_labels.count(d.label) > 0 || count >= 3) {
                 d.quadric_key = gtsam::symbol(d.label[0], std::stoi(d.label.substr(1)));
                 newly_associated.push_back(d);
-
-                std::cout << d.quadric_key << std::endl;
             }
         }
 

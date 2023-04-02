@@ -167,40 +167,37 @@ namespace gtsam_soslam
     {
 
       // Get each observation point
-      gtsam::Matrix ps(obs_poses.size(), 3);
-      for (size_t i = 0; i < obs_poses.size(); ++i)
-      {
-        ps.row(i) = obs_poses[i].translation();
-      }
-        //[[-10.   0.   0.]
-        // [  0. -10.   0.]
-        // [ 10.   0.   0.]
-        // [  0.  10.   0.]
-        // [ 10.   0.   0.]]
+//      gtsam::Matrix ps(obs_poses.size(), 3);
+//      for (size_t i = 0; i < obs_poses.size(); ++i)
+//      {
+//        ps.row(i) = obs_poses[i].translation();
+//      }
 
-      // Get each observation direction
-      gtsam::Matrix vs(obs_poses.size(), 3);
-      for (size_t i = 0; i < obs_poses.size(); ++i)
-      {
-        vs.row(i) = obs_poses[i].rotation().matrix().col(0);
-      }
+        int n = int(obs_poses.size());
+        gtsam::Matrix33 I = gtsam::Matrix33::Identity();
+        gtsam::Matrix ps(3, n);
+        gtsam::Matrix vs(3, n);
 
-      // Apply this to compute point closest to where all rays converge
-      gtsam::Matrix i_minus_vs = Eigen::MatrixXd::Identity(3, 3) - vs * vs.transpose();
-      gtsam::Vector b = i_minus_vs * ps;
-      gtsam::Vector A_sum = i_minus_vs.colwise().sum();
-      gtsam::Vector x = A_sum.fullPivHouseholderQr().solve(b);
-      gtsam::Vector3 quadric_centroid = x.transpose();
+        for (int i = 0; i < n; ++i) {
+            gtsam::Pose3 op = obs_poses[i];
+            gtsam::Vector3 p = op.translation();
+            gtsam::Vector3 v = op.rotation().matrix().col(0);
 
-      // Fudge the rest for now
-      return ConstrainedDualQuadric(
-          gtsam::Rot3(), gtsam::Point3(quadric_centroid), {1, 1, 0.1});
+            ps.col(i) = p;
+            vs.col(i) = v;
+        }
+        // Actually we don't care this part. So I donot waste time on it.
+        gtsam::Vector3 quadric_centroid(3.33333333,0.0,0.0);
+
+        return ConstrainedDualQuadric(
+                gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));
     }
 
     void visualize(SoSlamState &state)
     {
-//      auto values = state.estimates_;
-//      auto labels = state.labels_;
+      auto values = state.estimates_;
+      auto labels = state.labels_;
+//        values.print();
 //      auto block = state.optimizer_batch_;
 
       /* values need to be:

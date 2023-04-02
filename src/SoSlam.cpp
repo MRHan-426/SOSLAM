@@ -91,8 +91,6 @@ void SoSlam::guess_initial_values() {
             points.push_back(bb->measurement());
         }
 
-//        std::cout << poses << std::endl;
-
         utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
     }
 
@@ -108,9 +106,18 @@ void SoSlam::spin() {
     if (state_.optimizer_batch_) {
         guess_initial_values();
         auto& s = state_;
-        gtsam::ISAM2 a(s.optimizer_params_);
-        s.optimizer_ = a;
-        s.optimizer_.update(s.graph_, s.estimates_);
+
+        // Using ISAM2 for optimization
+        // gtsam::ISAM2 a(s.optimizer_params_);
+        // s.optimizer_ = a;
+        // gtsam::ISAM2Result result = s.optimizer_.update(s.graph_, s.estimates_);
+        // s.estimates_ = s.optimizer_.calculateEstimate();
+        std::cout << s.initial_pose_ << std::endl;
+//        s.estimates_.print();
+        s.graph_.print();
+
+        gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+        s.estimates_ = optimizer.optimize();
         utils::visualize(s);
     }
 }
@@ -140,18 +147,20 @@ void SoSlam::step() {
             s.labels_[d.quadric_key] = d.label;
         }
     }
+    gtsam::Vector6 temp1 = gtsam::Vector6::Zero();
+    auto  noise_prior = gtsam::noiseModel::Diagonal::Sigmas(temp1);
 
     // Add new pose to the factor graph
     if (!p.isValid()) {
-        s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, s.noise_prior_));
+        s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
     } else {
 
         gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
         // gtsam::SharedNoiseModel noiseodomPtr(new gtsam::noiseModel::Diagonal(s.noise_odom_));
-        gtsam::Vector6 temp;
-        temp <<  0.01, 0.01, 0.01, 0.01,0.01,0.01;
+        gtsam::Vector6 temp2;
+        temp2 <<  0.01, 0.01, 0.01, 0.01,0.01,0.01;
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
-        gtsam::noiseModel::Diagonal::Sigmas(temp);
+        gtsam::noiseModel::Diagonal::Sigmas(temp2);
         s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
     }
 
@@ -168,7 +177,7 @@ void SoSlam::step() {
         s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
     }
 
-    s.graph_.print();
+//    s.graph_.print();
 
     s.prev_step = *n;
 }
@@ -183,8 +192,8 @@ void SoSlam::reset() {
     s.labels_.clear();
     s.graph_ = gtsam::NonlinearFactorGraph();
     s.estimates_ = gtsam::Values();
-    s.optimizer_params_ = gtsam::ISAM2Params();
-    s.optimizer_ = gtsam::ISAM2();
+    s.optimizer_params_ = gtsam::LevenbergMarquardtParams();
+    // s.optimizer_ = gtsam::LevenbergMarquardtOptimizer(s.graph_, s.estimates_);
     // s.calib_depth_ = data_source_.calib_depth();
     s.calib_rgb_ = data_source_.calib_rgb();
     StepState new_step;
