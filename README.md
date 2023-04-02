@@ -39,6 +39,6 @@ sudo make install
 
 ## 4.Notes for variables and functions
 
-(1) quardicKey is initialized with zero, zero represents None.
+(1) quardicKey is initialized with 66666, 66666 represents None.
 
-So if you want to create a new quadric, start from long unsigned int 1.
+So if you want to create a new quadric, try to avoid it from being 66666.

@@ -57,7 +57,7 @@ public:
         return *this;
     }
 
-    explicit Detection(std::string label = "", gtsam::Vector4 bounds = gtsam::Vector4::Zero(), gtsam::Key pose_key = 0, gtsam::Key quadric_key = 0) :
+    explicit Detection(std::string label = "", gtsam::Vector4 bounds = gtsam::Vector4::Zero(), gtsam::Key pose_key = 0, gtsam::Key quadric_key = 66666) :
             label(std::move(label)), bounds(std::move(bounds)), pose_key(pose_key), quadric_key(quadric_key) {}
 };
 

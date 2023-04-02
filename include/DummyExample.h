@@ -97,13 +97,14 @@ public:
         return result;
     }
 
-        std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state) {
-            auto& s = state;
-            auto& n = state.this_step;
-            std::vector<Detection> new_ds = (!n.isValid()) ? std::vector<Detection>{} : n.detections;
+    std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state)
+    {
+        auto& s = state;
+        auto& n = state.this_step;
+        std::vector<Detection> new_ds = (!n.isValid()) ? std::vector<Detection>{} : n.detections;
 
-            std::vector<Detection> ds = new_ds;
-            ds.insert(ds.end(), s.unassociated_.begin(), s.unassociated_.end());
+        std::vector<Detection> ds = new_ds;
+        ds.insert(ds.end(), s.unassociated_.begin(), s.unassociated_.end());
 
         std::unordered_set<std::string> associated_labels;
         for (const auto& d : s.associated_) {
@@ -120,22 +121,24 @@ public:
             }
 
             if (associated_labels.count(d.label) > 0 || count >= 3) {
-                newly_associated.push_back(d);
                 d.quadric_key = gtsam::symbol(d.label[0], std::stoi(d.label.substr(1)));
+                newly_associated.push_back(d);
+
+                std::cout << d.quadric_key << std::endl;
             }
         }
 
-        std::vector<Detection> detection_intersection, detection_difference;
+        std::vector<Detection> associated, unassociated;
         for (const auto& d : flat({ds, s.associated_})) {
             if (std::find(newly_associated.begin(), newly_associated.end(), d) != newly_associated.end() ||
                 std::find(s.associated_.begin(), s.associated_.end(), d) != s.associated_.end()) {
-                detection_intersection.push_back(d);
+                associated.push_back(d);
             } else {
-                detection_difference.push_back(d);
+                unassociated.push_back(d);
             }
         }
 
-        return std::make_tuple(newly_associated, detection_intersection, detection_difference);
+        return std::make_tuple(newly_associated, associated, unassociated);
     }
 };
 } // namespace gtsam_soslam

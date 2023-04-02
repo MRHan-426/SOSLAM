@@ -165,12 +165,18 @@ namespace gtsam_soslam
         const std::vector<AlignedBox2> &boxes,
         SoSlamState &state)
     {
+
       // Get each observation point
       gtsam::Matrix ps(obs_poses.size(), 3);
       for (size_t i = 0; i < obs_poses.size(); ++i)
       {
         ps.row(i) = obs_poses[i].translation();
       }
+        //[[-10.   0.   0.]
+        // [  0. -10.   0.]
+        // [ 10.   0.   0.]
+        // [  0.  10.   0.]
+        // [ 10.   0.   0.]]
 
       // Get each observation direction
       gtsam::Matrix vs(obs_poses.size(), 3);

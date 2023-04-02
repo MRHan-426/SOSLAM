@@ -90,6 +90,9 @@ void SoSlam::guess_initial_values() {
             poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
             points.push_back(bb->measurement());
         }
+
+//        std::cout << poses << std::endl;
+
         utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
     }
 
@@ -123,20 +126,17 @@ void SoSlam::step() {
     StepState* n;
     n = &(s.this_step);
     n->i = new_step_index;
+    n->pose_key = gtsam::Symbol('x',new_step_index);
 
     // Get latest data from the scene (odom, images, and detections)
     std::tie(n->odom, n->depth,n->rgb) = data_source_.next(s);
-
     n->detections = detector_.detect(s); // be aware to deal with the situation that detector is none
-
-
     std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
 
     // Extract some labels
     // TODO handle cases where different labels used for a single quadric???
-    s.labels_.clear();
     for (const auto& d : s.associated_) {
-        if (d.quadric_key != 0) {
+        if (d.quadric_key != 66666) {
             s.labels_[d.quadric_key] = d.label;
         }
     }
@@ -157,7 +157,7 @@ void SoSlam::step() {
 
     // Add any newly associated detections to the factor graph
     for (const auto& d : n->new_associated) {
-        if (d.quadric_key == 0) {
+        if (d.quadric_key == 66666) {
             std::cerr << "WARN: skipping associated detection with quadric_key == 0, which means None" << std::endl;
             continue;
         }
@@ -168,8 +168,9 @@ void SoSlam::step() {
         s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
     }
 
+    s.graph_.print();
+
     s.prev_step = *n;
-    std::cout<<"888"<<std::endl;
 }
 
 
