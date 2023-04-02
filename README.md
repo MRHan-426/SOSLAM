@@ -2,7 +2,7 @@
 ---
 ```shell
 cmake 3.26.0
-libboost 1.71.0  # make sure to compile C++ version for source code.
+libboost 1.71.0  # make sure to compile C++ version from source code.
 eigen 3.3.7
 ```
 
@@ -19,7 +19,9 @@ Note that higher version may bring unexpected errors.
 git clone --branch 4.1.1 https://github.com/borglab/gtsam.git
 ```
 
-## 3.Modify Eigen cmake config file: cmake/HandleEigen.cmake
+## 3.Modify Eigen cmake config file
+
+Open: cmake/HandleEigen.cmake
 
 add below line just after "option(GTSAM_USE_SYSTEM_EIGEN...)"
 

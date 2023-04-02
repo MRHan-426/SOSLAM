@@ -191,9 +191,8 @@ namespace gtsam_soslam
       auto values = state.estimates_;
       auto labels = state.labels_;
 //        values.print();
-//      auto block = state.optimizer_batch_;
 
-      /* values need to be:
+      /* values in quadricslam original code are as follows:
       Values:Values with 7 values:
       Value q0: (gtsam_quadrics::ConstrainedDualQuadric)
                  1  5.33268e-16 -5.92244e-17 -8.88324e-16
@@ -263,7 +262,7 @@ namespace gtsam_soslam
       for (const auto &key_value_pair : values)
       {
         gtsam::Key key = key_value_pair.key;
-        char symbol_char = gtsam::Symbol(key).chr();
+        unsigned char symbol_char = gtsam::Symbol(key).chr();
 
         if (symbol_char == 'x')
         {
@@ -283,14 +282,12 @@ namespace gtsam_soslam
     {
       // Figure out the new factors
       std::set<gtsam::NonlinearFactor::shared_ptr> fs;
-      for (size_t i = 0; i < current.size(); ++i)
-      {
-        fs.insert(current.at(i));
-      }
-      for (size_t i = 0; i < previous.size(); ++i)
-      {
-        fs.erase(previous.at(i));
-      }
+        for (const auto& element : current) {
+            fs.insert(element);
+        }
+        for (const auto& element : previous) {
+            fs.erase(element);
+        }
 
       // Return a NEW graph with the factors
       gtsam::NonlinearFactorGraph out;
