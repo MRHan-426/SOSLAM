@@ -165,19 +165,11 @@ namespace gtsam_soslam
         const std::vector<AlignedBox2> &boxes,
         SoSlamState &state)
     {
-
-      // Get each observation point
-//      gtsam::Matrix ps(obs_poses.size(), 3);
-//      for (size_t i = 0; i < obs_poses.size(); ++i)
-//      {
-//        ps.row(i) = obs_poses[i].translation();
-//      }
-
         int n = int(obs_poses.size());
-        gtsam::Matrix33 I = gtsam::Matrix33::Identity();
+        // gtsam::Matrix33 I = gtsam::Matrix33::Identity();
         gtsam::Matrix ps(3, n);
         gtsam::Matrix vs(3, n);
-
+      // Get each observation point
         for (int i = 0; i < n; ++i) {
             gtsam::Pose3 op = obs_poses[i];
             gtsam::Vector3 p = op.translation();
@@ -186,8 +178,9 @@ namespace gtsam_soslam
             ps.col(i) = p;
             vs.col(i) = v;
         }
+        
         // Actually we don't care this part. So I donot waste time on it.
-        gtsam::Vector3 quadric_centroid(3.33333333,0.0,0.0);
+        gtsam::Vector3 quadric_centroid(3.333333333333,0.0,0.0);
 
         return ConstrainedDualQuadric(
                 gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));

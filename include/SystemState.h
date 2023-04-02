@@ -73,6 +73,8 @@ public:
 
     explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i)) {
     }
+    
+    StepState(const StepState& other) = default;
 
     StepState& operator=(const StepState& other) {
         if (this != &other) {
