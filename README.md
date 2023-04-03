@@ -47,5 +47,5 @@ So if you want to create a new quadric, try to avoid it from being 66666.
 
 (2) optimizer_batch = true  ->  Dummy，initialize_quadric_ray_intersection, batch
 
-optimizer_batch = false  ->  SOSLAM，initialize_with_ssc_psc_bbs, step
+optimizer_batch = false  ->  SOSLAM，initialize_with_ssc_psc_bbs, step(LM)
 
