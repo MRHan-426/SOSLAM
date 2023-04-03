@@ -70,18 +70,30 @@ void SoSlam::guess_initial_values() {
             s.estimates_.insert(f->keys().at(1), gtsam::Pose3());
         }
     }
-    auto _ok = [](const BoundingBoxFactor& x) { return x.objectKey(); };
+    auto _ok_bbs = [](const BoundingBoxFactor& x) { return x.objectKey(); };
+//    auto _ok_ssc = [](const SemanticScaleFactor& x) { return x.objectKey(); };
+
     std::vector<BoundingBoxFactor*> bbs;
+//    std::vector<SemanticScaleFactor*> ssc;
+
     for (const auto& f : fs) {
         if (auto bb = dynamic_cast<BoundingBoxFactor *>(f.get())) {
             bbs.push_back(bb);
         }
+//        else if (auto ss = dynamic_cast<SemanticScaleFactor *>(f.get())) {
+//            ssc.push_back(ss);
+//        }
     }
 
     std::map<int, std::vector<BoundingBoxFactor*>> grouped_bbs;
+//    std::map<int, std::vector<SemanticScaleFactor*>> grouped_ssc;
+
     for (auto bb : bbs) {
-        grouped_bbs[static_cast<int>(_ok(*bb))].push_back(bb);
+        grouped_bbs[static_cast<int>(_ok_bbs(*bb))].push_back(bb);
     }
+//    for (auto ss : ssc) {
+//        grouped_ssc[static_cast<int>(_ok_ssc(*ss))].push_back(ss);
+//    }
 
     for (const auto& kv : grouped_bbs) {
         std::vector<gtsam::Pose3> poses;
@@ -118,7 +130,6 @@ void SoSlam::spin() {
     }
 }
 
-
 void SoSlam::step() {
     // Setup state for the current step
     auto& s = state_;
@@ -143,37 +154,43 @@ void SoSlam::step() {
             s.labels_[d.quadric_key] = d.label;
         }
     }
-    gtsam::Vector6 temp1 = gtsam::Vector6::Zero();
-    auto  noise_prior = gtsam::noiseModel::Diagonal::Sigmas(temp1);
+
+    // Define noise model
+    auto  noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
+    gtsam::Vector6 temp;
+    temp <<  0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+    gtsam::noiseModel::Diagonal::shared_ptr noise_odom = \
+        gtsam::noiseModel::Diagonal::Sigmas(temp);
+    gtsam::noiseModel::Diagonal::shared_ptr noise_boxes = \
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
+    gtsam::noiseModel::Diagonal::shared_ptr noise_scc = \
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
 
     // Add new pose to the factor graph
     if (!p.isValid()) {
         s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
-    } else {
-
+    }
+    else {
         gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
-        gtsam::Vector6 temp2;
-        temp2 <<  0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
-        gtsam::noiseModel::Diagonal::shared_ptr noise_odom = \
-        gtsam::noiseModel::Diagonal::Sigmas(temp2);
         s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
     }
 
     // Add any newly associated detections to the factor graph
     for (const auto& d : n->new_associated) {
         if (d.quadric_key == 66666) {
-            std::cerr << "WARN: skipping associated detection with quadric_key == 0, which means None" << std::endl;
+            std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
             continue;
         }
         boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(s.calib_rgb_));
-        gtsam::noiseModel::Diagonal::shared_ptr noise_boxes = \
-        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
+
         s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
+
+        s.graph_.add(SemanticScaleFactor(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc));
+
     }
 
     s.prev_step = *n;
 }
-
 
 void SoSlam::reset() {
 

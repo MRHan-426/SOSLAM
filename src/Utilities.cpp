@@ -186,73 +186,6 @@ namespace gtsam_soslam
                 gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));
     }
 
-    void visualize(SoSlamState &state)
-    {
-      auto values = state.estimates_;
-      auto labels = state.labels_;
-//        values.print();
-
-      /* values in quadricslam original code are as follows:
-      Values:Values with 7 values:
-      Value q0: (gtsam_quadrics::ConstrainedDualQuadric)
-                 1  5.33268e-16 -5.92244e-17 -8.88324e-16
-       5.10908e-16            1 -2.04511e-17 -4.26056e-16
-      -5.76232e-17 -2.09414e-17            1  2.30073e-18
-      -8.88324e-16 -4.26056e-16  2.30073e-18           -1
-
-      Value q1: (gtsam_quadrics::ConstrainedDualQuadric)
-      -2.33147e-15           -1           -1           -1
-                -1 -5.55112e-16           -1           -1
-                -1           -1 -1.11022e-16           -1
-                -1           -1           -1           -1
-
-      Value x0: (gtsam::Pose3)
-      R: [
-          0, 0, -1;
-          1, 0, 0;
-          0, -1, 0
-          ]
-      t: 10  0  0
-
-      Value x1: (gtsam::Pose3)
-      R: [
-          1, -1.06515e-17, 7.62121e-17;
-          -7.65252e-17, 3.82794e-18, 1;
-          -1.12274e-17, -1, 4.07367e-18
-      ]
-      t:  3.314e-16  -10  9.62244e-19
-
-      Value x2: (gtsam::Pose3)
-      R: [
-          -1.30194e-16, -1.44876e-17, 1;
-          -1, -1.78409e-17, -1.33587e-16;
-          1.41949e-17, -1, -1.13698e-17
-      ]
-      t:  -10  1.57443e-15  1.43737e-16
-
-      Value x3: (gtsam::Pose3)
-      R: [
-          -1, -1.27118e-17, -4.65885e-16;
-          4.68574e-16, 3.00111e-18, -1;
-          9.75593e-18, -1, -5.62604e-18
-      ]
-      t:  5.42251e-15  10  -1.86248e-16
-
-      Value x4: (gtsam::Pose3)
-      R: [
-          3.41841e-16, -4.09092e-17, -1;
-          1, -2.87323e-17, 3.41342e-16;
-          -2.57698e-17, -1, 4.10462e-17
-      ]
-      t:  10  -2.76928e-15  -3.42707e-16*/
-    
-    /* labels and block need to be:
-    ###################
-    Labels:{8142508126285856768: 'q0', 8142508126285856769: 'q1'}
-    ###################
-    Block:True
-    */  
-    }
 
     std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values)
     {
@@ -341,6 +274,80 @@ namespace gtsam_soslam
       }
       return out;
     }
+    void visualize(SoSlamState &state)
+        {
+          gtsam::Values values = state.estimates_;
+          auto labels = state.labels_;
+          values.print();
+
+          // test for semantic scale factor
+          gtsam::Key b = 8142508126285856768;
+          ConstrainedDualQuadric a = values.at<ConstrainedDualQuadric>(b);
+          std::cout << "quadric pose and size:" << std::endl;
+          std::cout << a.pose() << std::endl << a.radii() << std::endl;
+
+          /* values in quadricslam original code are as follows:
+          Values:Values with 7 values:
+          Value q0: (gtsam_quadrics::ConstrainedDualQuadric)
+                     1  5.33268e-16 -5.92244e-17 -8.88324e-16
+           5.10908e-16            1 -2.04511e-17 -4.26056e-16
+          -5.76232e-17 -2.09414e-17            1  2.30073e-18
+          -8.88324e-16 -4.26056e-16  2.30073e-18           -1
+
+          Value q1: (gtsam_quadrics::ConstrainedDualQuadric)
+          -2.33147e-15           -1           -1           -1
+                    -1 -5.55112e-16           -1           -1
+                    -1           -1 -1.11022e-16           -1
+                    -1           -1           -1           -1
+
+          Value x0: (gtsam::Pose3)
+          R: [
+              0, 0, -1;
+              1, 0, 0;
+              0, -1, 0
+              ]
+          t: 10  0  0
+
+          Value x1: (gtsam::Pose3)
+          R: [
+              1, -1.06515e-17, 7.62121e-17;
+              -7.65252e-17, 3.82794e-18, 1;
+              -1.12274e-17, -1, 4.07367e-18
+          ]
+          t:  3.314e-16  -10  9.62244e-19
+
+          Value x2: (gtsam::Pose3)
+          R: [
+              -1.30194e-16, -1.44876e-17, 1;
+              -1, -1.78409e-17, -1.33587e-16;
+              1.41949e-17, -1, -1.13698e-17
+          ]
+          t:  -10  1.57443e-15  1.43737e-16
+
+          Value x3: (gtsam::Pose3)
+          R: [
+              -1, -1.27118e-17, -4.65885e-16;
+              4.68574e-16, 3.00111e-18, -1;
+              9.75593e-18, -1, -5.62604e-18
+          ]
+          t:  5.42251e-15  10  -1.86248e-16
+
+          Value x4: (gtsam::Pose3)
+          R: [
+              3.41841e-16, -4.09092e-17, -1;
+              1, -2.87323e-17, 3.41342e-16;
+              -2.57698e-17, -1, 4.10462e-17
+          ]
+          t:  10  -2.76928e-15  -3.42707e-16*/
+
+          /* labels and block need to be:
+          ###################
+          Labels:{8142508126285856768: 'q0', 8142508126285856769: 'q1'}
+          ###################
+          Block:True
+          */
+      }
+
 
   } // namespace utils
 } // namespace gtsam_soslam

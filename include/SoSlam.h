@@ -1,11 +1,12 @@
 #pragma once
 
 #include "SystemState.h"
-#include "Utilities.h"
-#include "ConstrainedDualQuadric.h"
-#include "AlignedBox2.h"
-#include "BoundingBoxFactor.h"
 #include "DummyExample.h"
+#include "Utilities.h"
+#include "AlignedBox2.h"
+#include "ConstrainedDualQuadric.h"
+#include "BoundingBoxFactor.h"
+#include "SemanticScaleFactor.h"
 
 #include <optional>
 #include <functional>

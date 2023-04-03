@@ -66,12 +66,22 @@ public:
         std::vector<Detection> detections;
         for (size_t iq = 0; iq < QUADRICS.size(); ++iq) {
             const auto& q = QUADRICS[iq];
-            gtsam::Symbol symbol('q', iq);
+//            gtsam::Symbol symbol('q', iq);
             boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state.calib_rgb_));
-            auto bounds = QuadricCamera::project(q, POSES[current_i], calibPtr).bounds().vector();
-
+            gtsam::Vector4 bounds = QuadricCamera::project(q, POSES[current_i], calibPtr).bounds().vector();
+            std::string label;
+            switch (iq) {
+                case 0:
+                    label = "q0";
+                    break;
+                case 1:
+                    label = "q1";
+                    break;
+                default:
+                    label = "q0";
+                    break;}
             detections.emplace_back(
-            symbol.string(), bounds, state.this_step.pose_key
+                label, bounds, state.this_step.pose_key
             );
 
         }

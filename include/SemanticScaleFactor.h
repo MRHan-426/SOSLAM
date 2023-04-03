@@ -47,8 +47,9 @@ namespace gtsam_soslam
                             const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
                             const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                             const gtsam::SharedNoiseModel &model,
-                            const int &sigma_scc = 1,
-                            const MeasurementModel &errorType = STANDARD)
+                            const MeasurementModel &errorType = STANDARD,
+                            const int &sigma_scc = 1
+                            )
                 : Base(model, poseKey, quadricKey),
                   calibration_(calibration),
                   quadricKey_(quadricKey),
@@ -81,7 +82,7 @@ namespace gtsam_soslam
             {
                 throw std::logic_error(
                         "The error type \"" + errorString +
-                        "\" is not a valid option for initializing a BoundingBoxFactor");
+                        "\" is not a valid option for initializing a SemanticScaleFactor");
             }
         }
 
