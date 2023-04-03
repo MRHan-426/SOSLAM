@@ -4,7 +4,6 @@
 #pragma once
 #include "AlignedBox2.h"
 #include "ConstrainedDualQuadric.h"
-#include "SoSlam.h"
 
 #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/Pose3.h>
@@ -29,11 +28,10 @@ namespace gtsam_soslam
         };
 
     protected:
+        std::string label_;
         boost::shared_ptr<gtsam::Cal3_S2> calibration_; //< camera calibration
         typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> Base;
-        gtsam::Key quadricKey_;
         MeasurementModel measurementModel_;
-        std::string label_;
         int sigma_scc_;
 
     public:
@@ -41,7 +39,7 @@ namespace gtsam_soslam
 
         /** Default constructor */
         SemanticScaleFactor()
-                : measurementModel_(STANDARD), label_("None"), sigma_scc_(1){};
+                : label_("None"),measurementModel_(STANDARD), sigma_scc_(1){};
 
         SemanticScaleFactor(const std::string &label,
                             const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
@@ -51,10 +49,9 @@ namespace gtsam_soslam
                             const int &sigma_scc = 1
                             )
                 : Base(model, poseKey, quadricKey),
-                  calibration_(calibration),
-                  quadricKey_(quadricKey),
-                  measurementModel_(errorType),
                   label_(label),
+                  calibration_(calibration),
+                  measurementModel_(errorType),
                   sigma_scc_(sigma_scc)
                   {};
 
@@ -65,9 +62,8 @@ namespace gtsam_soslam
                             const std::string &errorString,
                             const int &sigma_scc = 1)
                 : Base(model, poseKey, quadricKey),
-                  calibration_(calibration),
-                  quadricKey_(quadricKey),
                   label_(label),
+                  calibration_(calibration),
                   sigma_scc_(sigma_scc)
         {
             if (errorString == "STANDARD")

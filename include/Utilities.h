@@ -24,6 +24,8 @@
 
 #include "ConstrainedDualQuadric.h"
 #include "SoSlam.h"
+#include "BoundingBoxFactor.h"
+#include "SemanticScaleFactor.h"
 
 #include <gtsam/base/Matrix.h>
 #include <gtsam/geometry/Pose3.h>
@@ -89,6 +91,11 @@ ConstrainedDualQuadric initialize_quadric_ray_intersection(
     SoSlamState& state
 );
 
+ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
+    const BoundingBoxFactor& bbs,
+    const SemanticScaleFactor& ssc
+//          const PlaneSupportingFactor& psc
+    );
 
 // visualize
 void visualize(SoSlamState& state);

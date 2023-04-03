@@ -186,6 +186,34 @@ namespace gtsam_soslam
                 gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));
     }
 
+    ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
+          const BoundingBoxFactor& bbs,
+          const SemanticScaleFactor& ssc
+//          const PlaneSupportingFactor& psc
+    ){
+
+        gtsam::NonlinearFactorGraph sub_graph;
+        gtsam::Values initial_estimate;
+
+        sub_graph.add(bbs);
+        sub_graph.add(ssc);
+//        sub_graph.add(psc);
+
+        // set a prior quadric
+        ConstrainedDualQuadric quadric;
+        gtsam::Pose3 camera_pose;
+
+        initial_estimate.insert(bbs.objectKey(), quadric);
+        initial_estimate.insert(bbs.poseKey(), camera_pose);
+
+        gtsam::LevenbergMarquardtParams params;
+        gtsam::LevenbergMarquardtOptimizer optimizer(sub_graph, initial_estimate, params);
+        auto result = optimizer.optimize();
+
+        ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
+//        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
+        return initial_quadric;
+    }
 
     std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values)
     {

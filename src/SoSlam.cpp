@@ -2,11 +2,11 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
+#define DUMMY_INITIALIZATION false
 
 using namespace std;
 
 namespace gtsam_soslam{
-
 SoSlam::SoSlam(
     DummyData data_source,
     DummyAssociator associator,
@@ -70,30 +70,25 @@ void SoSlam::guess_initial_values() {
             s.estimates_.insert(f->keys().at(1), gtsam::Pose3());
         }
     }
+    // will not be used in soslam
+    if (DUMMY_INITIALIZATION)
+    {
     auto _ok_bbs = [](const BoundingBoxFactor& x) { return x.objectKey(); };
-//    auto _ok_ssc = [](const SemanticScaleFactor& x) { return x.objectKey(); };
 
     std::vector<BoundingBoxFactor*> bbs;
-//    std::vector<SemanticScaleFactor*> ssc;
 
     for (const auto& f : fs) {
         if (auto bb = dynamic_cast<BoundingBoxFactor *>(f.get())) {
             bbs.push_back(bb);
         }
-//        else if (auto ss = dynamic_cast<SemanticScaleFactor *>(f.get())) {
-//            ssc.push_back(ss);
-//        }
     }
 
     std::map<int, std::vector<BoundingBoxFactor*>> grouped_bbs;
-//    std::map<int, std::vector<SemanticScaleFactor*>> grouped_ssc;
 
     for (auto bb : bbs) {
         grouped_bbs[static_cast<int>(_ok_bbs(*bb))].push_back(bb);
     }
-//    for (auto ss : ssc) {
-//        grouped_ssc[static_cast<int>(_ok_ssc(*ss))].push_back(ss);
-//    }
+
 
     for (const auto& kv : grouped_bbs) {
         std::vector<gtsam::Pose3> poses;
@@ -102,8 +97,10 @@ void SoSlam::guess_initial_values() {
             poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
             points.push_back(bb->measurement());
         }
-
+        std::cout << kv.second.front()->objectKey() << std::endl;
+        s.estimates_.print();
         utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
+    }
     }
 
 }
@@ -182,11 +179,28 @@ void SoSlam::step() {
             continue;
         }
         boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(s.calib_rgb_));
+        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes);
+        SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc);
+        s.graph_.add(bbs);
+        s.graph_.add(ssc);
 
-        s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
+        if (!DUMMY_INITIALIZATION)
+        {
+            gtsam::KeyVector keys = s.estimates_.keys();
+            auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
+            bool found = (iter != keys.end());
+            if(!found)
+            {
+                ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(bbs, ssc);
+                initial_quadric.addToValues(s.estimates_, bbs.objectKey());
 
-        s.graph_.add(SemanticScaleFactor(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc));
+            }
+            // those factors have the same quadric key
+            // it is enough to add once
+//            initial_quadric.addToValues(s.estimates_, ssc.objectKey());
+//            initial_quadric.addToValues(s.estimates_, psc.objectKey());
 
+        }
     }
 
     s.prev_step = *n;
