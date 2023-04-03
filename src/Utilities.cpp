@@ -165,54 +165,57 @@ namespace gtsam_soslam
         const std::vector<AlignedBox2> &boxes,
         SoSlamState &state)
     {
-        int n = int(obs_poses.size());
-        // gtsam::Matrix33 I = gtsam::Matrix33::Identity();
-        gtsam::Matrix ps(3, n);
-        gtsam::Matrix vs(3, n);
+      int n = int(obs_poses.size());
+      // gtsam::Matrix33 I = gtsam::Matrix33::Identity();
+      gtsam::Matrix ps(3, n);
+      gtsam::Matrix vs(3, n);
       // Get each observation point
-        for (int i = 0; i < n; ++i) {
-            gtsam::Pose3 op = obs_poses[i];
-            gtsam::Vector3 p = op.translation();
-            gtsam::Vector3 v = op.rotation().matrix().col(0);
+      for (int i = 0; i < n; ++i)
+      {
+        gtsam::Pose3 op = obs_poses[i];
+        gtsam::Vector3 p = op.translation();
+        gtsam::Vector3 v = op.rotation().matrix().col(0);
 
-            ps.col(i) = p;
-            vs.col(i) = v;
-        }
-        
-        // Actually we don't care this part. So I donot waste time on it.
-        gtsam::Vector3 quadric_centroid(3.333333333333,0.0,0.0);
+        ps.col(i) = p;
+        vs.col(i) = v;
+      }
 
-        return ConstrainedDualQuadric(
-                gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));
+      // Actually we don't care this part. So I donot waste time on it.
+      gtsam::Vector3 quadric_centroid(3.333333333333, 0.0, 0.0);
+
+      return ConstrainedDualQuadric(
+          gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));
     }
 
     ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
-        const BoundingBoxFactor& bbs,
-        const SemanticScaleFactor& ssc,
-        const gtsam::Pose3& camera_pose
-//          const PlaneSupportingFactor& psc
-    ){
+        const BoundingBoxFactor &bbs,
+        const SemanticScaleFactor &ssc,
+        const PlaneSupportingFactor &psc,
+        const gtsam::Pose3 &camera_pose
 
-        gtsam::NonlinearFactorGraph sub_graph;
-        gtsam::Values initial_estimate;
+    )
+    {
 
-        sub_graph.add(bbs);
-        sub_graph.add(ssc);
-//        sub_graph.add(psc);
+      gtsam::NonlinearFactorGraph sub_graph;
+      gtsam::Values initial_estimate;
 
-        // set a prior quadric
-        ConstrainedDualQuadric quadric;
+      sub_graph.add(bbs);
+      sub_graph.add(ssc);
+      sub_graph.add(psc);
 
-        initial_estimate.insert(bbs.objectKey(), quadric);
-        initial_estimate.insert(bbs.poseKey(), camera_pose);
+      // set a prior quadric
+      ConstrainedDualQuadric quadric;
 
-        gtsam::LevenbergMarquardtParams params;
-        gtsam::LevenbergMarquardtOptimizer optimizer(sub_graph, initial_estimate, params);
-        auto result = optimizer.optimize();
+      initial_estimate.insert(bbs.objectKey(), quadric);
+      initial_estimate.insert(bbs.poseKey(), camera_pose);
 
-        ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
-//        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
-        return initial_quadric;
+      gtsam::LevenbergMarquardtParams params;
+      gtsam::LevenbergMarquardtOptimizer optimizer(sub_graph, initial_estimate, params);
+      auto result = optimizer.optimize();
+
+      ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
+      //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
+      return initial_quadric;
     }
 
     std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values)
@@ -243,12 +246,14 @@ namespace gtsam_soslam
     {
       // Figure out the new factors
       std::set<gtsam::NonlinearFactor::shared_ptr> fs;
-        for (const auto& element : current) {
-            fs.insert(element);
-        }
-        for (const auto& element : previous) {
-            fs.erase(element);
-        }
+      for (const auto &element : current)
+      {
+        fs.insert(element);
+      }
+      for (const auto &element : previous)
+      {
+        fs.erase(element);
+      }
 
       // Return a NEW graph with the factors
       gtsam::NonlinearFactorGraph out;
@@ -303,77 +308,78 @@ namespace gtsam_soslam
       return out;
     }
     void visualize(SoSlamState &state)
-        {
-          gtsam::Values values = state.estimates_;
-          auto labels = state.labels_;
-          values.print();
+    {
+      gtsam::Values values = state.estimates_;
+      auto labels = state.labels_;
+      values.print();
 
-          // test for semantic scale factor
-          gtsam::Key b = 8142508126285856768;
-          ConstrainedDualQuadric a = values.at<ConstrainedDualQuadric>(b);
-          std::cout << "quadric pose and size:" << std::endl;
-          std::cout << a.pose() << std::endl << a.radii() << std::endl;
+      // test for semantic scale factor
+      gtsam::Key b = 8142508126285856768;
+      ConstrainedDualQuadric a = values.at<ConstrainedDualQuadric>(b);
+      std::cout << "quadric pose and size:" << std::endl;
+      std::cout << a.pose() << std::endl
+                << a.radii() << std::endl;
 
-          /* values in quadricslam original code are as follows:
-          Values:Values with 7 values:
-          Value q0: (gtsam_quadrics::ConstrainedDualQuadric)
-                     1  5.33268e-16 -5.92244e-17 -8.88324e-16
-           5.10908e-16            1 -2.04511e-17 -4.26056e-16
-          -5.76232e-17 -2.09414e-17            1  2.30073e-18
-          -8.88324e-16 -4.26056e-16  2.30073e-18           -1
+      /* values in quadricslam original code are as follows:
+      Values:Values with 7 values:
+      Value q0: (gtsam_quadrics::ConstrainedDualQuadric)
+                 1  5.33268e-16 -5.92244e-17 -8.88324e-16
+       5.10908e-16            1 -2.04511e-17 -4.26056e-16
+      -5.76232e-17 -2.09414e-17            1  2.30073e-18
+      -8.88324e-16 -4.26056e-16  2.30073e-18           -1
 
-          Value q1: (gtsam_quadrics::ConstrainedDualQuadric)
-          -2.33147e-15           -1           -1           -1
-                    -1 -5.55112e-16           -1           -1
-                    -1           -1 -1.11022e-16           -1
-                    -1           -1           -1           -1
+      Value q1: (gtsam_quadrics::ConstrainedDualQuadric)
+      -2.33147e-15           -1           -1           -1
+                -1 -5.55112e-16           -1           -1
+                -1           -1 -1.11022e-16           -1
+                -1           -1           -1           -1
 
-          Value x0: (gtsam::Pose3)
-          R: [
-              0, 0, -1;
-              1, 0, 0;
-              0, -1, 0
-              ]
-          t: 10  0  0
-
-          Value x1: (gtsam::Pose3)
-          R: [
-              1, -1.06515e-17, 7.62121e-17;
-              -7.65252e-17, 3.82794e-18, 1;
-              -1.12274e-17, -1, 4.07367e-18
+      Value x0: (gtsam::Pose3)
+      R: [
+          0, 0, -1;
+          1, 0, 0;
+          0, -1, 0
           ]
-          t:  3.314e-16  -10  9.62244e-19
+      t: 10  0  0
 
-          Value x2: (gtsam::Pose3)
-          R: [
-              -1.30194e-16, -1.44876e-17, 1;
-              -1, -1.78409e-17, -1.33587e-16;
-              1.41949e-17, -1, -1.13698e-17
-          ]
-          t:  -10  1.57443e-15  1.43737e-16
+      Value x1: (gtsam::Pose3)
+      R: [
+          1, -1.06515e-17, 7.62121e-17;
+          -7.65252e-17, 3.82794e-18, 1;
+          -1.12274e-17, -1, 4.07367e-18
+      ]
+      t:  3.314e-16  -10  9.62244e-19
 
-          Value x3: (gtsam::Pose3)
-          R: [
-              -1, -1.27118e-17, -4.65885e-16;
-              4.68574e-16, 3.00111e-18, -1;
-              9.75593e-18, -1, -5.62604e-18
-          ]
-          t:  5.42251e-15  10  -1.86248e-16
+      Value x2: (gtsam::Pose3)
+      R: [
+          -1.30194e-16, -1.44876e-17, 1;
+          -1, -1.78409e-17, -1.33587e-16;
+          1.41949e-17, -1, -1.13698e-17
+      ]
+      t:  -10  1.57443e-15  1.43737e-16
 
-          Value x4: (gtsam::Pose3)
-          R: [
-              3.41841e-16, -4.09092e-17, -1;
-              1, -2.87323e-17, 3.41342e-16;
-              -2.57698e-17, -1, 4.10462e-17
-          ]
-          t:  10  -2.76928e-15  -3.42707e-16*/
+      Value x3: (gtsam::Pose3)
+      R: [
+          -1, -1.27118e-17, -4.65885e-16;
+          4.68574e-16, 3.00111e-18, -1;
+          9.75593e-18, -1, -5.62604e-18
+      ]
+      t:  5.42251e-15  10  -1.86248e-16
 
-          /* labels and block need to be:
-          ###################
-          Labels:{8142508126285856768: 'q0', 8142508126285856769: 'q1'}
-          ###################
-          Block:True
-          */
-      }
+      Value x4: (gtsam::Pose3)
+      R: [
+          3.41841e-16, -4.09092e-17, -1;
+          1, -2.87323e-17, 3.41342e-16;
+          -2.57698e-17, -1, 4.10462e-17
+      ]
+      t:  10  -2.76928e-15  -3.42707e-16*/
+
+      /* labels and block need to be:
+      ###################
+      Labels:{8142508126285856768: 'q0', 8142508126285856769: 'q1'}
+      ###################
+      Block:True
+      */
+    }
   } // namespace utils
 } // namespace gtsam_soslam

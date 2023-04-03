@@ -33,6 +33,7 @@ add_library(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/Constants.cpp
     ${PROJECT_SOURCE_DIR}/src/Utilities.cpp
     ${PROJECT_SOURCE_DIR}/src/SemanticScaleFactor.cpp
+    ${PROJECT_SOURCE_DIR}/src/PlaneSupportingFactor.cpp
 
         )
 
