@@ -20,6 +20,14 @@
          - [x] 3.3.4 Debug Bounding Box Constraint.  
     - [ ] 3.4 Add Quadric Initialization part into "c++ core".
 - [ ] 4. Add visualization part.
+    - [ ] dependency problems
+    - [ ] adding 3D drawing(MapDrawer)
+        - [ ] Map object that can return all objects to draw
+    - [ ] adding frame drawer(FrameDrawer)
+        - [ ] state == Tracking::NOT_INITIALIZED
+        - [ ] quadricimage is in Tracking, move to here. 
+        - [ ] It also use a Update to update images, find a way to place Update.
+    - [ ] multithread part
 - [ ] 5. Doing experiments, Record Video.
 - [ ] 6. Write final report.
  
