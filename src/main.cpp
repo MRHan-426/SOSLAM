@@ -13,7 +13,7 @@ void run() {
             associator,//DummyAssociator associator
             detector, //DummyDetector detector
             initial_pose,//gtsam::Pose3 initial_pose
-            true //bool optimizer_batch
+            false //bool optimizer_batch
     );
 
     q.spin();

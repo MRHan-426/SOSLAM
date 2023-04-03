@@ -123,7 +123,7 @@ namespace gtsam_soslam
     }
 
     /* ************************************************************************* */
-    gtsam::Matrix kron(const gtsam::Matrix m1, const gtsam::Matrix m2)
+    gtsam::Matrix kron(const gtsam::Matrix &m1, const gtsam::Matrix &m2)
     {
       gtsam::Matrix m3(m1.rows() * m2.rows(), m1.cols() * m2.cols());
 
@@ -139,7 +139,7 @@ namespace gtsam_soslam
     }
 
     /* ************************************************************************* */
-    gtsam::Matrix TVEC(const int m, const int n)
+    gtsam::Matrix TVEC(int m, int n)
     {
       gtsam::Matrix T(m * n, m * n);
       for (int j = 0; j < m * n; j++)
@@ -187,8 +187,9 @@ namespace gtsam_soslam
     }
 
     ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
-          const BoundingBoxFactor& bbs,
-          const SemanticScaleFactor& ssc
+        const BoundingBoxFactor& bbs,
+        const SemanticScaleFactor& ssc,
+        const gtsam::Pose3& camera_pose
 //          const PlaneSupportingFactor& psc
     ){
 
@@ -201,7 +202,6 @@ namespace gtsam_soslam
 
         // set a prior quadric
         ConstrainedDualQuadric quadric;
-        gtsam::Pose3 camera_pose;
 
         initial_estimate.insert(bbs.objectKey(), quadric);
         initial_estimate.insert(bbs.poseKey(), camera_pose);
@@ -375,7 +375,5 @@ namespace gtsam_soslam
           Block:True
           */
       }
-
-
   } // namespace utils
 } // namespace gtsam_soslam

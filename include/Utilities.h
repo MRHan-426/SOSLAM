@@ -77,13 +77,13 @@ gtsam::Matrix44 matrix(const gtsam::Pose3& pose,
  * Performs the kronecker product
  * See: https://en.wikipedia.org/wiki/Kronecker_product
  */
-gtsam::Matrix kron(const gtsam::Matrix m1, const gtsam::Matrix m2);
+gtsam::Matrix kron(const gtsam::Matrix &m1, const gtsam::Matrix &m2);
 
 /**
  * Builds the orthogonal transpose vectorization matrix of an m by n matrix
  * See: http://www.ee.ic.ac.uk/hp/staff/dmb/matrix/special.html#VecTranspose
  */
-gtsam::Matrix TVEC(const int m, const int n);
+gtsam::Matrix TVEC(int m, int n);
 
 ConstrainedDualQuadric initialize_quadric_ray_intersection(
     const std::vector<gtsam::Pose3>& obs_poses,
@@ -93,7 +93,8 @@ ConstrainedDualQuadric initialize_quadric_ray_intersection(
 
 ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
     const BoundingBoxFactor& bbs,
-    const SemanticScaleFactor& ssc
+    const SemanticScaleFactor& ssc,
+    const gtsam::Pose3& camera_pose
 //          const PlaneSupportingFactor& psc
     );
 

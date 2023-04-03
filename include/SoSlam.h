@@ -48,6 +48,7 @@ public:
     void spin();
     void step();
     void reset();
+    std::tuple<BoundingBoxFactor,SemanticScaleFactor> add_detection_factors(const Detection &d, const gtsam::noiseModel::Diagonal::shared_ptr &noise_boxes, const gtsam::noiseModel::Diagonal::shared_ptr &noise_scc);
 
 };
 }//namespace gtsam_soslam

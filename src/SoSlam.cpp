@@ -2,7 +2,6 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
-#define DUMMY_INITIALIZATION false
 
 using namespace std;
 
@@ -71,7 +70,7 @@ void SoSlam::guess_initial_values() {
         }
     }
     // will not be used in soslam
-    if (DUMMY_INITIALIZATION)
+    if (s.optimizer_batch_)
     {
     auto _ok_bbs = [](const BoundingBoxFactor& x) { return x.objectKey(); };
 
@@ -125,9 +124,24 @@ void SoSlam::spin() {
         s.estimates_ = optimizer.optimize();
         utils::visualize(s);
     }
+    else{
+        state_.graph_.print(); // print all factors in current graph
+        utils::visualize(state_);
+    }
 }
 
 void SoSlam::step() {
+    // Define noise model
+    auto  noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
+    gtsam::Vector6 temp;
+    temp <<  0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+    gtsam::noiseModel::Diagonal::shared_ptr noise_odom = \
+        gtsam::noiseModel::Diagonal::Sigmas(temp);
+    gtsam::noiseModel::Diagonal::shared_ptr noise_boxes = \
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
+    gtsam::noiseModel::Diagonal::shared_ptr noise_scc = \
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+
     // Setup state for the current step
     auto& s = state_;
     auto p = state_.prev_step;
@@ -152,17 +166,6 @@ void SoSlam::step() {
         }
     }
 
-    // Define noise model
-    auto  noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
-    gtsam::Vector6 temp;
-    temp <<  0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
-    gtsam::noiseModel::Diagonal::shared_ptr noise_odom = \
-        gtsam::noiseModel::Diagonal::Sigmas(temp);
-    gtsam::noiseModel::Diagonal::shared_ptr noise_boxes = \
-        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
-    gtsam::noiseModel::Diagonal::shared_ptr noise_scc = \
-        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
-
     // Add new pose to the factor graph
     if (!p.isValid()) {
         s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
@@ -172,37 +175,36 @@ void SoSlam::step() {
         s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
     }
 
-    // Add any newly associated detections to the factor graph
-    for (const auto& d : n->new_associated) {
-        if (d.quadric_key == 66666) {
-            std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
-            continue;
-        }
-        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(s.calib_rgb_));
-        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes);
-        SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc);
-        s.graph_.add(bbs);
-        s.graph_.add(ssc);
+    std::tuple<BoundingBoxFactor,SemanticScaleFactor> bbs_scc;
 
-        if (!DUMMY_INITIALIZATION)
-        {
+    // batch optimization
+    if (s.optimizer_batch_){
+        for (const auto &d: n->new_associated) {
+        bbs_scc = add_detection_factors(d, noise_boxes, noise_scc);}
+    }
+    // step optimization
+    else{
+        guess_initial_values();
+        for (const auto &d: n->new_associated) {
+            // add bbs, ssc factors into graph
+            bbs_scc = add_detection_factors(d, noise_boxes, noise_scc);
+
+            // quadric initialization
             gtsam::KeyVector keys = s.estimates_.keys();
             auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
             bool found = (iter != keys.end());
-            if(!found)
-            {
-                ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(bbs, ssc);
-                initial_quadric.addToValues(s.estimates_, bbs.objectKey());
-
+            if (!found) {
+                gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
+                ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc), std::get<1>(bbs_scc), camera_pose);
+                // those factors have the same quadric key, just add once
+                s.estimates_.print();
+                std::cout << keys.size() << std::endl;
+                initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc).objectKey());
             }
-            // those factors have the same quadric key
-            // it is enough to add once
-//            initial_quadric.addToValues(s.estimates_, ssc.objectKey());
-//            initial_quadric.addToValues(s.estimates_, psc.objectKey());
-
         }
+        gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+        s.estimates_ = optimizer.optimize();
     }
-
     s.prev_step = *n;
 }
 
@@ -222,4 +224,18 @@ void SoSlam::reset() {
     state_.prev_step = new_step;
     state_.this_step = new_step;
 }
+
+// Helper function
+std::tuple<BoundingBoxFactor,SemanticScaleFactor> SoSlam::add_detection_factors(const Detection &d, const gtsam::noiseModel::Diagonal::shared_ptr &noise_boxes, const gtsam::noiseModel::Diagonal::shared_ptr &noise_scc) {
+    if (d.quadric_key == 66666) {
+        std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
+    }
+    boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_.calib_rgb_));
+    BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes);
+    SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc);
+    state_.graph_.add(bbs);
+    state_.graph_.add(ssc);
+    return std::make_tuple(bbs, ssc);
 }
+
+} // namespace gtsam_soslam
