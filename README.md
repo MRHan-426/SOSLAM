@@ -7,7 +7,7 @@
     - [x] 2.1 Finish compiling.
     - [x] 2.2 Get correct answer.
 - [ ] 3.New Constraints and quadric Initialization.
-    - [ ] 3.1 Finish writing constraints.
+    - [x] 3.1 Finish writing constraints.
          - [x] 3.1.1 Semantic Scale constraint.
          - [ ] 3.1.2 Plane Support constraint.
          - [ ] 3.1.3 Symmetry Texture constraint.
