@@ -14,10 +14,10 @@
          - [x] 3.1.4 Bounding Box constraint.    
     - [ ] 3.2 Finish writing Quadric Initialization.
     - [ ] 3.3 Add Constraints into "c++ core".
-         - [ ] 3.3.1 Debug Semantic Scale constraint.
+         - [x] 3.3.1 Debug Semantic Scale constraint.
          - [ ] 3.3.2 Debug Plane Support constraint.
          - [ ] 3.3.3 Debug Symmetry Texture constraint.
-         - [ ] 3.3.4 Debug Bounding Box Constraint.  
+         - [x] 3.3.4 Debug Bounding Box Constraint.  
     - [ ] 3.4 Add Quadric Initialization part into "c++ core".
 - [ ] 4. Add visualization part.
 - [ ] 5. Doing experiments, Record Video.
