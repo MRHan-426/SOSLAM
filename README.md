@@ -12,13 +12,13 @@
          - [ ] 3.1.2 Plane Support constraint.
          - [ ] 3.1.3 Symmetry Texture constraint.
          - [x] 3.1.4 Bounding Box constraint.    
-    - [ ] 3.2 Finish writing Quadric Initialization.
+    - [x] 3.2 Finish writing Quadric Initialization.
     - [ ] 3.3 Add Constraints into "c++ core".
          - [x] 3.3.1 Debug Semantic Scale constraint.
          - [ ] 3.3.2 Debug Plane Support constraint.
          - [ ] 3.3.3 Debug Symmetry Texture constraint.
          - [x] 3.3.4 Debug Bounding Box Constraint.  
-    - [ ] 3.4 Add Quadric Initialization part into "c++ core".
+    - [x] 3.4 Add Quadric Initialization part into "c++ core".
 - [ ] 4. Add visualization part.
     - [ ] dependency problems
     - [ ] adding 3D drawing(MapDrawer)
