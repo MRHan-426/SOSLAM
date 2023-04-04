@@ -30,12 +30,13 @@ public:
     std::string img_path_;
     std::string xml_path_;
     std::string calib_file_;
+    std::vector<std::string> odom_data_;
     int num_img_;
 
     void restart() override {
         i = 0;
     }
-    HandMadeData(const std::string& img_path = "input/img", const std::string& xml_path = "input/xml", const std::string& calib_file= "input/calib_params.txt")
+    HandMadeData(const std::string& img_path = "input/img", const std::string& xml_path = "input/xml", const std::string& calib_file= "input/calib_params.txt", const std::string& odom_file= "input/odom.txt")
     : img_path_(img_path),xml_path_(xml_path),calib_file_(calib_file) {
         i = 0;
         if (file_num(img_path) == 0 || file_num(xml_path) == 0){
@@ -47,6 +48,22 @@ public:
         else{
             num_img_ = file_num(img_path);
         }
+
+        std::ifstream infile(odom_file);
+
+        if (infile.is_open()) {
+            std::string line;
+            while (std::getline(infile, line)) {
+                odom_data_.push_back(line);
+            }
+            infile.close();
+            if (odom_data_.size() != static_cast<size_t>(num_img_)){
+                std::cerr << "length of image and odom does not match, please check." << std::endl;
+            }
+        } else {
+            std::cerr << "WARN: cannot open odom.txt, please check." << std::endl;
+        }
+
     }
 
     int file_num(const std::string& folder_path){
@@ -102,20 +119,34 @@ public:
 
     std::tuple<gtsam::Pose3, gtsam::Matrix3 , cv::Mat> next(SoSlamState& state) override
     {
+        std::vector<std::string> parts;
+        std::stringstream ss(odom_data_[i]); //start from 0
+        std::string token;
+        while (ss >> token) {
+            parts.push_back(token);
+        }
+        auto tx = std::stod(parts[1]);
+        auto ty = std::stod(parts[2]);
+        auto tz = std::stod(parts[3]);
+        auto qx = std::stod(parts[4]);
+        auto qy = std::stod(parts[5]);
+        auto qz = std::stod(parts[6]);
+        auto qw = std::stod(parts[7]);
+        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(qw, qx, qy, qz), gtsam::Point3(tx, ty, tz));
+
         ++i;
-        std::string img_name = img_path_ + std::to_string(i) + ".png";
+
+        std::string img_name = img_path_ + std::to_string(i) + ".png"; //start from 1.png
 
         gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
 
         cv::Mat img = cv::imread(img_name, cv::IMREAD_COLOR); //BGR
 
-        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, img);
+        return std::make_tuple(pose, mat, img);
     }
 
 private:
     int i;
-    const std::vector<gtsam::Pose3> POSES = Constants::POSES;
-
 };
 
 class HandMadeDetector : public BaseDetector
