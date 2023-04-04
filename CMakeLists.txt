@@ -9,6 +9,7 @@ find_package(GTSAM 4.1.1 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(TBB REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(pugixml REQUIRED)
 
 # Set include directories
 include_directories(
@@ -40,6 +41,7 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         gtsam
+        pugixml
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
         ${TBB_LIBRARIES}
@@ -50,6 +52,7 @@ target_link_libraries(${PROJECT_NAME}
 add_executable(soslam_exe src/main.cpp)
 target_link_libraries(soslam_exe
         gtsam
+        pugixml
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
         ${TBB_LIBRARIES}
