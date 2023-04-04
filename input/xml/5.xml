@@ -22,7 +22,7 @@
 			<xmax>289</xmax>
 			<ymax>172</ymax>
 		</bndbox>
-	</object>
+	<objectkey>1</objectkey></object>
 	<object>
 		<name>keyboard</name>
 		<pose>Unspecified</pose>
@@ -34,7 +34,7 @@
 			<xmax>267</xmax>
 			<ymax>209</ymax>
 		</bndbox>
-	</object>
+	<objectkey>2</objectkey></object>
 	<object>
 		<name>mouse</name>
 		<pose>Unspecified</pose>
@@ -46,7 +46,7 @@
 			<xmax>250</xmax>
 			<ymax>242</ymax>
 		</bndbox>
-	</object>
+	<objectkey>3</objectkey></object>
 	<object>
 		<name>tape</name>
 		<pose>Unspecified</pose>
@@ -58,7 +58,7 @@
 			<xmax>404</xmax>
 			<ymax>250</ymax>
 		</bndbox>
-	</object>
+	<objectkey>6</objectkey></object>
 	<object>
 		<name>book</name>
 		<pose>Unspecified</pose>
@@ -70,7 +70,7 @@
 			<xmax>450</xmax>
 			<ymax>204</ymax>
 		</bndbox>
-	</object>
+	<objectkey>4</objectkey></object>
 	<object>
 		<name>can</name>
 		<pose>Unspecified</pose>
@@ -82,5 +82,5 @@
 			<xmax>31</xmax>
 			<ymax>189</ymax>
 		</bndbox>
-	</object>
+	<objectkey>5</objectkey></object>
 </annotation>
