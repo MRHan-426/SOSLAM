@@ -3,7 +3,8 @@
 
 #include "DummyExample.h"
 #include "SoSlam.h"
-
+#include "Viewer.h"
+#include "MapDrawer.h"
 void run();
 
 
