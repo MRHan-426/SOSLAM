@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include "pugixml.hpp"
 #include <Eigen/Dense>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Cal3_S2.h>
@@ -36,7 +37,7 @@ public:
     void restart() override {
         i = 0;
     }
-    HandMadeData(const std::string& img_path = "input/img", const std::string& xml_path = "input/xml", const std::string& calib_file= "input/calib_params.txt", const std::string& odom_file= "input/odom.txt")
+    HandMadeData(const std::string& img_path = "../input/img/", const std::string& xml_path = "../input/xml/", const std::string& calib_file= "../input/calib_params.txt", const std::string& odom_file= "../input/odom.txt")
     : img_path_(img_path),xml_path_(xml_path),calib_file_(calib_file) {
         i = 0;
         if (file_num(img_path) == 0 || file_num(xml_path) == 0){
@@ -155,39 +156,36 @@ public:
     HandMadeDetector() : i(0) {}
 
     std::vector<Detection> detect(SoSlamState& state) override {
-        int current_i = i;
         ++i;
-
         std::vector<Detection> detections;
-        for (size_t iq = 0; iq < QUADRICS.size(); ++iq) {
-            const auto& q = QUADRICS[iq];
-//            gtsam::Symbol symbol('q', iq);
-            boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state.calib_rgb_));
-            gtsam::Vector4 bounds = QuadricCamera::project(q, POSES[current_i], calibPtr).bounds().vector();
-            std::string label;
-            switch (iq) {
-                case 0:
-                    label = "q0";
-                    break;
-                case 1:
-                    label = "q1";
-                    break;
-                default:
-                    label = "q0";
-                    break;}
+
+        std::string xml_name = "../input/xml/" + std::to_string(i) + ".xml"; //start from 1.xml
+
+        pugi::xml_document doc;
+        if (!doc.load_file(xml_name.c_str())) {
+            std::cerr << "WARN: cannot open xml file, please check." << std::endl;
+        }
+        pugi::xml_node root = doc.child("annotation");
+
+        for (pugi::xml_node object = root.child("object"); object; object = object.next_sibling("object")) {
+
+            pugi::xml_node bndbox = object.child("bndbox");
+            pugi::xml_node name = object.child("name");
+//            pugi::xml_node difficult = object.child("difficult"); // probability prior
+
+            std::string label = name.text().get();
+            gtsam::Vector4 bounds;
+            bounds << bndbox.child("xmin").text().as_int(), bndbox.child("ymin").text().as_int(), bndbox.child("xmax").text().as_int(), bndbox.child("ymax").text().as_int();
+
             detections.emplace_back(
                     label, bounds, state.this_step.pose_key
             );
-
         }
-
         return detections;
     }
 
 private:
     int i;
-    const std::vector<gtsam::Pose3> POSES = Constants::POSES;
-    const std::vector<ConstrainedDualQuadric> QUADRICS = Constants::QUADRICS;
 };
 
 
@@ -206,6 +204,8 @@ public:
 
     std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state) override
     {
+        // because our dataset has been associated by hand
+        // all
         auto& s = state;
         auto& n = state.this_step;
         std::vector<Detection> new_ds = (!n.isValid()) ? std::vector<Detection>{} : n.detections;
