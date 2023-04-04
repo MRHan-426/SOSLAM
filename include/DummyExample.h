@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Cal3_S2.h>
-
+#include <opencv4/opencv2/opencv.hpp> // 4.7.0
 namespace gtsam_soslam {
 class DummyData : public DataSource
 {
@@ -42,8 +42,8 @@ public:
     {
         ++i;
         gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
-        gtsam::Vector3 vec = gtsam::Vector3::Zero();
-        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, vec);
+        cv::Mat img;
+        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, img);
     }
 
 private:
