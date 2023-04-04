@@ -15,6 +15,7 @@
 #include <variant>
 #include <limits>
 
+#include <opencv2/opencv.hpp>
 #include <gtsam/nonlinear/LevenbergMarquardtParams.h>
 #include <gtsam/nonlinear/ISAM2Params.h>
 #include <gtsam/geometry/Pose3.h>

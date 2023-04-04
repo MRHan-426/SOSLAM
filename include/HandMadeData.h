@@ -15,23 +15,58 @@
 #include <vector>
 #include <optional>
 #include <unordered_set>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include <Eigen/Dense>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Cal3_S2.h>
+#include <opencv4/opencv2/opencv.hpp> // 4.7.0
+
 namespace gtsam_soslam {
 class HandMadeData : public DataSource
 {
 public:
+    std::string img_path_;
+    std::string xml_path_;
     std::string calib_file_;
+    int num_img_;
 
     void restart() override {
         i = 0;
     }
     HandMadeData(const std::string& img_path = "input/img", const std::string& xml_path = "input/xml", const std::string& calib_file= "input/calib_params.txt")
-    : calib_file_(calib_file)
-    {
+    : img_path_(img_path),xml_path_(xml_path),calib_file_(calib_file) {
+        i = 0;
+        if (file_num(img_path) == 0 || file_num(xml_path) == 0){
+            std::cerr << "WARN: there be no imgs or xmls in the folder path, please check." << std::endl;
+        }
+        else if (file_num(img_path) != file_num(xml_path)){
+            std::cerr << "WARN: number of images and xmls does not match, please check." << std::endl;
+        }
+        else{
+            num_img_ = file_num(img_path);
+        }
+    }
 
+    int file_num(const std::string& folder_path){
+        DIR *dir;
+        struct dirent *ent;
+        struct stat buf;
+        int file_count = 0;
+        if ((dir = opendir(folder_path.c_str())) != NULL) {
+            while ((ent = readdir(dir)) != NULL) {
+                std::string full_path = folder_path + "/" + ent->d_name;
+                if (stat(full_path.c_str(), &buf) == 0 && S_ISREG(buf.st_mode)) {
+                    file_count++;
+                }
+            }
+            closedir(dir);
+            return file_count;
+        }
+        else{
+            return int(0);
+        }
     }
 
     gtsam::Vector5 calib_rgb() override {
@@ -62,15 +97,19 @@ public:
     }
 
     bool done() const override {
-        return static_cast<std::vector<gtsam::Pose3>::size_type>(i)  == POSES.size();
+        return i == num_img_;
     }
 
-    std::tuple<gtsam::Pose3, gtsam::Matrix3 , gtsam::Vector3> next(SoSlamState& state) override
+    std::tuple<gtsam::Pose3, gtsam::Matrix3 , cv::Mat> next(SoSlamState& state) override
     {
         ++i;
+        std::string img_name = img_path_ + std::to_string(i) + ".png";
+
         gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
-        gtsam::Vector3 vec = gtsam::Vector3::Zero();
-        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, vec);
+
+        cv::Mat img = cv::imread(img_name, cv::IMREAD_COLOR); //BGR
+
+        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, img);
     }
 
 private:

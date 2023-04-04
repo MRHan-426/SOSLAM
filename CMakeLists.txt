@@ -7,7 +7,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -std=c++11 -Wall -
 find_package(Eigen3 REQUIRED)
 find_package(GTSAM 4.1.1 REQUIRED)
 find_package(Boost REQUIRED)
-find_package(TBB REQUIRED) # Add this line
+find_package(TBB REQUIRED)
+find_package(OpenCV REQUIRED)
 
 # Set include directories
 include_directories(
@@ -15,7 +16,8 @@ include_directories(
     ${EIGEN3_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${GTSAM_INCLUDE_DIR}
-    ${TBB_INCLUDE_DIRS} # Add this line
+    ${TBB_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
 )
 #link_directories(${Boost_LIBRARY_DIR})
 
@@ -34,14 +36,14 @@ add_library(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/Utilities.cpp
     ${PROJECT_SOURCE_DIR}/src/SemanticScaleFactor.cpp
     ${PROJECT_SOURCE_DIR}/src/PlaneSupportingFactor.cpp
-
         )
 
 target_link_libraries(${PROJECT_NAME}
         gtsam
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
-        ${TBB_LIBRARIES} # Add this line
+        ${TBB_LIBRARIES}
+        ${OpenCV_LIBS}
         )
 
 # Add executable
@@ -52,6 +54,7 @@ target_link_libraries(soslam_exe
         ${Boost_LIBRARIES}
         ${TBB_LIBRARIES}
         ${PROJECT_NAME}
+        ${OpenCV_LIBS}
 )
 
 
