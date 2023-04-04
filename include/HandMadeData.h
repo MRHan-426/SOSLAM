@@ -171,14 +171,15 @@ public:
 
             pugi::xml_node bndbox = object.child("bndbox");
             pugi::xml_node name = object.child("name");
-//            pugi::xml_node difficult = object.child("difficult"); // probability prior
+            pugi::xml_node objectkey = object.child("objectkey");
 
+            gtsam::Key quadrickey = std::stoull(objectkey.text().get());
             std::string label = name.text().get();
             gtsam::Vector4 bounds;
             bounds << bndbox.child("xmin").text().as_int(), bndbox.child("ymin").text().as_int(), bndbox.child("xmax").text().as_int(), bndbox.child("ymax").text().as_int();
 
             detections.emplace_back(
-                    label, bounds, state.this_step.pose_key
+                    label, bounds, state.this_step.pose_key, quadrickey
             );
         }
         return detections;
@@ -204,21 +205,34 @@ public:
 
     std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state) override
     {
-        // because our dataset has been associated by hand
-        // all
+        // Our dataset has been associated by hand
+        // In fact the associator here is fake
         auto& s = state;
         auto& n = state.this_step;
         std::vector<Detection> new_ds = (!n.isValid()) ? std::vector<Detection>{} : n.detections;
 
+        std::vector<Detection> newly_associated, associated, unassociated;
         std::vector<Detection> ds = new_ds;
+        // In fact, we make sure there are no unassocaited objects in the dataset.
         ds.insert(ds.end(), s.unassociated_.begin(), s.unassociated_.end());
+
+        for (const auto& d : ds){
+            if (d.quadric_key){
+
+
+            }
+
+        }
+
+        return std::make_tuple(newly_associated, associated, unassociated);
 
         std::unordered_set<std::string> associated_labels;
         for (const auto& d : s.associated_) {
             associated_labels.insert(d.label);
         }
 
-        std::vector<Detection> newly_associated;
+
+
         for (auto& d : ds) {
             int count = 0;
             for (const auto& x : ds) {
@@ -228,8 +242,8 @@ public:
             }
 
             if (associated_labels.count(d.label) > 0 || count >= 3) {
-                d.quadric_key = gtsam::symbol(d.label[0], std::stoi(d.label.substr(1)));
-                newly_associated.push_back(d);
+//                d.quadric_key = gtsam::symbol(d.label[0], std::stoi(d.label.substr(1)));
+//                newly_associated.push_back(d);
             }
         }
 
@@ -243,7 +257,6 @@ public:
             }
         }
 
-        return std::make_tuple(newly_associated, associated, unassociated);
     }
 };
 } // namespace gtsam_soslam
