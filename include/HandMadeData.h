@@ -210,53 +210,16 @@ public:
         auto& s = state;
         auto& n = state.this_step;
         std::vector<Detection> new_ds = (!n.isValid()) ? std::vector<Detection>{} : n.detections;
+        std::vector<Detection> newly_associated = new_ds;
 
-        std::vector<Detection> newly_associated, associated, unassociated;
-        std::vector<Detection> ds = new_ds;
+        std::vector<Detection> associated = s.associated_;
+        associated.insert(associated.end(), newly_associated.begin(), newly_associated.end());
+
         // In fact, we make sure there are no unassocaited objects in the dataset.
-        ds.insert(ds.end(), s.unassociated_.begin(), s.unassociated_.end());
-
-        for (const auto& d : ds){
-            if (d.quadric_key){
-
-
-            }
-
-        }
+        std::vector<Detection> unassociated;
+        unassociated = s.unassociated_;
 
         return std::make_tuple(newly_associated, associated, unassociated);
-
-        std::unordered_set<std::string> associated_labels;
-        for (const auto& d : s.associated_) {
-            associated_labels.insert(d.label);
-        }
-
-
-
-        for (auto& d : ds) {
-            int count = 0;
-            for (const auto& x : ds) {
-                if (x.label == d.label) {
-                    ++count;
-                }
-            }
-
-            if (associated_labels.count(d.label) > 0 || count >= 3) {
-//                d.quadric_key = gtsam::symbol(d.label[0], std::stoi(d.label.substr(1)));
-//                newly_associated.push_back(d);
-            }
-        }
-
-        std::vector<Detection> associated, unassociated;
-        for (const auto& d : flat({ds, s.associated_})) {
-            if (std::find(newly_associated.begin(), newly_associated.end(), d) != newly_associated.end() ||
-                std::find(s.associated_.begin(), s.associated_.end(), d) != s.associated_.end()) {
-                associated.push_back(d);
-            } else {
-                unassociated.push_back(d);
-            }
-        }
-
     }
 };
 } // namespace gtsam_soslam
