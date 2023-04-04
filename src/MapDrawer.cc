@@ -203,13 +203,31 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 
 //     if(bDrawGraph)
 //     {
-//         glLineWidth(mGraphLineWidth);
-//         glColor4f(0.0f,1.0f,0.0f,0.6f);
-//         glBegin(GL_LINES);
-//
+         glLineWidth(mGraphLineWidth);
+         glColor4f(0.0f,1.0f,0.0f,0.6f);
+         glBegin(GL_LINES);
+         pair<gtsam::Key, gtsam::Pose3> previous= {0,gtsam::Pose3::identity()};
+         pangolin::OpenGlMatrix PrevM;
+         PrevM.SetIdentity();
+         pair<gtsam::Key, gtsam::Pose3> current= {0,gtsam::Pose3::identity()};
+         pangolin::OpenGlMatrix CurM;
+         CurM.SetIdentity();
+         for(auto &ps: cps){
+             previous=current;
+             PrevM=CurM;
+             current=ps;
+             CurM = GetOpenGLCameraMatrixFromPose3(ps.second);
+             if(previous.first){
+//                 M.m[12] = poseMatrix(0,3);//twc.at<float>(0);
+//                 M.m[13] = poseMatrix(1,3);//twc.at<float>(1);
+//                 M.m[14] = poseMatrix(2,3);//twc.at<float>(2);
+//                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
+                 glVertex3f(PrevM.m[12],PrevM.m[13],PrevM.m[14]);
+                 glVertex3f(CurM.m[12],CurM.m[13],CurM.m[14]);
+             }
 //         for(size_t i=0; i<vpKFs.size(); i++)
 //         {
-//             // Covisibility Graph
+             // Covisibility Graph
 //             const vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
 //             cv::Mat Ow = vpKFs[i]->GetCameraCenter();
 //             if(!vCovKFs.empty())
@@ -243,9 +261,9 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
 //                 glVertex3f(Owl.at<float>(0),Owl.at<float>(1),Owl.at<float>(2));
 //             }
-//         }
-//
-//         glEnd();
+         }
+
+         glEnd();
 //     }
  }
 
