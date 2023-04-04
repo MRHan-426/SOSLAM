@@ -29,7 +29,7 @@ class DataSource {
 
         virtual bool done() const = 0;
 
-        virtual std::tuple<gtsam::Pose3, gtsam::Matrix3, cv::Mat> next(SoSlamState &state) = 0;
+        virtual std::tuple<gtsam::Pose3, gtsam::Matrix3, gtsam::Vector3> next(SoSlamState &state) = 0;
 
         virtual ~DataSource() = default;
 };
