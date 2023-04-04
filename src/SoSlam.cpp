@@ -5,96 +5,120 @@
 
 using namespace std;
 
-namespace gtsam_soslam{
-
-SoSlam::SoSlam(
-    DummyData data_source,
-    DummyAssociator associator,
-    DummyDetector detector,
-    const gtsam::Pose3& initial_pose,
-    const bool& optimizer_batch
-    ):
-    data_source_(std::move(data_source)),
-    associator_(associator),
-    detector_(std::move(detector)),
-    initial_pose_(initial_pose),
-    optimizer_batch_(optimizer_batch)
+namespace gtsam_soslam
 {
-    state_ = SoSlamState(initial_pose, optimizer_batch);
-    reset();
-}
+    SoSlam::SoSlam(
+        DataSource& data_source,
+        BaseAssociator& associator,
+        BaseDetector& detector,
+        const gtsam::Pose3 &initial_pose,
+        const bool &optimizer_batch) : data_source_(data_source),
+                                       associator_(associator),
+                                       detector_(detector),
+                                       initial_pose_(initial_pose),
+                                       optimizer_batch_(optimizer_batch)
+    {
+        state_ = SoSlamState(initial_pose, optimizer_batch);
+        reset();
+    }
 
-void SoSlam::guess_initial_values() {
-    auto& s = state_;
-    std::vector<boost::shared_ptr<gtsam::NonlinearFactor>> fs(s.graph_.nrFactors());
+    void SoSlam::guess_initial_values()
+    {
+        auto &s = state_;
+        std::vector<boost::shared_ptr<gtsam::NonlinearFactor>> fs(s.graph_.nrFactors());
 
-    std::transform(fs.begin(), fs.end(), fs.begin(),
-                   [&](decltype(fs.begin())::value_type const& f)
-                   { return s.graph_.at(std::distance(fs.begin(), std::find(fs.begin(), fs.end(), f))); });
+        std::transform(fs.begin(), fs.end(), fs.begin(),
+                       [&](decltype(fs.begin())::value_type const &f)
+                       { return s.graph_.at(std::distance(fs.begin(), std::find(fs.begin(), fs.end(), f))); });
 
-    for (const auto& f : fs) {
-        if (auto pf = dynamic_cast<gtsam::PriorFactor<gtsam::Pose3>*>(f.get())) {
-            auto key = pf->keys().at(0);
-            if (!s.estimates_.exists(key)) {
-                s.estimates_.insert(key, pf->prior());
+        for (const auto &f : fs)
+        {
+            if (auto pf = dynamic_cast<gtsam::PriorFactor<gtsam::Pose3> *>(f.get()))
+            {
+                auto key = pf->keys().at(0);
+                if (!s.estimates_.exists(key))
+                {
+                    s.estimates_.insert(key, pf->prior());
+                }
+            }
+        }
+        std::vector<gtsam::BetweenFactor<gtsam::Pose3> *> bfs;
+        for (const auto &f : fs)
+        {
+            if (auto bf = dynamic_cast<gtsam::BetweenFactor<gtsam::Pose3> *>(f.get()))
+            {
+                bfs.push_back(bf);
+            }
+        }
+
+        bool done = false;
+        while (!done)
+        {
+            gtsam::BetweenFactor<gtsam::Pose3> *bf = nullptr;
+            for (auto f : bfs)
+            {
+                if (s.estimates_.exists(f->keys().at(0)) && !s.estimates_.exists(f->keys().at(1)))
+                {
+                    bf = f;
+                    break;
+                }
+            }
+            if (bf == nullptr)
+            {
+                done = true;
+                continue;
+            }
+            s.estimates_.insert(bf->keys().at(1), s.estimates_.at<gtsam::Pose3>(bf->keys().at(0)) * bf->measured());
+            bfs.erase(std::remove(bfs.begin(), bfs.end(), bf), bfs.end());
+        }
+        for (auto f : bfs)
+        {
+            bool all_keys_exist = std::all_of(f->keys().begin(), f->keys().end(),
+                                              [&](const gtsam::Key &key)
+                                              { return s.estimates_.exists(key); });
+            if (!all_keys_exist)
+            {
+                s.estimates_.insert(f->keys().at(1), gtsam::Pose3());
+            }
+        }
+        // will not be used in soslam
+        if (s.optimizer_batch_)
+        {
+            auto _ok_bbs = [](const BoundingBoxFactor &x)
+            { return x.objectKey(); };
+
+            std::vector<BoundingBoxFactor *> bbs;
+
+            for (const auto &f : fs)
+            {
+                if (auto bb = dynamic_cast<BoundingBoxFactor *>(f.get()))
+                {
+                    bbs.push_back(bb);
+                }
+            }
+
+            std::map<int, std::vector<BoundingBoxFactor *>> grouped_bbs;
+
+            for (auto bb : bbs)
+            {
+                grouped_bbs[static_cast<int>(_ok_bbs(*bb))].push_back(bb);
+            }
+
+            for (const auto &kv : grouped_bbs)
+            {
+                std::vector<gtsam::Pose3> poses;
+                std::vector<AlignedBox2> points;
+                for (auto bb : kv.second)
+                {
+                    poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
+                    points.push_back(bb->measurement());
+                }
+                std::cout << kv.second.front()->objectKey() << std::endl;
+                s.estimates_.print();
+                utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
             }
         }
     }
-    std::vector<gtsam::BetweenFactor<gtsam::Pose3>*> bfs;
-    for (const auto& f : fs) {
-        if (auto bf = dynamic_cast<gtsam::BetweenFactor<gtsam::Pose3>*>(f.get())) {
-            bfs.push_back(bf);
-        }
-    }
-
-    bool done = false;
-    while (!done) {
-        gtsam::BetweenFactor<gtsam::Pose3>* bf = nullptr;
-        for (auto f : bfs) {
-            if (s.estimates_.exists(f->keys().at(0)) && !s.estimates_.exists(f->keys().at(1))) {
-                bf = f;
-                break;
-            }
-        }
-        if (bf == nullptr) {
-            done = true;
-            continue;
-        }
-        s.estimates_.insert(bf->keys().at(1), s.estimates_.at<gtsam::Pose3>(bf->keys().at(0)) * bf->measured());
-        bfs.erase(std::remove(bfs.begin(), bfs.end(), bf), bfs.end());
-    }
-    for (auto f : bfs) {
-        bool all_keys_exist = std::all_of(f->keys().begin(), f->keys().end(),
-                                          [&](const gtsam::Key& key) { return s.estimates_.exists(key); });
-        if (!all_keys_exist) {
-            s.estimates_.insert(f->keys().at(1), gtsam::Pose3());
-        }
-    }
-    auto _ok = [](const BoundingBoxFactor& x) { return x.objectKey(); };
-    std::vector<BoundingBoxFactor*> bbs;
-    for (const auto& f : fs) {
-        if (auto bb = dynamic_cast<BoundingBoxFactor *>(f.get())) {
-            bbs.push_back(bb);
-        }
-    }
-
-    std::map<int, std::vector<BoundingBoxFactor*>> grouped_bbs;
-    for (auto bb : bbs) {
-        grouped_bbs[static_cast<int>(_ok(*bb))].push_back(bb);
-    }
-
-    for (const auto& kv : grouped_bbs) {
-        std::vector<gtsam::Pose3> poses;
-        std::vector<AlignedBox2> points;
-        for (auto bb : kv.second) {
-            poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
-            points.push_back(bb->measurement());
-        }
-
-        utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
-    }
-
-}
 
 
 void SoSlam::spin() {
@@ -106,103 +130,153 @@ void SoSlam::spin() {
         // usleep(3000000);
     }
 
-    if (state_.optimizer_batch_) {
-        guess_initial_values();
-        auto& s = state_;
+        if (state_.optimizer_batch_)
+        {
+            guess_initial_values();
+            auto &s = state_;
 
-        // Using ISAM2 for optimization
-        // gtsam::ISAM2 a(s.optimizer_params_);
-        // s.optimizer_ = a;
-        // gtsam::ISAM2Result result = s.optimizer_.update(s.graph_, s.estimates_);
-        // s.estimates_ = s.optimizer_.calculateEstimate();
-        std::cout << s.initial_pose_ << std::endl;
-//        s.estimates_.print();
-        s.graph_.print();
+            // Using ISAM2 for optimization
+            /* gtsam::ISAM2 isam(s.optimizer_params_);
+             gtsam::ISAM2Result result = isam.update(s.graph_, s.estimates_);
+             s.estimates_ = isam.calculateEstimate();*/
 
-        gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-        s.estimates_ = optimizer.optimize();
-        utils::visualize(s);
-        cout<<"visulized"<<endl;
-        usleep(6000000);
-    }
-}
-
-
-void SoSlam::step() {
-    // Setup state for the current step
-    auto& s = state_;
-    auto p = state_.prev_step;
-
-    //initialize with zero
-    int new_step_index = p.i + 1;
-    StepState* n;
-    n = &(s.this_step);
-    n->i = new_step_index;
-    n->pose_key = gtsam::Symbol('x',new_step_index);
-
-    // Get latest data from the scene (odom, images, and detections)
-    std::tie(n->odom, n->depth,n->rgb) = data_source_.next(s);
-    n->detections = detector_.detect(s); // be aware to deal with the situation that detector is none
-    std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
-
-    // Extract some labels
-    // TODO handle cases where different labels used for a single quadric???
-    for (const auto& d : s.associated_) {
-        if (d.quadric_key != 66666) {
-            s.labels_[d.quadric_key] = d.label;
+            // s.estimates_.print(); // print estimate values
+            s.graph_.print(); // print all factors in current graph
+            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+            s.estimates_ = optimizer.optimize();
+            utils::visualize(s);
+        }
+        else
+        {
+            state_.graph_.print(); // print all factors in current graph
+            utils::visualize(state_);
         }
     }
-    gtsam::Vector6 temp1 = gtsam::Vector6::Zero();
-    auto  noise_prior = gtsam::noiseModel::Diagonal::Sigmas(temp1);
 
-    // Add new pose to the factor graph
-    if (!p.isValid()) {
-        s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
-    } else {
-
-        gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
-        // gtsam::SharedNoiseModel noiseodomPtr(new gtsam::noiseModel::Diagonal(s.noise_odom_));
-        gtsam::Vector6 temp2;
-        temp2 <<  0.01, 0.01, 0.01, 0.01,0.01,0.01;
+    void SoSlam::step()
+    {
+        // Define noise model
+        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
+        gtsam::Vector6 temp;
+        temp << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
-        gtsam::noiseModel::Diagonal::Sigmas(temp2);
-        s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
-    }
-
-    // Add any newly associated detections to the factor graph
-    for (const auto& d : n->new_associated) {
-        if (d.quadric_key == 66666) {
-            std::cerr << "WARN: skipping associated detection with quadric_key == 0, which means None" << std::endl;
-            continue;
-        }
-        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(s.calib_rgb_));
-        // gtsam::SharedNoiseModel noiseboxPtr(new gtsam::Matrix(s.noise_boxes_));
+            gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
-        s.graph_.add(BoundingBoxFactor(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
+        gtsam::noiseModel::Diagonal::shared_ptr noise_scc =
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+        gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+
+        // Setup state for the current step
+        auto &s = state_;
+        auto p = state_.prev_step;
+
+        // step index is initialized with zero
+        int new_step_index = p.i + 1;
+        StepState *n;
+        n = &(s.this_step);
+        n->i = new_step_index;
+        n->pose_key = gtsam::Symbol('x', new_step_index);
+
+        // Get latest data from the scene (odom, images, and detections)
+        std::tie(n->odom, n->depth, n->rgb) = data_source_.next(s);
+        n->detections = detector_.detect(s);
+        std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
+
+        // Extract labels
+        // TODO handle cases where different labels used for a single quadric???
+        for (const auto &d : s.associated_)
+        {
+            if (d.quadric_key != 66666)
+            {
+                s.labels_[d.quadric_key] = d.label;
+            }
+        }
+
+        // Add new pose to the factor graph
+        if (!p.isValid())
+        {
+            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
+        }
+        else
+        {
+            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
+        }
+
+        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> bbs_scc_psc;
+
+        // batch optimization
+        if (s.optimizer_batch_)
+        {
+            for (const auto &d : n->new_associated)
+            {
+                bbs_scc_psc = add_detection_factors(d, noise_boxes, noise_scc, noise_psc);
+            }
+        }
+        // step optimization
+        else
+        {
+            guess_initial_values();
+            for (const auto &d : n->new_associated)
+            {
+                // add bbs, ssc factors into graph
+                bbs_scc_psc = add_detection_factors(d, noise_boxes, noise_scc, noise_psc);
+
+                // quadric initialization
+                gtsam::KeyVector keys = s.estimates_.keys();
+                auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
+                bool found = (iter != keys.end());
+                if (!found)
+                {
+                    gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
+                    ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc_psc), std::get<1>(bbs_scc_psc), std::get<2>(bbs_scc_psc), camera_pose);
+                    // those factors have the same quadric key, just add once
+                    s.estimates_.print();
+                    std::cout << keys.size() << std::endl;
+                    initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc).objectKey());
+                }
+            }
+            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+            s.estimates_ = optimizer.optimize();
+        }
+        s.prev_step = *n;
     }
 
-//    s.graph_.print();
+    void SoSlam::reset()
+    {
 
-    s.prev_step = *n;
-}
+        data_source_.restart();
+        auto &s = state_;
+        s.associated_.clear();
+        s.unassociated_.clear();
+        s.labels_.clear();
+        s.graph_ = gtsam::NonlinearFactorGraph();
+        s.estimates_ = gtsam::Values();
+        s.optimizer_params_ = gtsam::LevenbergMarquardtParams();
+        // s.calib_depth_ = data_source_.calib_depth();
+        s.calib_rgb_ = data_source_.calib_rgb();
+        StepState new_step;
+        state_.prev_step = new_step;
+        state_.this_step = new_step;
+    }
 
+    // Helper function
+    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> SoSlam::add_detection_factors(const Detection &d, const gtsam::noiseModel::Diagonal::shared_ptr &noise_boxes, const gtsam::noiseModel::Diagonal::shared_ptr &noise_scc, const gtsam::noiseModel::Diagonal::shared_ptr &noise_psc)
+    {
+        if (d.quadric_key == 66666)
+        {
+            std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
+        }
+        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_.calib_rgb_));
+        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes);
+        SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc);
+        PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_psc);
+        state_.graph_.add(bbs);
+        state_.graph_.add(ssc);
+        state_.graph_.add(psc);
+        return std::make_tuple(bbs, ssc, psc);
+    }
 
-void SoSlam::reset() {
-
-    data_source_.restart();
-    auto& s = state_;
-    s.associated_.clear();
-    s.unassociated_.clear();
-    s.labels_.clear();
-    s.graph_ = gtsam::NonlinearFactorGraph();
-    s.estimates_ = gtsam::Values();
-    s.optimizer_params_ = gtsam::LevenbergMarquardtParams();
-    // s.optimizer_ = gtsam::LevenbergMarquardtOptimizer(s.graph_, s.estimates_);
-    // s.calib_depth_ = data_source_.calib_depth();
-    s.calib_rgb_ = data_source_.calib_rgb();
-    StepState new_step;
-    state_.prev_step = new_step;
-    state_.this_step = new_step;
-}
-}
+} // namespace gtsam_soslam

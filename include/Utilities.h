@@ -24,6 +24,9 @@
 
 #include "ConstrainedDualQuadric.h"
 #include "SoSlam.h"
+#include "BoundingBoxFactor.h"
+#include "SemanticScaleFactor.h"
+#include "PlaneSupportingFactor.h"
 
 #include <gtsam/base/Matrix.h>
 #include <gtsam/geometry/Pose3.h>
@@ -33,71 +36,79 @@
 #include <boost/optional.hpp>
 #include <Eigen/Dense>
 
-namespace gtsam_soslam {
-namespace utils {
+namespace gtsam_soslam
+{
+    namespace utils
+    {
 
-/**
- * Returns the real roots of the polynomial
- * If disc > 0: 2 solutions
- * If disc == 0: 1 real solution
- * If disc < 0: 2 imaginary solutions
- */
-gtsam::Vector2 solvePolynomial(const double& a, const double& b,
-                               const double& c);
+        /**
+         * Returns the real roots of the polynomial
+         * If disc > 0: 2 solutions
+         * If disc == 0: 1 real solution
+         * If disc < 0: 2 imaginary solutions
+         */
+        gtsam::Vector2 solvePolynomial(const double &a, const double &b,
+                                       const double &c);
 
-gtsam::Vector2 getConicPointsAtX(
-    const Eigen::Matrix<long double, 3, 3>& pointConic, const double& x);
+        gtsam::Vector2 getConicPointsAtX(
+            const Eigen::Matrix<long double, 3, 3> &pointConic, const double &x);
 
-gtsam::Vector2 getConicPointsAtY(
-    const Eigen::Matrix<long double, 3, 3>& pointConic, const double& y);
+        gtsam::Vector2 getConicPointsAtY(
+            const Eigen::Matrix<long double, 3, 3> &pointConic, const double &y);
 
-/** Interpolate poses */
-gtsam::Pose3 interpolate(const gtsam::Pose3& p1, const gtsam::Pose3& p2,
-                         const double& percent);
+        /** Interpolate poses */
+        gtsam::Pose3 interpolate(const gtsam::Pose3 &p1, const gtsam::Pose3 &p2,
+                                 const double &percent);
 
-/**
- * Converts Pose3 to Matrix and provides optional jacobians
- * https://atmos.washington.edu/~dennis/MatrixCalculus.pdf
- * https://en.wikipedia.org/wiki/Kronecker_product
- * https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf
- * https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf
- * Some Theorems on Matrix Differentiation with Special Reference to Kronecker
- * Matrix Products (H. Neudecker, 1969) A tutorial on SE(3) transformation
- * parameterizations and on-manifold optimization Jose-Luis Blanco (p.35)
- * -
- * https://jinyongjeong.github.io/Download/SE3/jlblanco2010geometry3d_techrep.pdf
- * http://www.ee.ic.ac.uk/hp/staff/dmb/matrix/special.html#VecTranspose
- */
-gtsam::Matrix44 matrix(const gtsam::Pose3& pose,
-                       gtsam::OptionalJacobian<16, 6> H = boost::none);
+        /**
+         * Converts Pose3 to Matrix and provides optional jacobians
+         * https://atmos.washington.edu/~dennis/MatrixCalculus.pdf
+         * https://en.wikipedia.org/wiki/Kronecker_product
+         * https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf
+         * https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf
+         * Some Theorems on Matrix Differentiation with Special Reference to Kronecker
+         * Matrix Products (H. Neudecker, 1969) A tutorial on SE(3) transformation
+         * parameterizations and on-manifold optimization Jose-Luis Blanco (p.35)
+         * -
+         * https://jinyongjeong.github.io/Download/SE3/jlblanco2010geometry3d_techrep.pdf
+         * http://www.ee.ic.ac.uk/hp/staff/dmb/matrix/special.html#VecTranspose
+         */
+        gtsam::Matrix44 matrix(const gtsam::Pose3 &pose,
+                               gtsam::OptionalJacobian<16, 6> H = boost::none);
 
-/**
- * Performs the kronecker product
- * See: https://en.wikipedia.org/wiki/Kronecker_product
- */
-gtsam::Matrix kron(const gtsam::Matrix m1, const gtsam::Matrix m2);
+        /**
+         * Performs the kronecker product
+         * See: https://en.wikipedia.org/wiki/Kronecker_product
+         */
+        gtsam::Matrix kron(const gtsam::Matrix &m1, const gtsam::Matrix &m2);
 
-/**
- * Builds the orthogonal transpose vectorization matrix of an m by n matrix
- * See: http://www.ee.ic.ac.uk/hp/staff/dmb/matrix/special.html#VecTranspose
- */
-gtsam::Matrix TVEC(const int m, const int n);
+        /**
+         * Builds the orthogonal transpose vectorization matrix of an m by n matrix
+         * See: http://www.ee.ic.ac.uk/hp/staff/dmb/matrix/special.html#VecTranspose
+         */
+        gtsam::Matrix TVEC(int m, int n);
 
-ConstrainedDualQuadric initialize_quadric_ray_intersection(
-    const std::vector<gtsam::Pose3>& obs_poses,
-    const std::vector<AlignedBox2>& boxes,
-    SoSlamState& state
-);
+        ConstrainedDualQuadric initialize_quadric_ray_intersection(
+            const std::vector<gtsam::Pose3> &obs_poses,
+            const std::vector<AlignedBox2> &boxes,
+            SoSlamState &state);
 
+        ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
+            const BoundingBoxFactor &bbs,
+            const SemanticScaleFactor &ssc,
+            const PlaneSupportingFactor &psc,
+            const gtsam::Pose3 &camera_pose
 
-// visualize
-void visualize(SoSlamState& state);
+        );
 
-std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values& values);
-// newfactors
-gtsam::NonlinearFactorGraph new_factors(const gtsam::NonlinearFactorGraph& current,
-                                         const gtsam::NonlinearFactorGraph& previous); 
-// newvalues
-gtsam::Values new_values(const gtsam::Values& current, const gtsam::Values& previous);
-}  // namespace utils
-}  // namespace gtsam_soslam
+        // visualize
+        void visualize(SoSlamState &state);
+
+        std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values);
+        // newfactors
+        gtsam::NonlinearFactorGraph new_factors(const gtsam::NonlinearFactorGraph &current,
+                                                const gtsam::NonlinearFactorGraph &previous);
+        // newvalues
+        gtsam::Values new_values(const gtsam::Values &current, const gtsam::Values &previous);
+    } // namespace utils
+} // namespace gtsam_soslam

@@ -1,49 +1,115 @@
-#pragma once
+//
+// Created by ziqihan on 4/3/23.
+//
+
+#ifndef GTSAM_SOSLAM_HANDMADEDATA_H
+#define GTSAM_SOSLAM_HANDMADEDATA_H
 #include "Constants.h"
 #include "QuadricCamera.h"
 #include "SystemState.h"
 #include "BaseClass.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <vector>
 #include <optional>
-#include <Eigen/Dense>
 #include <unordered_set>
+#include <dirent.h>
+#include <sys/stat.h>
+
+#include <Eigen/Dense>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Cal3_S2.h>
+#include <opencv4/opencv2/opencv.hpp> // 4.7.0
 
 namespace gtsam_soslam {
-class DummyData : public DataSource
+class HandMadeData : public DataSource
 {
 public:
+    std::string img_path_;
+    std::string xml_path_;
+    std::string calib_file_;
+    int num_img_;
+
     void restart() override {
         i = 0;
     }
-    DummyData() {
-        restart();
+    HandMadeData(const std::string& img_path = "input/img", const std::string& xml_path = "input/xml", const std::string& calib_file= "input/calib_params.txt")
+    : img_path_(img_path),xml_path_(xml_path),calib_file_(calib_file) {
+        i = 0;
+        if (file_num(img_path) == 0 || file_num(xml_path) == 0){
+            std::cerr << "WARN: there be no imgs or xmls in the folder path, please check." << std::endl;
+        }
+        else if (file_num(img_path) != file_num(xml_path)){
+            std::cerr << "WARN: number of images and xmls does not match, please check." << std::endl;
+        }
+        else{
+            num_img_ = file_num(img_path);
+        }
+    }
+
+    int file_num(const std::string& folder_path){
+        DIR *dir;
+        struct dirent *ent;
+        struct stat buf;
+        int file_count = 0;
+        if ((dir = opendir(folder_path.c_str())) != NULL) {
+            while ((ent = readdir(dir)) != NULL) {
+                std::string full_path = folder_path + "/" + ent->d_name;
+                if (stat(full_path.c_str(), &buf) == 0 && S_ISREG(buf.st_mode)) {
+                    file_count++;
+                }
+            }
+            closedir(dir);
+            return file_count;
+        }
+        else{
+            return int(0);
+        }
     }
 
     gtsam::Vector5 calib_rgb() override {
-        double fx = 525.0;
-        double fy = 525.0;
-        double s = 0.0;
-        double u0 = 160.0;
-        double v0 = 120.0;
-        
-        gtsam::Vector5 result;
-        result<<fx, fy, s, u0, v0;
-        return result;
+
+        try {
+            std::ifstream infile(calib_file_);
+            if (!infile.is_open()) {
+                throw std::runtime_error("Failed to open file!");
+            }
+            std::string line;
+            gtsam::Vector5 result;
+            // Just read the first line
+            getline(infile, line);
+            std::istringstream iss(line);
+            double num;
+            for (int j = 0; j < 5 && iss >> num; j++) {
+                result(j) = num;
+            }
+            infile.close();
+            return result;
+        }
+        catch (std::exception& e) {
+            std::cout << "Use backup calibration parameters" << std::endl;
+            gtsam::Vector5 result;
+            result << 525.0, 525.0, 0.0, 160.0, 120.0;
+            return result;
+        }
     }
 
     bool done() const override {
-        return static_cast<std::vector<gtsam::Pose3>::size_type>(i)  == POSES.size();
+        return i == num_img_;
     }
 
     std::tuple<gtsam::Pose3, gtsam::Matrix3 , cv::Mat> next(SoSlamState& state) override
     {
         ++i;
+        std::string img_name = img_path_ + std::to_string(i) + ".png";
+
         gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
-        gtsam::Vector3 vec = gtsam::Vector3::Zero();
-        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, vec);
+
+        cv::Mat img = cv::imread(img_name, cv::IMREAD_COLOR); //BGR
+
+        return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, img);
     }
 
 private:
@@ -52,10 +118,10 @@ private:
 
 };
 
-class DummyDetector : public BaseDetector
+class HandMadeDetector : public BaseDetector
 {
 public:
-    DummyDetector() : i(0) {}
+    HandMadeDetector() : i(0) {}
 
     std::vector<Detection> detect(SoSlamState& state) override {
         int current_i = i;
@@ -79,7 +145,7 @@ public:
                     label = "q0";
                     break;}
             detections.emplace_back(
-                label, bounds, state.this_step.pose_key
+                    label, bounds, state.this_step.pose_key
             );
 
         }
@@ -94,9 +160,11 @@ private:
 };
 
 
-class DummyAssociator : public BaseAssociator
+class HandMadeAssociator : public BaseAssociator
 {
 public:
+    HandMadeAssociator()
+    {}
     static std::vector<Detection> flat(const std::vector<std::vector<Detection>>& list_of_lists) {
         std::vector<Detection> result;
         for (const auto& sublist : list_of_lists) {
@@ -148,3 +216,5 @@ public:
     }
 };
 } // namespace gtsam_soslam
+
+#endif //GTSAM_SOSLAM_HANDMADEDATA_H

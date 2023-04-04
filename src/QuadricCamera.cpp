@@ -62,7 +62,7 @@ DualConic QuadricCamera::project(
     static gtsam::Matrix33 I33 = gtsam::Matrix::Identity(3, 3);
     static gtsam::Matrix44 I44 = gtsam::Matrix::Identity(4, 4);
     Eigen::Matrix<double, 9, 12> dC_dP =
-        kron(I33, P * Q) * utils::TVEC(3, 4) + kron(P * Q.transpose(), I33);
+    kron(I33, P * Q) * utils::TVEC(3, 4) + kron(P * Q.transpose(), I33);
     Eigen::Matrix<double, 12, 16> dP_dXi = kron(I44, K * I34);
     Eigen::Matrix<double, 16, 16> dXi_dX = -kron(Xi.transpose(), Xi);
     Eigen::Matrix<double, 16, 6> dX_dx;

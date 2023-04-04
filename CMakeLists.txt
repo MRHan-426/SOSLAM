@@ -36,10 +36,13 @@ add_library(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/SoSlam.cpp
     ${PROJECT_SOURCE_DIR}/src/Constants.cpp
     ${PROJECT_SOURCE_DIR}/src/Utilities.cpp
+    ${PROJECT_SOURCE_DIR}/src/SemanticScaleFactor.cpp
+    ${PROJECT_SOURCE_DIR}/src/PlaneSupportingFactor.cpp
     ${PROJECT_SOURCE_DIR}/src/Viewer.cc
     ${PROJECT_SOURCE_DIR}/src/MapDrawer.cc
 #    ${PROJECT_SOURCE_DIR}/src/FrameDrawer.cc
 )
+
 target_link_libraries(${PROJECT_NAME}
         gtsam
         pango_display
@@ -61,5 +64,8 @@ target_link_libraries(soslam_exe
         ${TBB_LIBRARIES}
         ${OpenCV_LIBS}
         ${PROJECT_NAME}
+        ${OpenCV_LIBS}
 )
+
+
 

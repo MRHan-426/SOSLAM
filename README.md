@@ -2,7 +2,7 @@
 ---
 ```shell
 cmake 3.26.0
-libboost 1.71.0  # make sure to compile C++ version for source code.
+libboost 1.71.0  # make sure to compile C++ version from source code.
 eigen 3.3.7
 ```
 
@@ -19,7 +19,9 @@ Note that higher version may bring unexpected errors.
 git clone --branch 4.1.1 https://github.com/borglab/gtsam.git
 ```
 
-## 3.Modify Eigen cmake config file: cmake/HandleEigen.cmake
+## 3.Modify Eigen cmake config file
+
+Open: cmake/HandleEigen.cmake
 
 add below line just after "option(GTSAM_USE_SYSTEM_EIGEN...)"
 
@@ -42,3 +44,8 @@ sudo make install
 (1) quardicKey is initialized with 66666, 66666 represents None.
 
 So if you want to create a new quadric, try to avoid it from being 66666.
+
+(2) optimizer_batch = true  ->  Dummy，initialize_quadric_ray_intersection, batch
+
+optimizer_batch = false  ->  SOSLAM，initialize_with_ssc_psc_bbs, step(LM )
+
