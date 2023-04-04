@@ -23,6 +23,7 @@
     - [x] dependency problems
     - [ ] adding quadrics drawing(MapDrawer)
         - [x] Map object that can return all objects to draw
+        - [x] camera pose drawing
         - [ ] verify drawing correctness
     - [ ] adding frame drawer(FrameDrawer)
         - [ ] state == Tracking::NOT_INITIALIZED
