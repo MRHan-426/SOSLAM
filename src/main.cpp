@@ -1,11 +1,11 @@
 #include "main.h"
 
 namespace gtsam_soslam{
-void run() {
+void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector) {
 
-    DummyData data_source;
-    DummyAssociator associator;
-    DummyDetector detector;
+//    DummyData data_source;
+//    DummyAssociator associator;
+//    DummyDetector detector;
     const gtsam::Pose3& initial_pose = Constants::POSES[0];
 
     SoSlam q(
@@ -20,7 +20,14 @@ void run() {
 }
 }
 
-int main() {
-    gtsam_soslam::run();
+int main(int argc, char* argv[]) {
+
+
+    gtsam_soslam::DummyData data_source;
+    gtsam_soslam::DummyAssociator associator;
+    gtsam_soslam::DummyDetector detector;
+    gtsam_soslam::run(data_source, associator, detector);
+
+
     return 0;
 }

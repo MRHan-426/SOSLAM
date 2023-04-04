@@ -26,18 +26,18 @@ namespace gtsam_soslam
     {
     public:
         // TODO：Class Associator, DataSource, DummyDetector
-        DummyData data_source_;
-        DummyAssociator associator_;
-        DummyDetector detector_;
+        DataSource& data_source_;
+        BaseAssociator& associator_;
+        BaseDetector& detector_;
         // VisualOdometry visual_odometry_;
         gtsam::Pose3 initial_pose_;
         bool optimizer_batch_;
         SoSlamState state_;
 
         SoSlam(
-            DummyData data_source,
-            DummyAssociator associator,
-            DummyDetector detector,
+            DataSource& data_source,
+            BaseAssociator& associator,
+            BaseDetector& detector,
             // VisualOdometry visual_odometry = std::nullptr, //Optional
             const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
             const bool &optimizer_batch = true);

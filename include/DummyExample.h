@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include "QuadricCamera.h"
 #include "SystemState.h"
+#include "BaseClass.h"
 
 #include <vector>
 #include <optional>
@@ -11,17 +12,17 @@
 #include <gtsam/geometry/Cal3_S2.h>
 
 namespace gtsam_soslam {
-class DummyData
+class DummyData : public DataSource
 {
 public:
-    void restart() {
+    void restart() override {
         i = 0;
     }
     DummyData() {
         restart();
     }
 
-    gtsam::Vector5 calib_rgb() {
+    gtsam::Vector5 calib_rgb() override {
         double fx = 525.0;
         double fy = 525.0;
         double s = 0.0;
@@ -33,12 +34,11 @@ public:
         return result;
     }
 
-
-    bool done() const {
+    bool done() const override {
         return static_cast<std::vector<gtsam::Pose3>::size_type>(i)  == POSES.size();
     }
 
-    std::tuple<gtsam::Pose3, gtsam::Matrix3 , gtsam::Vector3> next(SoSlamState& state) 
+    std::tuple<gtsam::Pose3, gtsam::Matrix3 , gtsam::Vector3> next(SoSlamState& state) override
     {
         ++i;
         gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
@@ -46,20 +46,18 @@ public:
         return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, vec);
     }
 
-
-
 private:
     int i;
     const std::vector<gtsam::Pose3> POSES = Constants::POSES;
 
 };
 
-
-class DummyDetector {
+class DummyDetector : public BaseDetector
+{
 public:
     DummyDetector() : i(0) {}
 
-    std::vector<Detection> detect(SoSlamState& state) {
+    std::vector<Detection> detect(SoSlamState& state) override {
         int current_i = i;
         ++i;
 
@@ -96,7 +94,8 @@ private:
 };
 
 
-class DummyAssociator {
+class DummyAssociator : public BaseAssociator
+{
 public:
     static std::vector<Detection> flat(const std::vector<std::vector<Detection>>& list_of_lists) {
         std::vector<Detection> result;
@@ -106,7 +105,7 @@ public:
         return result;
     }
 
-    std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state)
+    std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state) override
     {
         auto& s = state;
         auto& n = state.this_step;

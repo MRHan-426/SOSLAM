@@ -8,13 +8,13 @@ using namespace std;
 namespace gtsam_soslam
 {
     SoSlam::SoSlam(
-        DummyData data_source,
-        DummyAssociator associator,
-        DummyDetector detector,
+        DataSource& data_source,
+        BaseAssociator& associator,
+        BaseDetector& detector,
         const gtsam::Pose3 &initial_pose,
-        const bool &optimizer_batch) : data_source_(std::move(data_source)),
+        const bool &optimizer_batch) : data_source_(data_source),
                                        associator_(associator),
-                                       detector_(std::move(detector)),
+                                       detector_(detector),
                                        initial_pose_(initial_pose),
                                        optimizer_batch_(optimizer_batch)
     {

@@ -73,7 +73,7 @@ namespace gtsam_soslam
         // Get the eigenvector corresponding to the desired eigenvalue
         desired_eigenvector_x = eigenvectors.col(i);
         std::cout << "Eigenvector corresponding to eigenvalue " << desired_eigenvalue_x << ":" << std::endl;
-        std::cout << desired_eigenvector_x << std::endl;
+        std::cout << "des x: " << desired_eigenvector_x << std::endl;
       }
 
       /* find the eigen value for y */
@@ -96,47 +96,34 @@ namespace gtsam_soslam
         // Get the eigenvector corresponding to the desired eigenvalue
         desired_eigenvector_y = eigenvectors.col(i);
         std::cout << "Eigenvector corresponding to eigenvalue " << desired_eigenvalue_y << ":" << std::endl;
-        std::cout << desired_eigenvector_y << std::endl;
+        std::cout << "des y: "<< desired_eigenvector_y << std::endl;
       }
 
       /* convert the eigen format to gtsam format */
       // gtsam::Vector4 normal_x = gtsam::Vector4::fromEigen(desired_eigenvector_x);
-      gtsam::Vector4 normal_x(desired_eigenvector_x(0), desired_eigenvector_x(1), desired_eigenvector_x(2), desired_eigenvector_x(3));
+      std::cout << "des x size: "<< desired_eigenvector_x.size() << std::endl;
+      std::cout << "des y size: "<< desired_eigenvector_y.size() << std::endl;
+      gtsam::Vector1 error;
+      if (desired_eigenvector_x.size() == 4 && desired_eigenvector_y.size() == 4){
+          gtsam::Vector4 normal_x(desired_eigenvector_x(0), desired_eigenvector_x(1), desired_eigenvector_x(2), desired_eigenvector_x(3));
 
-      // gtsam::Vector4 normal_y = gtsam::Vector4::fromEigen(desired_eigenvector_y);
-      gtsam::Vector4 normal_y(desired_eigenvector_y(0), desired_eigenvector_y(1), desired_eigenvector_y(2), desired_eigenvector_y(3));
+          // gtsam::Vector4 normal_y = gtsam::Vector4::fromEigen(desired_eigenvector_y);
+          gtsam::Vector4 normal_y(desired_eigenvector_y(0), desired_eigenvector_y(1), desired_eigenvector_y(2), desired_eigenvector_y(3));
 
-      AlignedBox3 constrainBox = quadric.bounds();
-      gtsam::Vector4 support_plane_normal(0, 0, 1, constrainBox.zmin());
+          AlignedBox3 constrainBox = quadric.bounds();
+          gtsam::Vector4 support_plane_normal(0, 0, 1, constrainBox.zmin());
 
-      gtsam::Vector1 error_tagent = support_plane_normal.transpose() * normalized_Q * support_plane_normal;
-      gtsam::Vector1 error_xNormal = normal_x.transpose() * support_plane_normal;
-      gtsam::Vector1 error_yNormal = normal_y.transpose() * support_plane_normal;
+          gtsam::Vector1 error_tagent = support_plane_normal.transpose() * normalized_Q * support_plane_normal;
+          gtsam::Vector1 error_xNormal = normal_x.transpose() * support_plane_normal;
+          gtsam::Vector1 error_yNormal = normal_y.transpose() * support_plane_normal;
 
-      gtsam::Vector1 error = error_tagent + error_xNormal + error_yNormal;
-      // ====================================================================
+          error = error_tagent + error_xNormal + error_yNormal;
+      }
+      else{
+          error(20);
+      }
+      cout << "error" << error << endl;
 
-      // Eigen::Matrix<double, 2, 1> r0;
-      // r0 << radii(0) / radii(2), radii(1) / radii(2);
-      // auto rs = semantic_table.getEntry(label_);
-      // gtsam::Vector1 error;
-
-      // // cannot figure out a good way of putting variable into <>
-      // switch (sigma_scc_)
-      // {
-      // case 1:
-      //   error << (r0 - rs).lpNorm<1>();
-      //   break;
-      // case 5:
-      //   error << (r0 - rs).lpNorm<5>(ss);
-      //   break;
-      // case 10:
-      //   error << (r0 - rs).lpNorm<10>();
-      //   break;
-      // default:
-      //   error << (r0 - rs).lpNorm<1>();
-      //   break;
-      // }
 
       if (NUMERICAL_DERIVATIVE)
       {
