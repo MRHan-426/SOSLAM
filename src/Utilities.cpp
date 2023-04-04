@@ -314,11 +314,11 @@ namespace gtsam_soslam
       values.print();
 
       // test for semantic scale factor
-      gtsam::Key b = 8142508126285856768;
-      ConstrainedDualQuadric a = values.at<ConstrainedDualQuadric>(b);
-      std::cout << "quadric pose and size:" << std::endl;
-      std::cout << a.pose() << std::endl
-                << a.radii() << std::endl;
+//      gtsam::Key b = 8142508126285856768;
+//      ConstrainedDualQuadric a = values.at<ConstrainedDualQuadric>(b);
+//      std::cout << "quadric pose and size:" << std::endl;
+//      std::cout << a.pose() << std::endl
+//                << a.radii() << std::endl;
 
       /* values in quadricslam original code are as follows:
       Values:Values with 7 values:
