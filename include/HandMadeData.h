@@ -9,34 +9,56 @@
 #include "SystemState.h"
 #include "BaseClass.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <vector>
 #include <optional>
-#include <Eigen/Dense>
 #include <unordered_set>
+
+#include <Eigen/Dense>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Cal3_S2.h>
-
 namespace gtsam_soslam {
 class HandMadeData : public DataSource
 {
 public:
+    std::string calib_file_;
+
     void restart() override {
         i = 0;
     }
-    HandMadeData() {
-        restart();
+    HandMadeData(const std::string& img_path = "input/img", const std::string& xml_path = "input/xml", const std::string& calib_file= "input/calib_params.txt")
+    : calib_file_(calib_file)
+    {
+
     }
 
     gtsam::Vector5 calib_rgb() override {
-        double fx = 525.0;
-        double fy = 525.0;
-        double s = 0.0;
-        double u0 = 160.0;
-        double v0 = 120.0;
 
-        gtsam::Vector5 result;
-        result<<fx, fy, s, u0, v0;
-        return result;
+        try {
+            std::ifstream infile(calib_file_);
+            if (!infile.is_open()) {
+                throw std::runtime_error("Failed to open file!");
+            }
+            std::string line;
+            gtsam::Vector5 result;
+            // Just read the first line
+            getline(infile, line);
+            std::istringstream iss(line);
+            double num;
+            for (int j = 0; j < 5 && iss >> num; j++) {
+                result(j) = num;
+            }
+            infile.close();
+            return result;
+        }
+        catch (std::exception& e) {
+            std::cout << "Use backup calibration parameters" << std::endl;
+            gtsam::Vector5 result;
+            result << 525.0, 525.0, 0.0, 160.0, 120.0;
+            return result;
+        }
     }
 
     bool done() const override {

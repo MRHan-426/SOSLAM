@@ -22,12 +22,10 @@ void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detect
 
 int main(int argc, char* argv[]) {
 
-
     gtsam_soslam::DummyData data_source;
     gtsam_soslam::DummyAssociator associator;
     gtsam_soslam::DummyDetector detector;
     gtsam_soslam::run(data_source, associator, detector);
-
 
     return 0;
 }
