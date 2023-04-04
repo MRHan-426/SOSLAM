@@ -50,3 +50,7 @@ So if you want to create a new quadric, try to avoid it from being 66666.
 
 optimizer_batch = false  ->  SOSLAM，initialize_with_ssc_psc_bbs, step(LM )
 
+(3) if you want to run dummy example, run ./soslam_exe --dummy.
+
+By default, we will use hand labelled data.
+
