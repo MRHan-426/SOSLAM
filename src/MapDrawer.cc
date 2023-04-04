@@ -27,190 +27,14 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 {
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
-    // mKeyFrameSize = fSettings["Viewer.KeyFrameSize"];
-    // mKeyFrameLineWidth = fSettings["Viewer.KeyFrameLineWidth"];
-    // mGraphLineWidth = fSettings["Viewer.GraphLineWidth"];
+    mKeyFrameSize = fSettings["Viewer.KeyFrameSize"];
+    mKeyFrameLineWidth = fSettings["Viewer.KeyFrameLineWidth"];
+    mGraphLineWidth = fSettings["Viewer.GraphLineWidth"];
     // mPointSize = fSettings["Viewer.PointSize"];
     mCameraSize = fSettings["Viewer.CameraSize"];
     mCameraLineWidth = fSettings["Viewer.CameraLineWidth"];
 }
 
-// void MapDrawer::DrawMapPoints()
-// {
-//     const vector<MapPoint*> &vpMPs = mpMap->GetAllMapPoints();
-//     const vector<MapPoint*> &vpRefMPs = mpMap->GetReferenceMapPoints();
-
-//     set<MapPoint*> spRefMPs(vpRefMPs.begin(), vpRefMPs.end());
-
-//     if(vpMPs.empty())
-//         return;
-
-//     glPointSize(mPointSize);
-//     glBegin(GL_POINTS);
-//     glColor3f(0.0,0.0,0.0);
-//     //glColor3f(1.0,1.0,1.0);
-
-//     for(size_t i=0, iend=vpMPs.size(); i<iend;i++)
-//     {
-//         if(vpMPs[i]->isBad() || spRefMPs.count(vpMPs[i]))
-//             continue;
-//         cv::Mat pos = vpMPs[i]->GetWorldPos();
-//         glVertex3f(pos.at<float>(0),pos.at<float>(1),pos.at<float>(2));
-//     }
-//     glEnd();
-
-//     glPointSize(mPointSize);
-//     glBegin(GL_POINTS);
-//     glColor3f(1.0,0.0,0.0);
-//     //glColor3f(0.5,0.5,0.5);
-
-//     for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
-//     {
-//         if((*sit)->isBad())
-//             continue;
-//         cv::Mat pos = (*sit)->GetWorldPos();
-//         glVertex3f(pos.at<float>(0),pos.at<float>(1),pos.at<float>(2));
-
-//     }
-//     glEnd();
-// }
-
-// void MapDrawer::DrawSemiDense(const double sigma)
-// {
-//     const vector<KeyFrame*> &vpKf = mpMap->GetAllKeyFrames();
-//     if(vpKf.empty())return;
-
-//     glPointSize(mPointSize);
-//     glBegin(GL_POINTS);
-//     glColor3f(0.0,1.0,0.0);
-
-//     int draw_cnt(0);
-//     for(size_t i = 0; i < vpKf.size();++i)
-//     {
-//         KeyFrame* kf = vpKf[i];
-//         kf->SetNotEraseDrawer();
-//         if( kf->isBad() || !kf->semidense_flag_ || !kf->interKF_depth_flag_) {
-//             kf->SetEraseDrawer();
-//             continue;
-//         }
-
-//         unique_lock<mutex> lock(kf->mMutexSemiDensePoints);
-
-//         draw_cnt ++;
-//         for(int y = 0; y< kf->im_.rows; y++)
-//             for(int x = 0; x< kf->im_.cols; x++)
-//             {
-//                 if (kf->depth_sigma_.at<float>(y,x) > sigma) continue;
-
-//                 if( kf->depth_map_checked_.at<float>(y,x) > 0.000001 )
-//                 {
-//                     Eigen::Vector3f Pw  (kf->SemiDensePointSets_.at<float>(y,3*x),
-//                                          kf->SemiDensePointSets_.at<float>(y,3*x+1),
-//                                          kf->SemiDensePointSets_.at<float>(y,3*x+2));
-
-//                     float b = kf->rgb_.at<uchar>(y, 3*x) / 255.0;
-//                     float g = kf->rgb_.at<uchar>(y, 3*x+1) / 255.0;
-//                     float r = kf->rgb_.at<uchar>(y, 3*x+2) / 255.0;
-//                     glColor3f(r, g, b);
-
-//                     glVertex3f( Pw[0],Pw[1],Pw[2]);
-//                 }
-//             }
-//         kf->SetEraseDrawer();
-//     }
-//     glEnd();
-// }
-
-// void MapDrawer::DrawModel()
-// {
-//     const vector<KeyFrame*> &vpKf = mpMap->GetAllKeyFrames();
-//     Model* pModel = mpMap->GetModel();
-//     if(vpKf.empty()) return;
-//     if(pModel == NULL) return;
-
-//     pModel->SetNotErase();
-
-//     // get the most recent reconstructed keyframe to texture
-//     KeyFrame* kfToTexture = NULL;
-//     KeyFrame* prevKf = NULL;
-//     for(size_t i = 0; i < vpKf.size();++i) {
-//         KeyFrame *kf = vpKf[i];
-//         kf->SetNotEraseDrawer();
-//         if (kf->isBad()) {
-//             kf->SetEraseDrawer();
-//             continue;
-//         }
-//         if (prevKf == NULL){
-//             kfToTexture = kf;
-//             prevKf = kf;
-//         } else if (kf->mnId > prevKf->mnId){
-//             kfToTexture = kf;
-//             prevKf->SetEraseDrawer();
-//             prevKf = kf;
-//         }
-//     }
-//     if (kfToTexture == NULL) return;
-
-
-//     static unsigned int frameTex = 0;
-//     if (!frameTex)
-//         glGenTextures(1, &frameTex);
-
-//     cv::Size imSize = kfToTexture->rgb_.size();
-
-//     glBindTexture(GL_TEXTURE_2D, frameTex);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-//     // image are saved in RGB format, grayscale images are converted
-//     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-//                  imSize.width, imSize.height, 0,
-//                  GL_BGR,
-//                  GL_UNSIGNED_BYTE,
-//                  kfToTexture->rgb_.data);
-
-
-//     glEnable(GL_TEXTURE_2D);
-
-//     glBegin(GL_TRIANGLES);
-//     glColor3f(1.0,1.0,1.0);
-
-//     for (list<dlovi::Matrix>::const_iterator it = pModel->GetTris().begin(); it != pModel->GetTris().end(); it++) {
-
-//         dlovi::Matrix point0 = pModel->GetPoints()[(*it)(0)];
-//         dlovi::Matrix point1 = pModel->GetPoints()[(*it)(1)];
-//         dlovi::Matrix point2 = pModel->GetPoints()[(*it)(2)];
-
-//         vector<float> uv0 = kfToTexture->GetTexCoordinate(point0(0),point0(1),point0(2));
-//         vector<float> uv1 = kfToTexture->GetTexCoordinate(point1(0),point1(1),point1(2));
-//         vector<float> uv2 = kfToTexture->GetTexCoordinate(point2(0),point2(1),point2(2));
-
-//         // if all vertices are projected in the image
-//         if (uv0.size() == 2 && uv1.size() == 2 && uv2.size() == 2) {
-
-//             glTexCoord2f(uv0[0], uv0[1]);
-//             glVertex3d(point0(0), point0(1), point0(2));
-
-//             glTexCoord2f(uv1[0], uv1[1]);
-//             glVertex3d(point1(0), point1(1), point1(2));
-
-//             glTexCoord2f(uv2[0], uv2[1]);
-//             glVertex3d(point2(0), point2(1), point2(2));
-
-//         }
-//     }
-
-//     glEnd();
-
-//     glDisable(GL_TEXTURE_2D);
-
-
-//     kfToTexture->SetEraseDrawer();
-
-//     pModel->SetErase();
-
-// }
 
 // void MapDrawer::DrawTriangles(pangolin::OpenGlMatrix &Twc)
 // {
@@ -313,58 +137,68 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 
 
 
-// void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
-// {
-//     const float &w = mKeyFrameSize;
-//     const float h = w*0.75;
-//     const float z = w*0.6;
-
+ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
+ {
+     const float &w = mKeyFrameSize;
+     const float h = w*0.75;
+     const float z = w*0.6;
+     const gtsam::Values vEstimates=s->estimates_;
+     auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
+     std::map<gtsam::Key, gtsam::Pose3> cps = current_ps_qs.first;
 //     const vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
 
 //     if(bDrawKF)
 //     {
+//    cout<<"previous poses"<<endl;
+//    int i=-1;
+         for(auto &ps: cps){
 //         for(size_t i=0; i<vpKFs.size(); i++)
 //         {
+//            i++;
+             gtsam::Pose3 p = ps.second;
 //             KeyFrame* pKF = vpKFs[i];
+             pangolin::OpenGlMatrix Tw = GetOpenGLCameraMatrixFromPose3(p);
 //             cv::Mat Twc = pKF->GetPoseInverse().t();
+//            cout<< p.matrix()<<endl;
+             glPushMatrix();
 
-//             glPushMatrix();
+//             glMultMatrixf(Twc.m);
+             glMultMatrixd(Tw.m);
 
-//             glMultMatrixf(Twc.ptr<GLfloat>(0));
+             glLineWidth(mKeyFrameLineWidth);
 
-//             glLineWidth(mKeyFrameLineWidth);
-            
-//             // [EAO] created by objects.
+             // [EAO] created by objects.
 //             if(pKF->mbCreatedByObjs)
 //                 glColor3f(1.0f,0.0f,0.0f);
 //             else
-//                 glColor3f(0.0f,0.0f,1.0f);
+                 glColor3f(0.0f,0.0f,1.0f);
 
-//             glBegin(GL_LINES);
-//             glVertex3f(0,0,0);
-//             glVertex3f(w,h,z);
-//             glVertex3f(0,0,0);
-//             glVertex3f(w,-h,z);
-//             glVertex3f(0,0,0);
-//             glVertex3f(-w,-h,z);
-//             glVertex3f(0,0,0);
-//             glVertex3f(-w,h,z);
+             glBegin(GL_LINES);
+             glVertex3f(0,0,0);
+             glVertex3f(w,h,z);
+             glVertex3f(0,0,0);
+             glVertex3f(w,-h,z);
+             glVertex3f(0,0,0);
+             glVertex3f(-w,-h,z);
+             glVertex3f(0,0,0);
+             glVertex3f(-w,h,z);
 
-//             glVertex3f(w,h,z);
-//             glVertex3f(w,-h,z);
+             glVertex3f(w,h,z);
+             glVertex3f(w,-h,z);
 
-//             glVertex3f(-w,h,z);
-//             glVertex3f(-w,-h,z);
+             glVertex3f(-w,h,z);
+             glVertex3f(-w,-h,z);
 
-//             glVertex3f(-w,h,z);
-//             glVertex3f(w,h,z);
+             glVertex3f(-w,h,z);
+             glVertex3f(w,h,z);
 
-//             glVertex3f(-w,-h,z);
-//             glVertex3f(w,-h,z);
-//             glEnd();
+             glVertex3f(-w,-h,z);
+             glVertex3f(w,-h,z);
+             glEnd();
 
-//             glPopMatrix();
-//         }
+             glPopMatrix();
+         }
+//         cout<<"number of pose "<<i<<endl;
 //     }
 
 //     if(bDrawGraph)
@@ -372,7 +206,7 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 //         glLineWidth(mGraphLineWidth);
 //         glColor4f(0.0f,1.0f,0.0f,0.6f);
 //         glBegin(GL_LINES);
-
+//
 //         for(size_t i=0; i<vpKFs.size(); i++)
 //         {
 //             // Covisibility Graph
@@ -389,7 +223,7 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 //                     glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
 //                 }
 //             }
-
+//
 //             // Spanning tree
 //             KeyFrame* pParent = vpKFs[i]->GetParent();
 //             if(pParent)
@@ -398,7 +232,7 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
 //                 glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
 //             }
-
+//
 //             // Loops
 //             set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
 //             for(set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
@@ -410,10 +244,10 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 //                 glVertex3f(Owl.at<float>(0),Owl.at<float>(1),Owl.at<float>(2));
 //             }
 //         }
-
+//
 //         glEnd();
 //     }
-// }
+ }
 
 // BRIEF [EAO-SLAM] draw objects.
 void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj, 
@@ -546,6 +380,7 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
 
 void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
 {
+
     const float &w = mCameraSize;
     const float h = w*0.75;
     const float z = w*0.6;
@@ -597,6 +432,7 @@ void MapDrawer::GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M)
 {
 //    if(!mCameraPose.empty())
 //    {
+//    cout<<"current camera"<<endl;
         cv::Mat Rwc(3,3,CV_32F);
         cv::Mat twc(3,1,CV_32F);
 //        {
@@ -606,7 +442,7 @@ void MapDrawer::GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M)
 //        Rwc = mCameraPose.rowRange(0,3).colRange(0,3).t();
 //        twc = -Rwc*mCameraPose.rowRange(0,3).col(3);
 //        }
-
+//        cout<< poseMatrix<<endl;
         M.m[0] = poseMatrix(0,0);//Rwc.at<float>(0,0);
         M.m[1] = poseMatrix(1,0);//Rwc.at<float>(1,0);
         M.m[2] = poseMatrix(2,0);//Rwc.at<float>(2,0);
@@ -630,5 +466,37 @@ void MapDrawer::GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M)
 //    else
 //        M.SetIdentity();
 }
+
+    pangolin::OpenGlMatrix MapDrawer::GetOpenGLCameraMatrixFromPose3(gtsam::Pose3 &ps)
+    {
+        pangolin::OpenGlMatrix M;
+        M.SetIdentity();
+        cv::Mat Rwc(3,3,CV_32F);
+        cv::Mat twc(3,1,CV_32F);
+
+//        gtsam::Pose3 pose3=ps;
+        gtsam::Matrix44 poseMatrix = ps.matrix();
+
+        M.m[0] = poseMatrix(0,0);//Rwc.at<float>(0,0);
+        M.m[1] = poseMatrix(1,0);//Rwc.at<float>(1,0);
+        M.m[2] = poseMatrix(2,0);//Rwc.at<float>(2,0);
+        M.m[3]  = 0.0;
+
+        M.m[4] = poseMatrix(0,1);//Rwc.at<float>(0,1);
+        M.m[5] = poseMatrix(1,1);//Rwc.at<float>(1,1);
+        M.m[6] = poseMatrix(2,1);//Rwc.at<float>(2,1);
+        M.m[7]  = 0.0;
+
+        M.m[8] = poseMatrix(0,2);//Rwc.at<float>(0,2);
+        M.m[9] = poseMatrix(1,2);//Rwc.at<float>(1,2);
+        M.m[10] = poseMatrix(2,2);//Rwc.at<float>(2,2);
+        M.m[11]  = 0.0;
+
+        M.m[12] = poseMatrix(0,3);//twc.at<float>(0);
+        M.m[13] = poseMatrix(1,3);//twc.at<float>(1);
+        M.m[14] = poseMatrix(2,3);//twc.at<float>(2);
+        M.m[15]  = 1.0;
+        return M;
+    }
 
 } //namespace ORB_SLAM

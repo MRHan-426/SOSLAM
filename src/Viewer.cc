@@ -189,7 +189,7 @@ void Viewer::Run()
         if(menuShowCamera)
             mpMapDrawer->DrawCurrentCamera(Twc);
         // if(menuShowKeyFrames || menuShowGraph)
-        //     mpMapDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowGraph);
+             mpMapDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowGraph);
         // if(menuShowPoints)
         //     mpMapDrawer->DrawMapPoints();
         // if(menuShowSemiDense)

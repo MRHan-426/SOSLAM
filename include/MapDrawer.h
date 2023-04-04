@@ -50,6 +50,7 @@ public:
     void SetCurrentCameraPose(const cv::Mat &Tcw);
     // void SetReferenceKeyFrame(KeyFrame *pKF);
     void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M);
+    pangolin::OpenGlMatrix GetOpenGLCameraMatrixFromPose3(gtsam::Pose3 &ps);
 
 private:
     float mKeyFrameSize;

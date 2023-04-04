@@ -127,7 +127,7 @@ void SoSlam::spin() {
         cout<<"step once"<<endl;
         step();
         cout<<"step end"<<endl;
-        // usleep(3000000);
+         usleep(3000000);
     }
 
         if (state_.optimizer_batch_)
