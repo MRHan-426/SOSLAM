@@ -9,6 +9,7 @@ eigen 3.3.7
 ```shell
 sudo apt install libeigen3-dev
 sudo apt install libtbb-dev
+sudo apt-get install libpugixml-dev # a light library to deal with xml file
 ```
 
 ## 2.Download GTSAM 4.1.1
