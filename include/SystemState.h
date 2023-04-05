@@ -104,11 +104,13 @@ public:
     gtsam::Values estimates_;
     // double calib_depth_;
     gtsam::Cal3_S2 calib_rgb_;
+
     StepState prev_step;
     StepState this_step;
 
     explicit SoSlamState(const gtsam::Pose3& initial_pose = Constants::POSES[0], const bool& optimizer_batch = true)
         : initial_pose_(initial_pose),
+
           optimizer_batch_(optimizer_batch)
     {
         noise_prior_ = gtsam::Matrix(6,6);

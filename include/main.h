@@ -9,6 +9,10 @@
 #include "MapDrawer.h"
 // void run();
 
-void run(gtsam_soslam::DataSource& data_source,gtsam_soslam::BaseAssociator& associator,gtsam_soslam::BaseDetector& detector, const gtsam::Pose3& initial_pose);
+void run(gtsam_soslam::DataSource& data_source,\
+            gtsam_soslam::BaseAssociator& associator,\
+            gtsam_soslam::BaseDetector& detector,\
+            const gtsam::Pose3& initial_pose
+            );
 
 #endif // MAIN_H
