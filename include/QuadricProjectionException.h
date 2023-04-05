@@ -15,7 +15,7 @@
  * @author Lachlan Nicholson
  * @brief An exception to be thrown when projecting a quadric has failed
  */
-
+#pragma once
 #include <gtsam/base/ThreadsafeException.h>
 #include <gtsam/inference/Key.h>
 

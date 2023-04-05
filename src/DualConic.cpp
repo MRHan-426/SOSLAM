@@ -19,7 +19,7 @@
 #include <gtsam/base/numericalDerivative.h>
 #include <QuadricProjectionException.h>
 #include <Utilities.h>
-#include <DualConic.h>
+#include "DualConic.h"
 #include <QuadricCamera.h>
 #include <cmath>
 #include <iomanip>

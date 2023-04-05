@@ -6,13 +6,14 @@
  * @brief factor between Pose3 and ConstrainedDualQuadric
  */
 
-#include <gtsam/base/numericalDerivative.h>
-#include <QuadricProjectionException.h>
-#include <BoundingBoxFactor.h>
-#include <QuadricCamera.h>
-#include <eigen3/Eigen/Dense>
+#include "QuadricProjectionException.h"
+#include "BoundingBoxFactor.h"
+#include "QuadricCamera.h"
 
+#include <eigen3/Eigen/Dense>
 #include <boost/bind/bind.hpp>
+#include <gtsam/base/numericalDerivative.h>
+
 #define NUMERICAL_DERIVATIVE true
 
 using namespace std;

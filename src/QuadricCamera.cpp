@@ -17,8 +17,8 @@
  */
 
 #include <gtsam/base/numericalDerivative.h>
-#include <Utilities.h>
-#include <QuadricCamera.h>
+#include "Utilities.h"
+#include "QuadricCamera.h"
 
 namespace gtsam_soslam {
 
