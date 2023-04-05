@@ -46,11 +46,13 @@ class BoundingBoxFactor
   };  ///< enum to declare which error function to use
 
  protected:
-  AlignedBox2 measured_;                           ///< measured bounding box
-  boost::shared_ptr<gtsam::Cal3_S2> calibration_;  ///< camera calibration
-  typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
+    AlignedBox2 measured_;                           ///< measured bounding box
+    boost::shared_ptr<gtsam::Cal3_S2> calibration_;  ///< camera calibration
+    typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
       Base;  ///< base class has keys and noisemodel as private members
-  MeasurementModel measurementModel_;
+    MeasurementModel measurementModel_;
+    int sigma_bbs_;
+
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -60,7 +62,7 @@ class BoundingBoxFactor
 
   /** Default constructor */
   BoundingBoxFactor()
-      : measured_(0., 0., 0., 0.), measurementModel_(STANDARD){};
+      : measured_(0., 0., 0., 0.), measurementModel_(STANDARD), sigma_bbs_(10){};
 
   /** Constructor from measured box, calbration, dimensions and posekey,
    * quadrickey, noisemodel */
@@ -68,11 +70,15 @@ class BoundingBoxFactor
                     const boost::shared_ptr<gtsam::Cal3_S2>& calibration,
                     const gtsam::Key& poseKey, const gtsam::Key& quadricKey,
                     const gtsam::SharedNoiseModel& model,
-                    const MeasurementModel& errorType = STANDARD)
+                    const MeasurementModel& errorType = STANDARD,
+                    const int &sigma_bbs = 10
+                    )
       : Base(model, poseKey, quadricKey),
         measured_(measured),
         calibration_(calibration),
-        measurementModel_(errorType){};
+        measurementModel_(errorType),
+        sigma_bbs_(sigma_bbs)
+        {};
 
   /** Constructor from measured box, calbration, dimensions and posekey,
    * quadrickey, noisemodel */
@@ -80,10 +86,14 @@ class BoundingBoxFactor
                     const boost::shared_ptr<gtsam::Cal3_S2>& calibration,
                     const gtsam::Key& poseKey, const gtsam::Key& quadricKey,
                     const gtsam::SharedNoiseModel& model,
-                    const std::string& errorString)
+                    const std::string& errorString,
+                    const int &sigma_bbs = 10
+                    )
       : Base(model, poseKey, quadricKey),
         measured_(measured),
-        calibration_(calibration) {
+        calibration_(calibration),
+        sigma_bbs_(sigma_bbs)
+        {
     if (errorString == "STANDARD") {
       measurementModel_ = STANDARD;
     } else if (errorString == "TRUNCATED") {

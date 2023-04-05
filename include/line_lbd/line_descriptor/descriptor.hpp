@@ -769,7 +769,7 @@ class CV_EXPORTS BinaryDescriptor : public Algorithm
       /* check parameters */
       if( n < 0 || k < 0 || k > n || p <= 0.0 || p >= 1.0 )
       {
-        std::cout << "nfa: wrong n, k or p values." << std::endl;
+//        std::cout << "nfa: wrong n, k or p values." << std::endl;
         exit( 0 );
       }
       /* trivial cases */
