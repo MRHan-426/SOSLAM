@@ -50,11 +50,11 @@ namespace gtsam_soslam
       Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors().real();
 
       /* Find the eigen value for x */
-      double desired_eigenvalue_x = 1 / std::pow(radius.x(), 2); // for example
+      double desired_eigenvalue_x = 1 / std::pow(-radius.x(), 2); // for example
       int i = 0;
       for (i = 0; i < eigenvalues.size(); i++)
       {
-        if (std::abs(eigenvalues(i) - desired_eigenvalue_x) < 1e-1)
+        if (std::abs(eigenvalues(i) - desired_eigenvalue_x) < 1e-2)
         {
           break; // found the eigenvalue
         }
@@ -74,10 +74,10 @@ namespace gtsam_soslam
       }
 
       /* find the eigen value for y */
-      double desired_eigenvalue_y = 1 / std::pow(radius.y(), 2); // for example
+      double desired_eigenvalue_y = 1 / std::pow(-radius.y(), 2); // for example
       for (i = 0; i < eigenvalues.size(); i++)
       {
-        if (std::abs(eigenvalues(i) - desired_eigenvalue_y) < 5e-1)
+        if (std::abs(eigenvalues(i) - desired_eigenvalue_y) < 1e-2)
         {
           break; // found the eigenvalue
         }
