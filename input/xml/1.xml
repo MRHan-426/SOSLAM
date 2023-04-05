@@ -34,8 +34,7 @@
 			<xmax>326</xmax>
 			<ymax>317</ymax>
 		</bndbox>
-	<objectkey>2</objectkey>
-	</object>
+	<objectkey>2</objectkey></object>
 	<object>
 		<name>mouse</name>
 		<pose>Unspecified</pose>

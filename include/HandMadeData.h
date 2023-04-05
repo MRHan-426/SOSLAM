@@ -173,7 +173,9 @@ public:
             pugi::xml_node name = object.child("name");
             pugi::xml_node objectkey = object.child("objectkey");
 
-            gtsam::Key quadrickey = std::stoull(objectkey.text().get());
+            auto key = std::stoull(objectkey.text().get());
+            gtsam::Key quadrickey = gtsam::Symbol('q', key);
+
             std::string label = name.text().get();
             gtsam::Vector4 bounds;
             bounds << bndbox.child("xmin").text().as_int(), bndbox.child("ymin").text().as_int(), bndbox.child("xmax").text().as_int(), bndbox.child("ymax").text().as_int();
