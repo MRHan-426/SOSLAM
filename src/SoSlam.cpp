@@ -240,13 +240,15 @@ void SoSlam::spin() {
                     gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
                     ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc_psc), std::get<1>(bbs_scc_psc), std::get<2>(bbs_scc_psc), camera_pose);
                     // those factors have the same quadric key, just add once
-//                    s.estimates_.print();
-//                    std::cout << keys.size() << std::endl;
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc).objectKey());
                 }
             }
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
+//            s.isam_optimizer_.update(
+//                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+//                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+//            s.estimates_ = s.isam_optimizer_.calculateEstimate();
         }
         s.prev_step = *n;
     }
