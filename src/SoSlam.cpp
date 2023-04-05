@@ -145,11 +145,6 @@ void SoSlam::spin() {
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
         }
-        else
-        {
-//            state_.graph_.print(); // print all factors in current graph
-            utils::visualize(state_);
-        }
     }
 
     void SoSlam::step()
@@ -249,6 +244,8 @@ void SoSlam::spin() {
 //                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
 //                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
 //            s.estimates_ = s.isam_optimizer_.calculateEstimate();
+            utils::visualize(s);
+
         }
         s.prev_step = *n;
     }
