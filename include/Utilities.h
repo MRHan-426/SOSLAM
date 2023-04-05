@@ -110,5 +110,9 @@ namespace gtsam_soslam
                                                 const gtsam::NonlinearFactorGraph &previous);
         // newvalues
         gtsam::Values new_values(const gtsam::Values &current, const gtsam::Values &previous);
+
+        double area(const Detection&);
+
+        double iou(const Detection&, const Detection&);
     } // namespace utils
 } // namespace gtsam_soslam

@@ -307,6 +307,25 @@ namespace gtsam_soslam
       }
       return out;
     }
+    double area(const gtsam::Vector4& bounds) {
+        return (bounds[2] - bounds[0]) * (bounds[3] - bounds[1]);
+    }
+
+
+    double iou(const Detection& a, const Detection& b) {
+        gtsam::Vector4 intersection_bounds;
+        intersection_bounds[0] = std::max(a.bounds[0], b.bounds[0]);
+        intersection_bounds[1] = std::min(a.bounds[1], b.bounds[1]);
+        intersection_bounds[2] = std::min(a.bounds[2], b.bounds[2]);
+        intersection_bounds[3] = std::max(a.bounds[3], b.bounds[3]);
+
+        double int_area = area(intersection_bounds);
+        double union_area = area(a.bounds) + area(b.bounds) - int_area;
+        return int_area / union_area;
+    }
+
+
+
     void visualize(SoSlamState &state)
     {
       gtsam::Values values = state.estimates_;
