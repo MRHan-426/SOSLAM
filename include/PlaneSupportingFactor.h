@@ -32,37 +32,32 @@ namespace gtsam_soslam
         boost::shared_ptr<gtsam::Cal3_S2> calibration_; //< camera calibration
         typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> Base;
         MeasurementModel measurementModel_;
-        int sigma_scc_;
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /** Default constructor */
         PlaneSupportingFactor()
-            : label_("None"), measurementModel_(STANDARD), sigma_scc_(1){};
+            : label_("None"), measurementModel_(STANDARD){};
 
         PlaneSupportingFactor(const std::string &label,
                               const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
                               const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                               const gtsam::SharedNoiseModel &model,
-                              const MeasurementModel &errorType = STANDARD,
-                              const int &sigma_scc = 10)
+                              const MeasurementModel &errorType = STANDARD)
             : Base(model, poseKey, quadricKey),
               label_(label),
               calibration_(calibration),
-              measurementModel_(errorType),
-              sigma_scc_(sigma_scc){};
+              measurementModel_(errorType){};
 
         PlaneSupportingFactor(const std::string &label,
                               const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
                               const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                               const gtsam::SharedNoiseModel &model,
-                              const std::string &errorString,
-                              const int &sigma_scc = 10)
+                              const std::string &errorString)
             : Base(model, poseKey, quadricKey),
               label_(label),
-              calibration_(calibration),
-              sigma_scc_(sigma_scc)
+              calibration_(calibration)
         {
             if (errorString == "STANDARD")
             {
