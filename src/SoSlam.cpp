@@ -113,8 +113,7 @@ namespace gtsam_soslam
                     poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
                     points.push_back(bb->measurement());
                 }
-                std::cout << kv.second.front()->objectKey() << std::endl;
-                s.estimates_.print();
+//                s.estimates_.print();
                 utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
             }
         }
@@ -124,10 +123,10 @@ namespace gtsam_soslam
 void SoSlam::spin() {
     while (!data_source_.done()) {
         // should run five times
-        cout<<"step once"<<endl;
+//        cout<<"step once"<<endl;
         step();
-        cout<<"step end"<<endl;
-         usleep(3000000);
+//        cout<<"step end"<<endl;
+//         usleep(3000000);
     }
 
         if (state_.optimizer_batch_)
@@ -141,14 +140,14 @@ void SoSlam::spin() {
              s.estimates_ = isam.calculateEstimate();*/
 
             // s.estimates_.print(); // print estimate values
-            s.graph_.print(); // print all factors in current graph
+//            s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
         }
         else
         {
-            state_.graph_.print(); // print all factors in current graph
+//            state_.graph_.print(); // print all factors in current graph
             utils::visualize(state_);
         }
     }
@@ -233,8 +232,8 @@ void SoSlam::spin() {
                     gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
                     ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc_psc), std::get<1>(bbs_scc_psc), std::get<2>(bbs_scc_psc), camera_pose);
                     // those factors have the same quadric key, just add once
-                    s.estimates_.print();
-                    std::cout << keys.size() << std::endl;
+//                    s.estimates_.print();
+//                    std::cout << keys.size() << std::endl;
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc).objectKey());
                 }
             }
@@ -270,7 +269,7 @@ void SoSlam::spin() {
             std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
         }
         boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_.calib_rgb_));
-        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes);
+        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes, "TRUNCATED");
         SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc);
         PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_psc);
         state_.graph_.add(bbs);

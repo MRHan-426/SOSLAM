@@ -78,7 +78,7 @@ namespace gtsam_soslam
                     *H2 = db_dq_;
                 }
             }
-
+//            std::cout << "Semantic Error: " << error <<std::endl;
             return error;
 
             // check for nans

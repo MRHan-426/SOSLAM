@@ -74,7 +74,7 @@ gtsam::Vector5 HandMadeData::calib_rgb() {
         return result;
     }
     catch (std::exception& e) {
-        std::cout << "Use backup calibration parameters" << std::endl;
+       std::cout << "Use backup calibration parameters" << std::endl;
         gtsam::Vector5 result;
         result << 525.0, 525.0, 0.0, 160.0, 120.0;
         return result;

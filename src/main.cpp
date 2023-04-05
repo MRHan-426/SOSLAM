@@ -2,9 +2,7 @@
 
 
 namespace gtsam_soslam{
-std::thread* mptViewer;
-std::thread* mptLocalMapping;
-// void run() {
+
 void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector,\
         const gtsam::Pose3& initial_pose)
 {
@@ -18,17 +16,25 @@ void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detect
     );
     SoSlamState* s = &(q->state_);
 
-//    mpFrameDrawer = new FrameDrawer(s);
-    string YamlFile = "../TUM2.yaml";
-    MapDrawer* mpMapDrawer = new MapDrawer(s, YamlFile);
-    FrameDrawer* mpFrameDrawer= nullptr;
-    Viewer* mpViewer = new Viewer(s, mpFrameDrawer,mpMapDrawer,YamlFile);
-//     if(bUseViewer)
-    mptViewer = new thread(&Viewer::Run, mpViewer);
-    mptLocalMapping = new thread(&SoSlam::spin,q);
-    mptViewer->join();
-    mptLocalMapping->join();
-    // q.spin();
+    if (false){
+        std::thread* mptViewer;
+        std::thread* mptLocalMapping;
+//        mpFrameDrawer = new FrameDrawer(s);
+        string YamlFile = "../TUM2.yaml";
+        MapDrawer* mpMapDrawer = new MapDrawer(s, YamlFile);
+        FrameDrawer* mpFrameDrawer= nullptr;
+        Viewer* mpViewer = new Viewer(s, mpFrameDrawer,mpMapDrawer,YamlFile);
+        //     if(bUseViewer)
+        mptViewer = new thread(&Viewer::Run, mpViewer);
+        mptLocalMapping = new thread(&SoSlam::spin,q);
+        mptViewer->join();
+        mptLocalMapping->join();
+        // q.spin();
+    }
+    else{
+         q -> spin();
+    }
+
 }
 }
 
