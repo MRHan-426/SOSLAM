@@ -195,8 +195,8 @@ private:
 class HandMadeAssociator : public BaseAssociator
 {
 public:
-    HandMadeAssociator()
-    {}
+    HandMadeAssociator() = default;
+
     static std::vector<Detection> flat(const std::vector<std::vector<Detection>>& list_of_lists) {
         std::vector<Detection> result;
         for (const auto& sublist : list_of_lists) {
