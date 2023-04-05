@@ -2,7 +2,7 @@
 
 ## TODO
 
-- [ ] 1. Get dataset ready. Label and associate data by hand.
+- [x] 1. Get dataset ready. Label and associate data by hand.
 - [x] 2. Rewrite quardicslam in C++, called "c++ core".
     - [x] 2.1 Finish compiling.
     - [x] 2.2 Get correct answer.
@@ -20,19 +20,22 @@
          - [x] 3.3.4 Debug Bounding Box Constraint.  
     - [x] 3.4 Add Quadric Initialization part into "c++ core".
 - [ ] 4. Add visualization part.
-    - [x] dependency problems
-    - [ ] adding quadrics drawing(MapDrawer)
-        - [x] Map object that can return all objects to draw
-        - [x] camera pose drawing
-        - [x] graph drawing
-        - [ ] verify drawing correctness
-    - [ ] adding frame drawer(FrameDrawer)
-        - [ ] state == Tracking::NOT_INITIALIZED
+    - [x] dependency problems.
+    - [ ] adding quadrics drawing(MapDrawer).
+        - [x] Map object that can return all objects to draw.
+        - [x] camera pose drawing.
+        - [x] graph drawing.
+        - [ ] verify drawing correctness.
+    - [ ] adding frame drawer(FrameDrawer).
+        - [ ] state == Tracking::NOT_INITIALIZED.
         - [ ] quadricimage is in Tracking, move to here. 
         - [ ] It also use a Update to update images, find a way to place Update.
     - [ ] multithread part
-- [ ] 5. Doing experiments, Record Video.
-- [ ] 6. Write final report.
+- [ ] 5. Writing evaluation function.
+    - [ ] 5.1 Rot.
+    - [ ] 5.2 IOU.
+- [ ] 6. Doing experiments, Record Video.
+- [ ] 7. Write final report.
  
 
 
