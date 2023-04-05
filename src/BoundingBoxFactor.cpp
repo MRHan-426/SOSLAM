@@ -38,25 +38,25 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
 
     switch (sigma_bbs_) {
       case 1:
-          for (const auto& plane : planes){
+          for (auto plane : planes){
               gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<1>());
               error = error + temp_error;
           }
           break;
       case 5:
-          for (const auto& plane : planes){
+          for (auto plane : planes){
               gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<5>());
               error = error + temp_error;
           }
           break;
       case 10:
-          for (const auto& plane : planes){
+          for (auto plane : planes){
               gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
               error = error + temp_error;
           }
           break;
       default:
-          for (const auto& plane : planes){
+          for (auto plane : planes){
               gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
               error = error + temp_error;
           }
@@ -80,7 +80,6 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
       }
     }
     std::cout << "BBC Error: " << error <<std::endl;
-
     return error;
 
     // check for nans
@@ -92,21 +91,23 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
 
     // handle projection failures
   } catch (QuadricProjectionException& e) {
-    // std::cout << "  Landmark " << symbolIndex(this->objectKey()) << "
-    // received: " << e.what() << std::endl;
+        // std::cout << "  Landmark " << symbolIndex(this->objectKey()) << "
+        // received: " << e.what() << std::endl;
 
-    // if error cannot be calculated
-    // set error vector and jacobians to zero
-    gtsam::Vector4 error = gtsam::Vector4::Ones() * 1000.0;
-    if (H1) {
-      *H1 = gtsam::Matrix::Zero(1, 6);
-    }
-    if (H2) {
-      *H2 = gtsam::Matrix::Zero(1, 9);
-    }
+        // if error cannot be calculated
+        // set error vector and jacobians to zero
+        gtsam::Vector1 error = gtsam::Vector1::Ones() * 1000.0;
+        if (H1) {
+          *H1 = gtsam::Matrix::Zero(1, 6);
+        }
+        if (H2) {
+          *H2 = gtsam::Matrix::Zero(1, 9);
+        }
 
-    return error;
-  }
+        return error;
+    }
+    // Just to avoid warning
+    return gtsam::Vector1::Ones() * 1000.0;
 }
 
 /* ************************************************************************* */

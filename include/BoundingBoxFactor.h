@@ -23,8 +23,8 @@
 #include <gtsam/nonlinear/Expression.h>
 #include <gtsam/nonlinear/NonlinearFactor.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
-#include <AlignedBox2.h>
-#include <ConstrainedDualQuadric.h>
+#include "AlignedBox2.h"
+#include "ConstrainedDualQuadric.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
@@ -126,8 +126,8 @@ class BoundingBoxFactor
    * Evaluate the error between a quadric and 3D pose
    * @param pose the 6DOF camera position
    * @param quadric the constrained dual quadric
-   * @param H1 the derivative of the error wrt camera pose (4x6)
-   * @param H2 the derivative of the error wrt quadric (4x9)
+   * @param H1 the derivative of the error wrt camera pose (1x6)
+   * @param H2 the derivative of the error wrt quadric (1x9)
    */
   gtsam::Vector evaluateError(
       const gtsam::Pose3& pose, const ConstrainedDualQuadric& quadric,
