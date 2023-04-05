@@ -311,7 +311,7 @@ namespace gtsam_soslam
     {
       gtsam::Values values = state.estimates_;
       auto labels = state.labels_;
-      values.print();
+//      values.print();
 
       // test for semantic scale factor
 //      gtsam::Key b = 8142508126285856768;

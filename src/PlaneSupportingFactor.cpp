@@ -63,14 +63,14 @@ namespace gtsam_soslam
       Eigen::VectorXd desired_eigenvector_x;
       if (i == eigenvalues.size())
       {
-        std::cout << "Desired eigenvalue not found." << std::endl;
+//        std::cout << "Desired eigenvalue not found." << std::endl;
       }
       else
       {
         // Get the eigenvector corresponding to the desired eigenvalue
         desired_eigenvector_x = eigenvectors.col(i);
-        std::cout << "Eigenvector corresponding to eigenvalue " << desired_eigenvalue_x << ":" << std::endl;
-        std::cout << "des x: " << desired_eigenvector_x << std::endl;
+//        std::cout << "Eigenvector corresponding to eigenvalue " << desired_eigenvalue_x << ":" << std::endl;
+//        std::cout << "des x: " << desired_eigenvector_x << std::endl;
       }
 
       /* find the eigen value for y */
@@ -86,20 +86,20 @@ namespace gtsam_soslam
       Eigen::VectorXd desired_eigenvector_y;
       if (i == eigenvalues.size())
       {
-        std::cout << "Desired eigenvalue not found." << std::endl;
+//        std::cout << "Desired eigenvalue not found." << std::endl;
       }
       else
       {
         // Get the eigenvector corresponding to the desired eigenvalue
         desired_eigenvector_y = eigenvectors.col(i);
-        std::cout << "Eigenvector corresponding to eigenvalue " << desired_eigenvalue_y << ":" << std::endl;
-        std::cout << "des y: " << desired_eigenvector_y << std::endl;
+//        std::cout << "Eigenvector corresponding to eigenvalue " << desired_eigenvalue_y << ":" << std::endl;
+//        std::cout << "des y: " << desired_eigenvector_y << std::endl;
       }
 
       /* convert the eigen format to gtsam format */
       // gtsam::Vector4 normal_x = gtsam::Vector4::fromEigen(desired_eigenvector_x);
-      std::cout << "des x size: " << desired_eigenvector_x.size() << std::endl;
-      std::cout << "des y size: " << desired_eigenvector_y.size() << std::endl;
+//      std::cout << "des x size: " << desired_eigenvector_x.size() << std::endl;
+//      std::cout << "des y size: " << desired_eigenvector_y.size() << std::endl;
       gtsam::Vector1 error;
       if (desired_eigenvector_x.size() == 4 && desired_eigenvector_y.size() == 4)
       {
@@ -123,7 +123,7 @@ namespace gtsam_soslam
         error(0) = large_error;
       }
 
-      cout << "error: " << error << endl;
+      // cout << "error: " << error << endl;
 
       if (NUMERICAL_DERIVATIVE)
       {
@@ -145,6 +145,7 @@ namespace gtsam_soslam
           *H2 = db_dq_;
         }
       }
+//        std::cout << "PSC Error: " << error <<std::endl;
 
       return error;
 

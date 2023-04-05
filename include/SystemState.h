@@ -96,7 +96,9 @@ public:
     gtsam::Matrix noise_odom_;
     gtsam::Matrix noise_boxes_;
     bool optimizer_batch_;
+    gtsam::ISAM2 isam_optimizer_;
     gtsam::LevenbergMarquardtParams optimizer_params_;
+    gtsam::ISAM2Params isam_params_;
     std::vector<Detection> associated_;
     std::vector<Detection> unassociated_;
     std::map<gtsam::Key, std::string> labels_;
@@ -111,12 +113,13 @@ public:
         : initial_pose_(initial_pose),
           optimizer_batch_(optimizer_batch)
     {
-        noise_prior_ = gtsam::Matrix(6,6);
-        noise_odom_ = gtsam::Matrix(6,6);
-        noise_boxes_ = gtsam::Matrix(4,4);
-        noise_prior_ = 0.01 * noise_prior_.setIdentity();
-        noise_odom_ = 0.01 * noise_prior_.setIdentity();
-        noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
+        isam_optimizer_ = gtsam::ISAM2(isam_params_);
+//        noise_prior_ = gtsam::Matrix(6,6);
+//        noise_odom_ = gtsam::Matrix(6,6);
+//        noise_boxes_ = gtsam::Matrix(4,4);
+//        noise_prior_ = 0.01 * noise_prior_.setIdentity();
+//        noise_odom_ = 0.01 * noise_prior_.setIdentity();
+//        noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
     }
 };
 } //gtsam_soslam

@@ -1,18 +1,8 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
  * @file BoundingBoxFactor.cpp
- * @date Apr 14, 2020
  * @author Lachlan Nicholson
+ * @modified_by ziqi han
+ * @modified_date 5/04/23
  * @brief factor between Pose3 and ConstrainedDualQuadric
  */
 
@@ -23,18 +13,18 @@
 #include <eigen3/Eigen/Dense>
 
 #include <boost/bind/bind.hpp>
-#define NUMERICAL_DERIVATIVE false
+#define NUMERICAL_DERIVATIVE true
 
 using namespace std;
 
 namespace gtsam_soslam {
 
-/* ************************************************************************* */
+// rewrite w.r.t SOSLAM paper
 gtsam::Vector BoundingBoxFactor::evaluateError(
     const gtsam::Pose3& pose, const ConstrainedDualQuadric& quadric,
     boost::optional<gtsam::Matrix&> H1,
     boost::optional<gtsam::Matrix&> H2) const {
-  try {
+    try {
     // check pose-quadric pair
     if (quadric.isBehind(pose)) {
       throw QuadricProjectionException("Quadric is behind camera");
@@ -42,40 +32,35 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
     if (quadric.contains(pose)) {
       throw QuadricProjectionException("Camera is inside quadric");
     }
+    gtsam::Vector1 error = gtsam::Vector1::Zero();
 
-    // project quadric taking into account partial derivatives
-    Eigen::Matrix<double, 9, 6> dC_dx;
-    Eigen::Matrix<double, 9, 9> dC_dq;
-    DualConic dualConic;
-    if (!NUMERICAL_DERIVATIVE) {
-      dualConic = QuadricCamera::project(quadric, pose, calibration_,
-                                         H2 ? &dC_dq : 0, H1 ? &dC_dx : 0);
-    } else {
-      dualConic = QuadricCamera::project(quadric, pose, calibration_);
-    }
+    std::vector<gtsam::Vector4> planes = QuadricCamera::project(measured_, pose, calibration_);
 
-    // check dual conic is valid for error function
-    if (!dualConic.isEllipse()) {
-      throw QuadricProjectionException("Projected Conic is non-ellipse");
-    }
-
-    // calculate conic bounds with derivatives
-    bool computeJacobians = bool(H1 || H2) && !NUMERICAL_DERIVATIVE;
-    Eigen::Matrix<double, 4, 9> db_dC;
-    AlignedBox2 predictedBounds;
-    if (measurementModel_ == STANDARD) {
-      predictedBounds = dualConic.bounds(computeJacobians ? &db_dC : 0);
-    } else if (measurementModel_ == TRUNCATED) {
-      try {
-        predictedBounds =
-            dualConic.smartBounds(calibration_, computeJacobians ? &db_dC : 0);
-      } catch (std::runtime_error& e) {
-        throw QuadricProjectionException("smartbounds failed");
-      }
-    }
-
-    // evaluate error
-    gtsam::Vector4 error = predictedBounds.vector() - measured_.vector();
+    switch (sigma_bbs_) {
+      case 1:
+          for (auto plane : planes){
+              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<1>());
+              error = error + temp_error;
+          }
+          break;
+      case 5:
+          for (auto plane : planes){
+              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<5>());
+              error = error + temp_error;
+          }
+          break;
+      case 10:
+          for (auto plane : planes){
+              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
+              error = error + temp_error;
+          }
+          break;
+      default:
+          for (auto plane : planes){
+              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
+              error = error + temp_error;
+          }
+          break;}
 
     if (NUMERICAL_DERIVATIVE) {
       std::function<gtsam::Vector(const gtsam::Pose3&,
@@ -84,30 +69,18 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
                              boost::placeholders::_1, boost::placeholders::_2,
                              boost::none, boost::none));
       if (H1) {
-        Eigen::Matrix<double, 4, 6> db_dx_ =
+        Eigen::Matrix<double, 1, 6> db_dx_ =
             gtsam::numericalDerivative21(funPtr, pose, quadric, 1e-6);
         *H1 = db_dx_;
       }
       if (H2) {
-        Eigen::Matrix<double, 4, 9> db_dq_ =
+        Eigen::Matrix<double, 1, 9> db_dq_ =
             gtsam::numericalDerivative22(funPtr, pose, quadric, 1e-6);
         *H2 = db_dq_;
       }
-    } else {
-      // calculate derivative of error wrt pose
-      if (H1) {
-        // combine partial derivatives
-        *H1 = db_dC * dC_dx;
-      }
-
-      // calculate derivative of error wrt quadric
-      if (H2) {
-        // combine partial derivatives
-        *H2 = db_dC * dC_dq;
-      }
     }
-
-    return error;
+    std::cout << "BBC Error: " << error / 10000 <<std::endl;
+    return error / 10000;
 
     // check for nans
     if (error.array().isInf().any() || error.array().isNaN().any() ||
@@ -118,21 +91,23 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
 
     // handle projection failures
   } catch (QuadricProjectionException& e) {
-    // std::cout << "  Landmark " << symbolIndex(this->objectKey()) << "
-    // received: " << e.what() << std::endl;
+        // std::cout << "  Landmark " << symbolIndex(this->objectKey()) << "
+        // received: " << e.what() << std::endl;
 
-    // if error cannot be calculated
-    // set error vector and jacobians to zero
-    gtsam::Vector4 error = gtsam::Vector4::Ones() * 1000.0;
-    if (H1) {
-      *H1 = gtsam::Matrix::Zero(4, 6);
-    }
-    if (H2) {
-      *H2 = gtsam::Matrix::Zero(4, 9);
-    }
+        // if error cannot be calculated
+        // set error vector and jacobians to zero
+        gtsam::Vector1 error = gtsam::Vector1::Ones() * 1000.0;
+        if (H1) {
+          *H1 = gtsam::Matrix::Zero(1, 6);
+        }
+        if (H2) {
+          *H2 = gtsam::Matrix::Zero(1, 9);
+        }
 
-    return error;
-  }
+        return error;
+    }
+    // Just to avoid warning
+    return gtsam::Vector1::Ones() * 1000.0;
 }
 
 /* ************************************************************************* */

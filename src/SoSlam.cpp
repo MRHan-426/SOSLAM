@@ -113,19 +113,21 @@ namespace gtsam_soslam
                     poses.push_back(s.estimates_.at<gtsam::Pose3>(bb->poseKey()));
                     points.push_back(bb->measurement());
                 }
-                std::cout << kv.second.front()->objectKey() << std::endl;
-                s.estimates_.print();
+//                s.estimates_.print();
                 utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_, kv.second.front()->objectKey());
             }
         }
     }
 
-    void SoSlam::spin()
-    {
-        while (!data_source_.done())
-        {
-            step();
-        }
+
+void SoSlam::spin() {
+    while (!data_source_.done()) {
+        // should run five times
+//        cout<<"step once"<<endl;
+        step();
+//        cout<<"step end"<<endl;
+//         usleep(3000000);
+    }
 
         if (state_.optimizer_batch_)
         {
@@ -138,14 +140,14 @@ namespace gtsam_soslam
              s.estimates_ = isam.calculateEstimate();*/
 
             // s.estimates_.print(); // print estimate values
-            s.graph_.print(); // print all factors in current graph
+//            s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
         }
         else
         {
-            state_.graph_.print(); // print all factors in current graph
+//            state_.graph_.print(); // print all factors in current graph
             utils::visualize(state_);
         }
     }
@@ -159,11 +161,19 @@ namespace gtsam_soslam
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
             gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
-        gtsam::noiseModel::Diagonal::shared_ptr noise_scc =
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+        gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
             gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
             gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+
+        // Huber kernel
+        auto huber_boxes = gtsam::noiseModel::Robust::Create(
+                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_boxes);
+        auto huber_ssc = gtsam::noiseModel::Robust::Create(
+                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_ssc);
+        auto huber_psc = gtsam::noiseModel::Robust::Create(
+                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_psc);
 
         // Setup state for the current step
         auto &s = state_;
@@ -209,7 +219,7 @@ namespace gtsam_soslam
         {
             for (const auto &d : n->new_associated)
             {
-                bbs_scc_psc = add_detection_factors(d, noise_boxes, noise_scc, noise_psc);
+                bbs_scc_psc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc);
             }
         }
         // step optimization
@@ -219,7 +229,7 @@ namespace gtsam_soslam
             for (const auto &d : n->new_associated)
             {
                 // add bbs, ssc factors into graph
-                bbs_scc_psc = add_detection_factors(d, noise_boxes, noise_scc, noise_psc);
+                bbs_scc_psc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc);
 
                 // quadric initialization
                 gtsam::KeyVector keys = s.estimates_.keys();
@@ -230,13 +240,15 @@ namespace gtsam_soslam
                     gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
                     ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc_psc), std::get<1>(bbs_scc_psc), std::get<2>(bbs_scc_psc), camera_pose);
                     // those factors have the same quadric key, just add once
-                    s.estimates_.print();
-                    std::cout << keys.size() << std::endl;
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc).objectKey());
                 }
             }
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
+//            s.isam_optimizer_.update(
+//                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+//                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+//            s.estimates_ = s.isam_optimizer_.calculateEstimate();
         }
         s.prev_step = *n;
     }
@@ -260,16 +272,19 @@ namespace gtsam_soslam
     }
 
     // Helper function
-    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> SoSlam::add_detection_factors(const Detection &d, const gtsam::noiseModel::Diagonal::shared_ptr &noise_boxes, const gtsam::noiseModel::Diagonal::shared_ptr &noise_scc, const gtsam::noiseModel::Diagonal::shared_ptr &noise_psc)
+    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> SoSlam::add_detection_factors(const Detection &d,\
+                                            const gtsam::noiseModel::Robust::shared_ptr &huber_boxes,\
+                                            const gtsam::noiseModel::Robust::shared_ptr &huber_ssc,\
+                                            const gtsam::noiseModel::Robust::shared_ptr &huber_psc)
     {
         if (d.quadric_key == 66666)
         {
             std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
         }
         boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_.calib_rgb_));
-        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, noise_boxes);
-        SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_scc);
-        PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, noise_psc);
+        BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, huber_boxes, "TRUNCATED");
+        SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_ssc);
+        PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_psc);
         state_.graph_.add(bbs);
         state_.graph_.add(ssc);
         state_.graph_.add(psc);
