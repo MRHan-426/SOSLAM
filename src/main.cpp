@@ -1,42 +1,35 @@
 #include "main.h"
 
 
-namespace gtsam_soslam{
+namespace gtsam_soslam {
 
-void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector,\
-        const gtsam::Pose3& initial_pose)
-{
+    void run(DataSource &data_source, BaseAssociator &associator, BaseDetector &detector, \
+        const gtsam::Pose3 &initial_pose) {
 
-    SoSlam *q= new SoSlam(
-            data_source, //DataSource
-            associator,//BaseAssociator
-            detector, //BaseDetector
-            initial_pose,//gtsam::Pose3 initial_pose
-            false //bool optimizer_batch
-    );
-    SoSlamState* s = &(q->state_);
+        SoSlam *q = new SoSlam(
+                data_source, //DataSource
+                associator,//BaseAssociator
+                detector, //BaseDetector
+                initial_pose,//gtsam::Pose3 initial_pose
+                false //bool optimizer_batch
+        );
+        SoSlamState *s = &(q->state_);
 
-    if (false){
-        std::thread* mptViewer;
-        std::thread* mptLocalMapping;
-//        mpFrameDrawer = new FrameDrawer(s);
-        string YamlFile = "../TUM2.yaml";
-        MapDrawer* mpMapDrawer = new MapDrawer(s, YamlFile);
-        FrameDrawer* mpFrameDrawer= nullptr;
-        Viewer* mpViewer = new Viewer(s, mpFrameDrawer,mpMapDrawer,YamlFile);
-        //     if(bUseViewer)
-        mptViewer = new thread(&Viewer::Run, mpViewer);
-        mptLocalMapping = new thread(&SoSlam::spin,q);
-        mptViewer->join();
-        mptLocalMapping->join();
-        // q.spin();
+        if (true) {
+            string YamlFile = "../TUM2.yaml";
+            FrameDrawer *mpFrameDrawer = nullptr;
+            auto *mpMapDrawer = new MapDrawer(s, YamlFile);
+            auto *mpViewer = new Viewer(s, mpFrameDrawer, mpMapDrawer, YamlFile);
+            auto *mptViewer = new thread(&Viewer::Run, mpViewer);
+            auto *mptLocalMapping = new thread(&SoSlam::spin, q);
+            mptViewer->join();
+            mptLocalMapping->join();
+        } else {
+            q->spin();
+        }
     }
-    else{
-         q -> spin();
-    }
+}
 
-}
-}
 
 int main(int argc, char* argv[]) {
     // Check if the "--dummy" command-line argument is present

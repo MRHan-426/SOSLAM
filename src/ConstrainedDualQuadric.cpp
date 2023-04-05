@@ -40,6 +40,7 @@ ConstrainedDualQuadric::ConstrainedDualQuadric(const gtsam::Matrix44& dQ) {
 /* ************************************************************************* */
 ConstrainedDualQuadric ConstrainedDualQuadric::constrain(
     const gtsam::Matrix4& dual_quadric) {
+
   // normalize if required
   gtsam::Matrix4 normalized_dual_quadric(dual_quadric);
   if (dual_quadric(3, 3) != 1.0) {
@@ -206,6 +207,7 @@ void ConstrainedDualQuadric::print(const std::string& s) const {
 /* ************************************************************************* */
 bool ConstrainedDualQuadric::equals(const ConstrainedDualQuadric& other,
                                     double tol) const {
+
   return this->normalizedMatrix().isApprox(other.normalizedMatrix(), tol);
 }
 

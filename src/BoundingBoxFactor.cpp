@@ -79,7 +79,7 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
         *H2 = db_dq_;
       }
     }
-    std::cout << "BBC Error: " << error / 10000 <<std::endl;
+//    std::cout << "BBC Error: " << error / 10000 <<std::endl;
     return error / 10000;
 
     // check for nans
