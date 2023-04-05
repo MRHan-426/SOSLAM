@@ -27,6 +27,7 @@
 #include "BoundingBoxFactor.h"
 #include "SemanticScaleFactor.h"
 #include "PlaneSupportingFactor.h"
+#include "Evaluation.h"
 
 #include <gtsam/base/Matrix.h>
 #include <gtsam/geometry/Pose3.h>
@@ -111,8 +112,8 @@ namespace gtsam_soslam
         // newvalues
         gtsam::Values new_values(const gtsam::Values &current, const gtsam::Values &previous);
 
-        double area(const Detection&);
+        double area(const gtsam::Vector4&);
 
-        double iou(const Detection&, const Detection&);
+        double iou(const AlignedBox2&, const AlignedBox2&);
     } // namespace utils
 } // namespace gtsam_soslam
