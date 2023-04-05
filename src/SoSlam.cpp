@@ -120,12 +120,15 @@ namespace gtsam_soslam
         }
     }
 
-    void SoSlam::spin()
-    {
-        while (!data_source_.done())
-        {
-            step();
-        }
+
+void SoSlam::spin() {
+    while (!data_source_.done()) {
+        // should run five times
+        cout<<"step once"<<endl;
+        step();
+        cout<<"step end"<<endl;
+         usleep(3000000);
+    }
 
         if (state_.optimizer_batch_)
         {

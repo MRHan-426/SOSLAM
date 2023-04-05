@@ -1,17 +1,36 @@
 #include "main.h"
 
-namespace gtsam_soslam{
-void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector,const gtsam::Pose3& initial_pose) {
 
-    SoSlam q(
+namespace gtsam_soslam{
+std::thread* mptViewer;
+std::thread* mptLocalMapping;
+// void run() {
+void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector) {
+
+//    DummyData data_source;
+//    DummyAssociator associator;
+//    DummyDetector detector;
+    const gtsam::Pose3& initial_pose = Constants::POSES[0];
+
+    SoSlam * q= new SoSlam(
             data_source, //DataSource
             associator,//BaseAssociator
             detector, //BaseDetector
             initial_pose,//gtsam::Pose3 initial_pose
             false //bool optimizer_batch
     );
-
-    q.spin();
+    SoSlamState* s = &(q->state_);
+//    mpFrameDrawer = new FrameDrawer(s);
+    string YamlFile = "../TUM2.yaml";
+    MapDrawer* mpMapDrawer = new MapDrawer(s, YamlFile);
+    FrameDrawer* mpFrameDrawer= nullptr;
+    Viewer* mpViewer = new Viewer(s, mpFrameDrawer,mpMapDrawer,YamlFile);
+//     if(bUseViewer)
+    mptViewer = new thread(&Viewer::Run, mpViewer);
+    mptLocalMapping = new thread(&SoSlam::spin,q);
+    mptViewer->join();
+    mptLocalMapping->join();
+    // q.spin();
 }
 }
 
