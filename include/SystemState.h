@@ -60,7 +60,7 @@ class StepState {
 public:
     int i;
     gtsam::Key pose_key;
-    gtsam::Vector3 rgb;
+    cv::Mat rgb;
     gtsam::Matrix3 depth;
     gtsam::Pose3 odom;
     std::vector<Detection> detections;

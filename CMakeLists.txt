@@ -10,7 +10,8 @@ find_package(GTSAM 4.1.1 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(TBB REQUIRED) # Add this line
 find_package(OpenCV REQUIRED)
-find_package(Pangolin 0.8 REQUIRED)find_package(pugixml REQUIRED)
+find_package(Pangolin 0.8 REQUIRED)
+find_package(pugixml REQUIRED)
 
 # Set include directories
 include_directories(
