@@ -271,9 +271,9 @@ void SoSlam::spin() {
 
     // Helper function
     std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> SoSlam::add_detection_factors(const Detection &d,\
-                                            const gtsam::noiseModel::Diagonal::shared_ptr &huber_boxes,\
-                                            const gtsam::noiseModel::Diagonal::shared_ptr &huber_ssc,\
-                                            const gtsam::noiseModel::Diagonal::shared_ptr &huber_psc)
+                                            const gtsam::noiseModel::Robust::shared_ptr &huber_boxes,\
+                                            const gtsam::noiseModel::Robust::shared_ptr &huber_ssc,\
+                                            const gtsam::noiseModel::Robust::shared_ptr &huber_psc)
     {
         if (d.quadric_key == 66666)
         {

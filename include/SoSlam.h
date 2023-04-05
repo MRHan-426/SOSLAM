@@ -48,8 +48,8 @@ namespace gtsam_soslam
         void spin();
         void step();
         void reset();
-        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> add_detection_factors(const Detection &d, const gtsam::noiseModel::Diagonal::shared_ptr &noise_boxes,
-                                                                                                        const gtsam::noiseModel::Diagonal::shared_ptr &noise_scc,
-                                                                                                        const gtsam::noiseModel::Diagonal::shared_ptr &noise_psc);
+        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> add_detection_factors(const Detection &d, const gtsam::noiseModel::Robust::shared_ptr &noise_boxes,
+                                                                                                        const gtsam::noiseModel::Robust::shared_ptr &noise_scc,
+                                                                                                        const gtsam::noiseModel::Robust::shared_ptr &noise_psc);
     };
 } // namespace gtsam_soslam
