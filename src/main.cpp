@@ -5,12 +5,7 @@ namespace gtsam_soslam{
 std::thread* mptViewer;
 std::thread* mptLocalMapping;
 // void run() {
-void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector) {
-
-//    DummyData data_source;
-//    DummyAssociator associator;
-//    DummyDetector detector;
-    const gtsam::Pose3& initial_pose = Constants::POSES[0];
+void run(DataSource& data_source,BaseAssociator& associator,BaseDetector& detector, const gtsam::Pose3& initial_pose) {
 
     SoSlam * q= new SoSlam(
             data_source, //DataSource
