@@ -77,13 +77,14 @@ DualConic QuadricCamera::project(
 std::vector<gtsam::Vector4> QuadricCamera::project(
     const AlignedBox2& box, const gtsam::Pose3& pose,
     const boost::shared_ptr<gtsam::Cal3_S2>& calibration) {
-  std::vector<gtsam::Vector4> planes;
-  for (auto line : box.lines()) {
-    gtsam::Vector4 plane =
-        QuadricCamera::transformToImage(pose, calibration).transpose() * line;
-    planes.push_back(plane);
-  }
-  return planes;
+    std::vector<gtsam::Vector4> planes;
+
+    for (const auto &line : box.lines()) {
+        gtsam::Vector4 plane =
+            QuadricCamera::transformToImage(pose, calibration).transpose() * line;
+        planes.push_back(plane);
+    }
+    return planes;
 }
 
 }  // namespace gtsam_soslam
