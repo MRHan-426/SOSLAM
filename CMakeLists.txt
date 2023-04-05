@@ -43,7 +43,7 @@ add_library(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/Viewer.cc
     ${PROJECT_SOURCE_DIR}/src/MapDrawer.cc
 #    ${PROJECT_SOURCE_DIR}/src/FrameDrawer.cc
-)
+    ${PROJECT_SOURCE_DIR}/src/HandMadeData.cpp)
 
 target_link_libraries(${PROJECT_NAME}
         gtsam
