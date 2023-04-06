@@ -49,7 +49,7 @@ namespace gtsam_soslam{
 //            result_bounds = dualConic.bounds();
 
             ious.push_back(utils::iou(result_bounds, AlignedBox2(detection->bounds)));
-            draw_ellipsoid(state, dualConic);
+            // draw_ellipsoid(state, dualConic);
         }
         return ious;
     }
