@@ -13,12 +13,12 @@
 namespace gtsam_soslam{
     namespace evaluate {
 
+    // Function to calculate 2D IOU
     std::vector<double> iou_evaluation(SoSlamState &state){
-
         auto pose_values = utils::ps_and_qs_from_values(state.estimates_).first;
         auto quadric_values = utils::ps_and_qs_from_values(state.estimates_).second;
         // use max posekey (latest pose)
-        gtsam::Key max_key;
+        gtsam::Key max_key = 0;
         gtsam::Pose3 camera_pose;
         for (const auto& kv : pose_values) {
             if (kv.first > max_key) {
@@ -48,9 +48,9 @@ namespace gtsam_soslam{
         }
         }
 
-        // Function to initialize QUADRICS
-        std::vector<gtsam::Pose3> ROT();
-
-        // Declare the constants
+    // Function to initialize QUADRICS
+    std::vector<gtsam::Vector3> rot_evaluation(SoSlamState &state){
+        //TODO
     }
+} //namespace evaluate
 } //namespace gtsam_soslam

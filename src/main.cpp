@@ -39,11 +39,9 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--dummy") == 0) {
             use_dummy_data = true;
-            break;
         }
         else if (strcmp(argv[i], "--3d") == 0){
             use_3D_visualization = true;
-            break;
         }
     }
 

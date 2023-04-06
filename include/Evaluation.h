@@ -21,13 +21,13 @@
 
 namespace gtsam_soslam{
     namespace evaluate {
-        // Function to calculate IOU
+
+        // Function to calculate 2D IOU
         std::vector<double> iou_evaluation(SoSlamState &state);
 
-        // Function to initialize QUADRICS
-        std::vector<gtsam::Pose3> ROT();
+        // Function to calculate Rot
+        std::vector<gtsam::Vector3> rot_evaluation(SoSlamState &state);
 
-        // Declare the constants
     }
 } //namespace gtsam_soslam
 #endif //GTSAM_SOSLAM_EVALUATION_H
