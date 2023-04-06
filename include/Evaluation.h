@@ -18,15 +18,20 @@
 #include <gtsam/geometry/Rot3.h>
 #include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Cal3_S2.h>
+#include <opencv4/opencv2/opencv.hpp> // 4.7.0
 
 namespace gtsam_soslam{
     namespace evaluate {
 
+        // visualize
+        void visualize(SoSlamState &state);
+
         // Function to calculate 2D IOU
-        std::vector<double> iou_evaluation(SoSlamState &state);
+        std::vector<double> iou_evaluation(const SoSlamState &state);
 
         // Function to calculate Rot
         std::vector<gtsam::Vector3> rot_evaluation(SoSlamState &state);
+        void draw_ellipsoid(const SoSlamState &state, const DualConic &dualConic);
 
     }
 } //namespace gtsam_soslam

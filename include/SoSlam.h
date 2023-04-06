@@ -2,6 +2,7 @@
 
 #include "SystemState.h"
 #include "DummyExample.h"
+#include "Evaluation.h"
 #include "Utilities.h"
 #include "AlignedBox2.h"
 #include "ConstrainedDualQuadric.h"
@@ -51,5 +52,9 @@ namespace gtsam_soslam
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor> add_detection_factors(const Detection &d, const gtsam::noiseModel::Robust::shared_ptr &noise_boxes,
                                                                                                         const gtsam::noiseModel::Robust::shared_ptr &noise_scc,
                                                                                                         const gtsam::noiseModel::Robust::shared_ptr &noise_psc);
+
+        gtsam::Point3 project_2d_point_to_3d(const Detection &d, const gtsam::Pose3 &camera_pose);
+        Eigen::MatrixXd pseudoInverse(const Eigen::MatrixXd& A);
+
     };
 } // namespace gtsam_soslam

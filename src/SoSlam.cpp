@@ -2,6 +2,7 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -143,7 +144,7 @@ void SoSlam::spin() {
 //            s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
-            utils::visualize(s);
+            evaluate::visualize(s);
         }
     }
 
@@ -156,9 +157,9 @@ void SoSlam::spin() {
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
             gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0,3.0,3.0,3.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
-            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(0.01,0.01));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
             gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
 
@@ -233,8 +234,12 @@ void SoSlam::spin() {
                 if (!found)
                 {
                     gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
-                    ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc_psc), std::get<1>(bbs_scc_psc), std::get<2>(bbs_scc_psc), camera_pose);
+                    auto center = project_2d_point_to_3d(d, camera_pose);
+                    ConstrainedDualQuadric initial_quadric = \
+                            utils::initialize_with_ssc_psc_bbs(std::get<0>(bbs_scc_psc),\
+                            std::get<1>(bbs_scc_psc), std::get<2>(bbs_scc_psc), center, camera_pose);
                     // those factors have the same quadric key, just add once
+                    std::cout << d.label << std::endl;
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc).objectKey());
                 }
             }
@@ -244,7 +249,7 @@ void SoSlam::spin() {
 //                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
 //                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
 //            s.estimates_ = s.isam_optimizer_.calculateEstimate();
-            utils::visualize(s);
+            evaluate::visualize(s);
 
         }
         s.prev_step = *n;
@@ -286,6 +291,34 @@ void SoSlam::spin() {
         state_.graph_.add(ssc);
         state_.graph_.add(psc);
         return std::make_tuple(bbs, ssc, psc);
+    }
+
+    // Not sure, p_w should be (X,Y,Z,1), but it turns out as (X,Y,Z,0)
+    gtsam::Point3 SoSlam::project_2d_point_to_3d(const Detection &d, const gtsam::Pose3 &camera_pose) {
+        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_.calib_rgb_));
+        auto bbs_center = AlignedBox2(d.bounds).center();
+        Eigen::Matrix<double, 3, 4> K1 = calibPtr->K() * gtsam::Matrix::Identity(3, 4);
+        gtsam::Matrix4 K2 = camera_pose.matrix();
+        gtsam::Point3 p_img(bbs_center[0], bbs_center[1], 1.0);
+        auto p_w = (K2.inverse() * pseudoInverse(K1) * p_img).eval();
+        gtsam::Point3 center(p_w[0], p_w[1], p_w[2]);
+        return center;
+    }
+
+    Eigen::MatrixXd SoSlam::pseudoInverse(const Eigen::MatrixXd& m) {
+        Eigen::JacobiSVD<Eigen::MatrixXd> svd(m, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        const auto &singularValues = svd.singularValues();
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> singularValuesInv(m.cols(), m.rows());
+        singularValuesInv.setZero();
+
+        double pinvtoler = 1.e-6;
+        for (unsigned int i = 0; i < singularValues.size(); ++i) {
+            if (singularValues(i) > pinvtoler)
+                singularValuesInv(i, i) = 1.0 / singularValues(i);
+            else
+                singularValuesInv(i, i) = 0.0;
+        }
+        return svd.matrixV() * singularValuesInv * svd.matrixU().transpose();
     }
 
 } // namespace gtsam_soslam

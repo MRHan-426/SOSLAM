@@ -33,33 +33,37 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
     if (quadric.contains(pose)) {
       throw QuadricProjectionException("Camera is inside quadric");
     }
-    gtsam::Vector1 error = gtsam::Vector1::Zero();
-
+    gtsam::Vector4 error;
+    int index = 0;
     std::vector<gtsam::Vector4> planes = QuadricCamera::project(measured_, pose, calibration_);
 
     switch (sigma_bbs_) {
       case 1:
           for (auto plane : planes){
-              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<1>());
-              error = error + temp_error;
+              auto temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<1>());
+              error(index) = temp_error;
+              index++;
           }
           break;
       case 5:
           for (auto plane : planes){
-              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<5>());
-              error = error + temp_error;
+              auto temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<5>());
+              error(index) = temp_error;
+              index++;
           }
           break;
       case 10:
           for (auto plane : planes){
-              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
-              error = error + temp_error;
+              auto temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
+              error(index) = temp_error;
+              index++;
           }
           break;
       default:
           for (auto plane : planes){
-              gtsam::Vector1 temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
-              error = error + temp_error;
+              auto temp_error((plane.transpose() * quadric.matrix() * plane).lpNorm<10>());
+              error(index) = temp_error;
+              index++;
           }
           break;}
 
@@ -70,18 +74,18 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
                              boost::placeholders::_1, boost::placeholders::_2,
                              boost::none, boost::none));
       if (H1) {
-        Eigen::Matrix<double, 1, 6> db_dx_ =
+        Eigen::Matrix<double, 4, 6> db_dx_ =
             gtsam::numericalDerivative21(funPtr, pose, quadric, 1e-6);
         *H1 = db_dx_;
       }
       if (H2) {
-        Eigen::Matrix<double, 1, 9> db_dq_ =
+        Eigen::Matrix<double, 4, 9> db_dq_ =
             gtsam::numericalDerivative22(funPtr, pose, quadric, 1e-6);
         *H2 = db_dq_;
       }
     }
-//    std::cout << "BBC Error: " << error / 10000 <<std::endl;
-    return error / 10000;
+//    std::cout << "BBC Error: " << error <<std::endl;
+    return error;
 
     // check for nans
     if (error.array().isInf().any() || error.array().isNaN().any() ||
@@ -97,18 +101,18 @@ gtsam::Vector BoundingBoxFactor::evaluateError(
 
         // if error cannot be calculated
         // set error vector and jacobians to zero
-        gtsam::Vector1 error = gtsam::Vector1::Ones() * 1000.0;
+        gtsam::Vector4 error = gtsam::Vector4::Ones() * 1000.0;
         if (H1) {
-          *H1 = gtsam::Matrix::Zero(1, 6);
+          *H1 = gtsam::Matrix::Zero(4, 6);
         }
         if (H2) {
-          *H2 = gtsam::Matrix::Zero(1, 9);
+          *H2 = gtsam::Matrix::Zero(4, 9);
         }
 
         return error;
     }
     // Just to avoid warning
-    return gtsam::Vector1::Ones() * 1000.0;
+    return gtsam::Vector4::Ones() * 1000.0;
 }
 
 /* ************************************************************************* */
