@@ -27,9 +27,10 @@
         - [x] graph drawing.
         - [ ] verify drawing correctness.
     - [ ] adding frame drawer(FrameDrawer).
-        - [ ] state == Tracking::NOT_INITIALIZED.
-        - [ ] quadricimage is in Tracking, move to here. 
-        - [ ] It also use a Update to update images, find a way to place Update.
+        - [x] state == Tracking::NOT_INITIALIZED.
+        - [x] quadricimage is in Tracking, move to here. 
+        - [x] It also use a Update to update images, find a way to place Update.
+        - [ ] verify drawing correctness.
     - [ ] multithread part
 - [ ] 5. Writing evaluation function.
     - [ ] 5.1 Rot.
