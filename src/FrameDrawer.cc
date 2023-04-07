@@ -270,43 +270,6 @@ cv::Mat FrameDrawer::GetQuadricImage()
     return mQuadricIm;
 }
 
-//void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
-//{
-//    stringstream s;
-//    if(nState==Tracking::NO_IMAGES_YET)
-//        s << " WAITING FOR IMAGES";
-//    else if(nState==Tracking::NOT_INITIALIZED)
-//        s << " TRYING TO INITIALIZE ";
-//    else if(nState==Tracking::OK)
-//    {
-//        if(!mbOnlyTracking)
-//            s << "SLAM MODE |  ";
-//        else
-//            s << "LOCALIZATION | ";
-//        int nKFs = mpMap->KeyFramesInMap();
-//        int nMPs = mpMap->MapPointsInMap();
-//        s << "KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked;
-//        if(mnTrackedVO>0)
-//            s << ", + VO matches: " << mnTrackedVO;
-//    }
-//    else if(nState==Tracking::LOST)
-//    {
-//        s << " TRACK LOST. TRYING TO RELOCALIZE ";
-//    }
-//    else if(nState==Tracking::SYSTEM_NOT_READY)
-//    {
-//        s << " LOADING ORB VOCABULARY. PLEASE WAIT...";
-//    }
-//
-//    int baseline=0;
-//    cv::Size textSize = cv::getTextSize(s.str(),cv::FONT_HERSHEY_PLAIN,1,1,&baseline);
-//
-//    imText = cv::Mat(im.rows+textSize.height+10,im.cols,im.type());
-//    im.copyTo(imText.rowRange(0,im.rows).colRange(0,im.cols));
-//    imText.rowRange(im.rows,imText.rows) = cv::Mat::zeros(textSize.height+10,im.cols,im.type());
-//    cv::putText(imText,s.str(),cv::Point(5,imText.rows-5),cv::FONT_HERSHEY_PLAIN,1,cv::Scalar(255,255,255),1,8);
-//
-//}
 
 // BRIEF draw yolo text.
 cv::Mat FrameDrawer::DrawYoloInfo(cv::Mat &im, bool bText)
@@ -331,26 +294,6 @@ cv::Mat FrameDrawer::DrawYoloInfo(cv::Mat &im, bool bText)
                         // cv::Scalar(0,255,0), 
                         2);                             
         }
-
-//        // draw lines in the box
-//        for(int obj_id = 0; obj_id < DObjsLines.size(); obj_id ++)
-//        {
-//            for(int line_id = 0; line_id < DObjsLines[obj_id].rows(); line_id++)
-//            {
-//                cv::Scalar lineColor;
-//                int R = ( rand() % (int) ( 255 + 1 ) );
-//                int G = ( rand() % (int) ( 255 + 1 ) );
-//                int B = ( rand() % (int) ( 255 + 1 ) );
-//                lineColor = cv::Scalar( R, G, B );
-//
-//                cv::line(   im,
-//                            cv::Point2f( DObjsLines[obj_id](line_id, 0), DObjsLines[obj_id](line_id, 1)),
-//                            cv::Point2f( DObjsLines[obj_id](line_id, 2), DObjsLines[obj_id](line_id, 3)),
-//                            cv::Scalar( 255, 255, 0 ),
-//                            //lineColor,
-//                            2.0);
-//            }
-//        }
 
         // draw bounding box.
         cv::rectangle(  im,
