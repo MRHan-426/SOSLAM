@@ -280,10 +280,20 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
     vector<cv::Mat> object_cen;
 
     int i = -1;
-    for (auto& key_value : cqs) {
-        i ++;
-        gtsam::Key ObjKey = key_value.first;
-        ConstrainedDualQuadric * Obj =&(key_value.second);
+        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+//    for (auto& key_value : cqs) {
+//        i++;
+//        gtsam::Key ObjKey = key_value.first;
+//        ConstrainedDualQuadric *Obj = &(key_value.second);
+        for (auto& q : qs) {
+            i++;
+//        gtsam::Key ObjKey = key_value.first;
+            ConstrainedDualQuadric *Obj = &(q);
+
+//    for (auto& key_value : cqs) {
+//        i ++;
+//        gtsam::Key ObjKey = key_value.first;
+//        ConstrainedDualQuadric * Obj =&(key_value.second);
 
         // Do something with the key and value
 //    }
@@ -344,30 +354,37 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
 
         gtsam::Point3 centroid = Obj->centroid();
         // quadrcis pose.
-        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
-        Twq.at<float>(0, 0) = 1;
-        Twq.at<float>(0, 1) = 0;
-        Twq.at<float>(0, 2) = 0;
-        //Twq.at<float>(0, 3) = Obj->mCenter3D.at<float>(0);
-        Twq.at<float>(0, 3) = centroid[0];
-        Twq.at<float>(1, 0) = 0;
-        Twq.at<float>(1, 1) = 1;
-        Twq.at<float>(1, 2) = 0;
-        //Twq.at<float>(1, 3) = Obj->mCenter3D.at<float>(1);
-        Twq.at<float>(1, 3) = centroid[1];
-        Twq.at<float>(2, 0) = 0;
-        Twq.at<float>(2, 1) = 0;
-        Twq.at<float>(2, 2) = 1;
-        //Twq.at<float>(2, 3) = Obj->mCenter3D.at<float>(2);
-        Twq.at<float>(2, 3) = centroid[2];
-        Twq.at<float>(3, 0) = 0;
-        Twq.at<float>(3, 1) = 0;
-        Twq.at<float>(3, 2) = 0;
-        Twq.at<float>(3, 3) = 1;
+        ;
+//        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
+        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
+//            for (int i = 0; i < 3; ++i) {
+//                for (int j = 0; j < 4; ++j) {
+//                    Twq.at<float>(i, j) = P(i, j);
+//                }
+//            }
+//        Twq.at<float>(0, 0) = 1;
+//        Twq.at<float>(0, 1) = 0;
+//        Twq.at<float>(0, 2) = 0;
+//        //Twq.at<float>(0, 3) = Obj->mCenter3D.at<float>(0);
+//        Twq.at<float>(0, 3) = centroid[0];
+//        Twq.at<float>(1, 0) = 0;
+//        Twq.at<float>(1, 1) = 1;
+//        Twq.at<float>(1, 2) = 0;
+//        //Twq.at<float>(1, 3) = Obj->mCenter3D.at<float>(1);
+//        Twq.at<float>(1, 3) = centroid[1];
+//        Twq.at<float>(2, 0) = 0;
+//        Twq.at<float>(2, 1) = 0;
+//        Twq.at<float>(2, 2) = 1;
+//        //Twq.at<float>(2, 3) = Obj->mCenter3D.at<float>(2);
+//        Twq.at<float>(2, 3) = centroid[2];
+//        Twq.at<float>(3, 0) = 0;
+//        Twq.at<float>(3, 1) = 0;
+//        Twq.at<float>(3, 2) = 0;
+//        Twq.at<float>(3, 3) = 1;
 
         // create a quadric.
         GLUquadricObj *pObj = gluNewQuadric();
-        cv::Mat Twq_t = Twq.t();
+        cv::Mat Twq_t = Twq;
 
         // color
         cv::Scalar sc;

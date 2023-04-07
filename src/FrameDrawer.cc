@@ -196,10 +196,15 @@ cv::Mat FrameDrawer::GetQuadricImage()
     }
 
     int i = -1;
-    for (auto& key_value : cqs) {
+    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+//    for (auto& key_value : cqs) {
+//        i++;
+//        gtsam::Key ObjKey = key_value.first;
+//        ConstrainedDualQuadric *Obj = &(key_value.second);
+    for (auto& q : qs) {
         i++;
-        gtsam::Key ObjKey = key_value.first;
-        ConstrainedDualQuadric *Obj = &(key_value.second);
+//        gtsam::Key ObjKey = key_value.first;
+        ConstrainedDualQuadric *Obj = &(q);
         gtsam::Vector3 radii = Obj->radii();
         double lenth = radii[0];
         double width = radii[1];
