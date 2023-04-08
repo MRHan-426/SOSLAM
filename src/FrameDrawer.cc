@@ -224,27 +224,45 @@ cv::Mat FrameDrawer::GetQuadricImage()
         // quadrcis pose.
         // object pose (world).
 //    cv::Mat Twq = Converter::toCvMat(mpMap->mvObjectMap[i]->mCuboid3D.pose);
-        cv::Mat Twq = cv::Mat::zeros(4, 4, CV_32F);
-        Twq.at<float>(0, 0) = 1;
-        Twq.at<float>(0, 1) = 0;
-        Twq.at<float>(0, 2) = 0;
-        //Twq.at<float>(0, 3) = Obj->mCenter3D.at<float>(0);
-        Twq.at<float>(0, 3) = centroid[0];
-        Twq.at<float>(1, 0) = 0;
-        Twq.at<float>(1, 1) = 1;
-        Twq.at<float>(1, 2) = 0;
-        //Twq.at<float>(1, 3) = Obj->mCenter3D.at<float>(1);
-        Twq.at<float>(1, 3) = centroid[1];
-        Twq.at<float>(2, 0) = 0;
-        Twq.at<float>(2, 1) = 0;
-        Twq.at<float>(2, 2) = 1;
-        //Twq.at<float>(2, 3) = Obj->mCenter3D.at<float>(2);
-        Twq.at<float>(2, 3) = centroid[2];
-        Twq.at<float>(3, 0) = 0;
-        Twq.at<float>(3, 1) = 0;
-        Twq.at<float>(3, 2) = 0;
-        Twq.at<float>(3, 3) = 1;
+//        cv::Mat Twq = cv::Mat::zeros(4, 4, CV_32F);
+//        Twq.at<float>(0, 0) = 1;
+//        Twq.at<float>(0, 1) = 0;
+//        Twq.at<float>(0, 2) = 0;
+//        //Twq.at<float>(0, 3) = Obj->mCenter3D.at<float>(0);
+//        Twq.at<float>(0, 3) = centroid[0];
+//        Twq.at<float>(1, 0) = 0;
+//        Twq.at<float>(1, 1) = 1;
+//        Twq.at<float>(1, 2) = 0;
+//        //Twq.at<float>(1, 3) = Obj->mCenter3D.at<float>(1);
+//        Twq.at<float>(1, 3) = centroid[1];
+//        Twq.at<float>(2, 0) = 0;
+//        Twq.at<float>(2, 1) = 0;
+//        Twq.at<float>(2, 2) = 1;
+//        //Twq.at<float>(2, 3) = Obj->mCenter3D.at<float>(2);
+//        Twq.at<float>(2, 3) = centroid[2];
+//        Twq.at<float>(3, 0) = 0;
+//        Twq.at<float>(3, 1) = 0;
+//        Twq.at<float>(3, 2) = 0;
+//        Twq.at<float>(3, 3) = 1;
+        gtsam::Pose3 pose=Obj->pose(); // assume pose is initialized
+        cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
+        cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
 
+// set translation matrix
+        T.at<float>(0, 3) = pose.translation().x();
+        T.at<float>(1, 3) = pose.translation().y();
+        T.at<float>(2, 3) = pose.translation().z();
+
+// set rotation matrix
+        gtsam::Rot3 rot = pose.rotation();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                R.at<float>(i, j) = rot.matrix()(i, j);
+            }
+        }
+
+// concatenate rotation and translation matrices
+        cv::Mat Twq = T * R;
         // create a quadric.
         cv::Mat Twq_t = Twq.t();
 

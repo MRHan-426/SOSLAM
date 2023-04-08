@@ -356,7 +356,15 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
         // quadrcis pose.
         ;
 //        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
-        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
+//        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
+            gtsam::Pose3 pose=Obj->pose();
+            gtsam::Rot3 rot = pose.rotation();
+            gtsam::Matrix33 rot_matrix = rot.matrix();
+
+            gtsam::Matrix44 homogeneous_matrix = gtsam::Matrix44::Identity();
+            homogeneous_matrix.block<3, 3>(0, 0) = rot_matrix;
+            std::vector<GLfloat> gl_matrix(homogeneous_matrix.data(), homogeneous_matrix.data() + homogeneous_matrix.size());
+
 //            for (int i = 0; i < 3; ++i) {
 //                for (int j = 0; j < 4; ++j) {
 //                    Twq.at<float>(i, j) = P(i, j);
@@ -384,7 +392,7 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
 
         // create a quadric.
         GLUquadricObj *pObj = gluNewQuadric();
-        cv::Mat Twq_t = Twq;
+//        cv::Mat Twq_t = Twq;
 
         // color
         cv::Scalar sc;
@@ -392,7 +400,9 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
 
         // add to display list
         glPushMatrix();
-        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
+//        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
+        glMultMatrixf(gl_matrix.data());
+
         glScalef(
                 (GLfloat)(axe.at<float>(0,0)),
                 (GLfloat)(axe.at<float>(0,1)),
