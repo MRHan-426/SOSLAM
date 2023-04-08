@@ -42,7 +42,7 @@ public:
     FrameDrawer(SoSlamState* sState);
 
     // Update info from the last processed frame.
-//    void Update(Tracking *pTracker);
+    void Update();
 
     // Draw last processed frame.
     cv::Mat DrawFrame();
@@ -149,7 +149,8 @@ protected:
 
     // Info of the frame to be drawn
     cv::Mat mIm;
-    cv::Mat mRGBIm; 
+    cv::Mat mRGBIm;
+    cv::Mat mDetIm;
     cv::Mat mQuadricIm; 
 
     int N;
@@ -166,10 +167,18 @@ protected:
     double DTimeStamp;
 
     // bounding box.
-//    std::vector<BoxSE> Dboxes;
+    std::vector<Detection> Dboxes;
     bool have_detected;
     std::vector<Eigen::MatrixXd> DObjsLines;    // object lines.
-
+    // [EAO] project quadrics to the image.
+    cv::Mat DrawQuadricProject( cv::Mat &im,
+                                const cv::Mat &P,
+                                const cv::Mat &axe,
+                                const cv::Mat &Twq,
+                                int nClassid,
+                                bool isGT=true,
+                                int nLatitudeNum = 7,
+                                int nLongitudeNum = 6);
     SoSlamState*  s;
 
     std::mutex mMutex;

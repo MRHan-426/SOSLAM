@@ -17,7 +17,7 @@ namespace gtsam_soslam {
 
         if (use_3D_visualization) {
             string YamlFile = "../TUM2.yaml";
-            FrameDrawer *mpFrameDrawer = nullptr;
+            FrameDrawer *mpFrameDrawer = new FrameDrawer(s);
             auto *mpMapDrawer = new MapDrawer(s, YamlFile);
             auto *mpViewer = new Viewer(s, mpFrameDrawer, mpMapDrawer, YamlFile);
             auto *mptViewer = new thread(&Viewer::Run, mpViewer);

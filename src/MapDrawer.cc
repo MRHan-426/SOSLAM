@@ -280,10 +280,20 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
     vector<cv::Mat> object_cen;
 
     int i = -1;
+//        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
     for (auto& key_value : cqs) {
-        i ++;
+        i++;
         gtsam::Key ObjKey = key_value.first;
-        ConstrainedDualQuadric * Obj =&(key_value.second);
+        ConstrainedDualQuadric *Obj = &(key_value.second);
+//        for (auto& q : qs) {
+//            i++;
+////        gtsam::Key ObjKey = key_value.first;
+//            ConstrainedDualQuadric *Obj = &(q);
+
+//    for (auto& key_value : cqs) {
+//        i ++;
+//        gtsam::Key ObjKey = key_value.first;
+//        ConstrainedDualQuadric * Obj =&(key_value.second);
 
         // Do something with the key and value
 //    }
@@ -344,30 +354,21 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
 
         gtsam::Point3 centroid = Obj->centroid();
         // quadrcis pose.
-        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
-        Twq.at<float>(0, 0) = 1;
-        Twq.at<float>(0, 1) = 0;
-        Twq.at<float>(0, 2) = 0;
-        //Twq.at<float>(0, 3) = Obj->mCenter3D.at<float>(0);
-        Twq.at<float>(0, 3) = centroid[0];
-        Twq.at<float>(1, 0) = 0;
-        Twq.at<float>(1, 1) = 1;
-        Twq.at<float>(1, 2) = 0;
-        //Twq.at<float>(1, 3) = Obj->mCenter3D.at<float>(1);
-        Twq.at<float>(1, 3) = centroid[1];
-        Twq.at<float>(2, 0) = 0;
-        Twq.at<float>(2, 1) = 0;
-        Twq.at<float>(2, 2) = 1;
-        //Twq.at<float>(2, 3) = Obj->mCenter3D.at<float>(2);
-        Twq.at<float>(2, 3) = centroid[2];
-        Twq.at<float>(3, 0) = 0;
-        Twq.at<float>(3, 1) = 0;
-        Twq.at<float>(3, 2) = 0;
-        Twq.at<float>(3, 3) = 1;
+        ;
+//        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
+//        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
+        gtsam::Pose3 pose=Obj->pose();
+        gtsam::Rot3 rot = pose.rotation();
+        gtsam::Matrix33 rot_matrix = rot.matrix();
+
+//            gtsam::Matrix44 homogeneous_matrix = gtsam::Matrix44::Identity();
+//            homogeneous_matrix.block<3, 3>(0, 0) = rot_matrix;
+        gtsam::Matrix44 homogeneous_matrix = pose.matrix();
+        std::vector<GLfloat> gl_matrix(homogeneous_matrix.data(), homogeneous_matrix.data() + homogeneous_matrix.size());
 
         // create a quadric.
         GLUquadricObj *pObj = gluNewQuadric();
-        cv::Mat Twq_t = Twq.t();
+//        cv::Mat Twq_t = Twq;
 
         // color
         cv::Scalar sc;
@@ -375,7 +376,9 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
 
         // add to display list
         glPushMatrix();
-        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
+//        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
+        glMultMatrixf(gl_matrix.data());
+
         glScalef(
                 (GLfloat)(axe.at<float>(0,0)),
                 (GLfloat)(axe.at<float>(0,1)),

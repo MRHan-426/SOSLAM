@@ -8,7 +8,7 @@ namespace Constants {
             {0, -10, 0},
             {-10, 0, 0},
             {0, 10, 0},
-            {10, 0, 0},
+//            {10, 0, 0},
         };
 
         std::vector<gtsam::Pose3> poses;
@@ -22,10 +22,13 @@ namespace Constants {
 
     std::vector<ConstrainedDualQuadric> initQuadrics() {
         std::vector<ConstrainedDualQuadric> quadrics{
-            ConstrainedDualQuadric(gtsam::Pose3(), {1, 1, 1}),
-            ConstrainedDualQuadric(gtsam::Pose3(gtsam::Rot3(), {1, 1, 1}), {1, 1, 1})
+            ConstrainedDualQuadric(gtsam::Pose3(), {3, 0.5, 0.5}),
+            ConstrainedDualQuadric(gtsam::Pose3(gtsam::Rot3::RzRyRx(30.0 * M_PI / 180.0,30.0 * M_PI / 180.0,30.0 * M_PI / 180.0), {2, 1, -1}), {0.5, 4, 0.5})
+//                        ConstrainedDualQuadric(gtsam::Pose3(gtsam::Rot3(), {3, 1.5, 0.5}), {1, 4, 1})
         };
 
+//        std::cout<<"standard"<<gtsam::Rot3()<<std::endl;
+//        std::cout<<"z90"<<gtsam::Rot3::Rz(30.0 * M_PI / 180.0)<<std::endl;
         return quadrics;
     }
     const std::vector<gtsam::Pose3> POSES = initPoses();

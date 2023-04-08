@@ -249,7 +249,7 @@ void SoSlam::spin() {
 //                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
 //                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
 //            s.estimates_ = s.isam_optimizer_.calculateEstimate();
-            evaluate::visualize(s);
+//            utils::visualize(s);
 
         }
         s.prev_step = *n;

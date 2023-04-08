@@ -221,32 +221,32 @@ void Viewer::Run()
 
         pangolin::FinishFrame();
 // debug later
-//        // gray image.
-//        cv::Mat im = mpFrameDrawer->DrawFrame();
-//        if(!im.empty())
-//        {
-//            cv::Mat resizeimg;
-//            cv::resize(im, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
-//            cv::imshow("Point, Line and Object Detection", resizeimg);
-//        }
-//
-//        // color image.
-//        cv::Mat RawImage = mpFrameDrawer->GetRawColorImage();
-//        if(!RawImage.empty())
-//        {
-//            cv::Mat resizeimg;
-//            cv::resize(RawImage, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
-//            cv::imshow("Raw Image", resizeimg);
-//        }
-//
-//        // quadric image.
-//        cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage();
-//        if(!QuadricImage.empty())
-//        {
-//            cv::Mat resizeimg;
-//            cv::resize(QuadricImage, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
-//            cv::imshow("Quadric Projection", resizeimg);
-//        }
+        // gray image.
+        cv::Mat im = mpFrameDrawer->DrawFrame();
+        if(!im.empty())
+        {
+            cv::Mat resizeimg;
+            cv::resize(im, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
+            cv::imshow("Point, Line and Object Detection", resizeimg);
+        }
+
+        // color image.
+        cv::Mat RawImage = mpFrameDrawer->GetRawColorImage();
+        if(!RawImage.empty())
+        {
+            cv::Mat resizeimg;
+            cv::resize(RawImage, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
+            cv::imshow("Raw Image", resizeimg);
+        }
+
+//         quadric image.
+        cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage();
+        if(!QuadricImage.empty())
+        {
+            cv::Mat resizeimg;
+            cv::resize(QuadricImage, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
+            cv::imshow("Quadric Projection", resizeimg);
+        }
 
         cv::waitKey(mT);
 
