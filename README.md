@@ -25,12 +25,12 @@
         - [x] Map object that can return all objects to draw.
         - [x] camera pose drawing.
         - [x] graph drawing.
-        - [ ] verify drawing correctness.
+        - [x] verify drawing correctness.
     - [ ] adding frame drawer(FrameDrawer).
         - [x] state == Tracking::NOT_INITIALIZED.
         - [x] quadricimage is in Tracking, move to here. 
         - [x] It also use a Update to update images, find a way to place Update.
-        - [ ] verify drawing correctness.
+        - [x] verify drawing correctness.
     - [ ] multithread part
 - [ ] 5. Writing evaluation function.
     - [ ] 5.1 Rot.
