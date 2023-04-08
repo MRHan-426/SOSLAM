@@ -196,25 +196,22 @@ cv::Mat FrameDrawer::GetQuadricImage()
     }
 
     int i = -1;
-    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
-//    for (auto& key_value : cqs) {
+//    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+    for (auto& key_value : cqs) {
+        i++;
+        gtsam::Key ObjKey = key_value.first;
+        ConstrainedDualQuadric *Obj = &(key_value.second);
+//    for (auto& q : qs) {
 //        i++;
 //        gtsam::Key ObjKey = key_value.first;
-//        ConstrainedDualQuadric *Obj = &(key_value.second);
-    for (auto& q : qs) {
-        i++;
-//        gtsam::Key ObjKey = key_value.first;
-        ConstrainedDualQuadric *Obj = &(q);
+//        ConstrainedDualQuadric *Obj = &(q);
         gtsam::Vector3 radii = Obj->radii();
         double lenth = radii[0];
         double width = radii[1];
         double height = radii[2];
 
         // step 10.7 project quadrics to the image (only for visualization).
-//        cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
-//    axe.at<float>(0) = mpMap->mvObjectMap[i]->mCuboid3D.lenth / 2;
-//    axe.at<float>(1) = mpMap->mvObjectMap[i]->mCuboid3D.width / 2;
-//    axe.at<float>(2) = mpMap->mvObjectMap[i]->mCuboid3D.height / 2;
+
         cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
         axe.at<float>(0) = lenth;
         axe.at<float>(1) = width;
@@ -223,27 +220,6 @@ cv::Mat FrameDrawer::GetQuadricImage()
         gtsam::Point3 centroid = Obj->centroid();
         // quadrcis pose.
         // object pose (world).
-//    cv::Mat Twq = Converter::toCvMat(mpMap->mvObjectMap[i]->mCuboid3D.pose);
-//        cv::Mat Twq = cv::Mat::zeros(4, 4, CV_32F);
-//        Twq.at<float>(0, 0) = 1;
-//        Twq.at<float>(0, 1) = 0;
-//        Twq.at<float>(0, 2) = 0;
-//        //Twq.at<float>(0, 3) = Obj->mCenter3D.at<float>(0);
-//        Twq.at<float>(0, 3) = centroid[0];
-//        Twq.at<float>(1, 0) = 0;
-//        Twq.at<float>(1, 1) = 1;
-//        Twq.at<float>(1, 2) = 0;
-//        //Twq.at<float>(1, 3) = Obj->mCenter3D.at<float>(1);
-//        Twq.at<float>(1, 3) = centroid[1];
-//        Twq.at<float>(2, 0) = 0;
-//        Twq.at<float>(2, 1) = 0;
-//        Twq.at<float>(2, 2) = 1;
-//        //Twq.at<float>(2, 3) = Obj->mCenter3D.at<float>(2);
-//        Twq.at<float>(2, 3) = centroid[2];
-//        Twq.at<float>(3, 0) = 0;
-//        Twq.at<float>(3, 1) = 0;
-//        Twq.at<float>(3, 2) = 0;
-//        Twq.at<float>(3, 3) = 1;
         gtsam::Pose3 pose=Obj->pose(); // assume pose is initialized
         cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
         cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
@@ -265,23 +241,6 @@ cv::Mat FrameDrawer::GetQuadricImage()
         cv::Mat Twq = T * R;
         // create a quadric.
         cv::Mat Twq_t = Twq.t();
-
-
-//        // object pose (world).
-//        cv::Mat Twq = Conveter::toCvMat(mpMap->mvObjectMap[i]->mCuboid3D.pose);
-
-        // Projection Matrix K[R|t].
-//        cv::Mat P(3, 4, CV_32F);
-//        Rcw.copyTo(P.rowRange(0, 3).colRange(0, 3));
-//        tcw.copyTo(P.rowRange(0, 3).col(3));
-//        P = mCurrentFrame.mK * P;
-//    // step 10.7 project quadrics to the image (only for visualization).
-//    cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
-//    axe.at<float>(0) = mpMap->mvObjectMap[i]->mCuboid3D.lenth / 2;
-//    axe.at<float>(1) = mpMap->mvObjectMap[i]->mCuboid3D.width / 2;
-//    axe.at<float>(2) = mpMap->mvObjectMap[i]->mCuboid3D.height / 2;
-
-
 
         mQuadricIm = DrawQuadricProject(mQuadricIm,
                                         cv_mat,
