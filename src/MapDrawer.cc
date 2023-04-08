@@ -361,8 +361,9 @@ void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
             gtsam::Rot3 rot = pose.rotation();
             gtsam::Matrix33 rot_matrix = rot.matrix();
 
-            gtsam::Matrix44 homogeneous_matrix = gtsam::Matrix44::Identity();
-            homogeneous_matrix.block<3, 3>(0, 0) = rot_matrix;
+//            gtsam::Matrix44 homogeneous_matrix = gtsam::Matrix44::Identity();
+//            homogeneous_matrix.block<3, 3>(0, 0) = rot_matrix;
+            gtsam::Matrix44 homogeneous_matrix = pose.matrix();
             std::vector<GLfloat> gl_matrix(homogeneous_matrix.data(), homogeneous_matrix.data() + homogeneous_matrix.size());
 
 //            for (int i = 0; i < 3; ++i) {
