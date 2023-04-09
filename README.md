@@ -32,6 +32,7 @@
         - [x] It also use a Update to update images, find a way to place Update.
         - [x] verify drawing correctness.
     - [x] multithread part
+    - [ ] world axis
 - [ ] 5. Writing evaluation function.
     - [ ] 5.1 Rot.
     - [x] 5.2 IOU.
