@@ -19,7 +19,7 @@
          - [ ] 3.3.3 Debug Symmetry Texture constraint.
          - [x] 3.3.4 Debug Bounding Box Constraint.  
     - [x] 3.4 Add Quadric Initialization part into "c++ core".
-- [ ] 4. Add visualization part.
+- [x] 4. Add visualization part.
     - [x] dependency problems.
     - [x] adding quadrics drawing(MapDrawer).
         - [x] Map object that can return all objects to draw.
@@ -32,7 +32,7 @@
         - [x] It also use a Update to update images, find a way to place Update.
         - [x] verify drawing correctness.
     - [x] multithread part
-    - [ ] world axis
+    - [x] world axis
 - [ ] 5. Writing evaluation function.
     - [ ] 5.1 Rot.
     - [x] 5.2 IOU.
