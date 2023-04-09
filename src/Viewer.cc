@@ -194,7 +194,7 @@ void Viewer::Run()
         //     mpMapDrawer->DrawMapPoints();
         // if(menuShowSemiDense)
         //     mpMapDrawer->DrawSemiDense(menuSigmaTH);
-
+        mpMapDrawer->Coordinate();
         // step draw objects.
 //        if(menuShowCubeObj || menuShowQuadricObj)
 //        {

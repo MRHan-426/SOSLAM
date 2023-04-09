@@ -38,6 +38,7 @@ public:
     void DrawFrame();
 
     void DrawMapPoints();
+    void Coordinate();
     void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph);
 
     // BRIEF [EAO-SLAM] draw objects.

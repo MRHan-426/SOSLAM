@@ -135,7 +135,22 @@ MapDrawer::MapDrawer(SoSlamState* sState, const string &strSettingPath):s(sState
 //    kfToTexture->SetEraseDrawer();
 //}
 
+void MapDrawer::Coordinate(){
+    // 绘制坐标系
+    glLineWidth(3);
+    glBegin ( GL_LINES );
+    glColor3f ( 0.8f,0.f,0.f );
+    glVertex3f( 0,0,0 );
+    glVertex3f( 0.5,0,0 );
+    glColor3f( 0.f,0.8f,0.f);
+    glVertex3f( 0,0,0 );
+    glVertex3f( 0,0.5,0 );
+    glColor3f( 0.2f,0.2f,1.f);
+    glVertex3f( 0,0,0 );
+    glVertex3f( 0,0,0.5 );
+    glEnd();
 
+}
 
  void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
  {
