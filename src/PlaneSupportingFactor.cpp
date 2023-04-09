@@ -44,7 +44,7 @@ namespace gtsam_soslam
 
       gtsam::Vector2 error;
       error << 1000 * x_axis[2], 1000 *  y_axis[2];
-      cout << "x error: " << error(0) << ", y error: " << error(1) << endl;
+//      cout << "x error: " << error(0) << ", y error: " << error(1) << endl;
 
 //      Eigen::MatrixXd matrix(normalized_Q.rows(), normalized_Q.cols());
 
@@ -156,7 +156,7 @@ namespace gtsam_soslam
           *H2 = db_dq_;
         }
       }
-        std::cout << "PSC Error: " << error[0] <<std::endl;
+//        std::cout << "PSC Error: " << error[0] <<std::endl;
 
       return error;
 

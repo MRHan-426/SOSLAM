@@ -248,13 +248,32 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
-            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-            s.estimates_ = optimizer.optimize();
+            try{
+                s.isam_optimizer_.update(
+                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+                s.estimates_ = s.isam_optimizer_.calculateEstimate();
+
+            }catch (gtsam::IndeterminantLinearSystemException &e){
+                std::cout << "Collect Data" << std::endl;
+            }
+//            if (n->i % 5 != 0){
+//                std::cout << "Step Single" << std::endl;
+//            }
+//            else if(n->i % 5 == 0){
+//                s.isam_optimizer_.update(s.graph_,s.estimates_);
+//                s.estimates_ = s.isam_optimizer_.calculateEstimate();
+//                std::cout << "Step 2" << std::endl;
+//            }
+//            else{
+//                utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()).print() ;
+
+//                std::cout << n->i << std::endl;
+//            }
+//            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+//            s.estimates_ = optimizer.optimize();
 //            s.graph_.print();
-//                        s.isam_optimizer_.update(
-//                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-//                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-//                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
+
         }
         s.prev_step = *n;
     }

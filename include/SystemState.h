@@ -113,13 +113,14 @@ public:
         : initial_pose_(initial_pose),
           optimizer_batch_(optimizer_batch)
     {
+
+        isam_params_.relinearizeThreshold = 0.05; // 控制何时重新线性化因子图
+        isam_params_.relinearizeSkip = 10; // 控制多少次预测步骤后重新线性化因子图
+        isam_params_.enableRelinearization = true; // 控制线性化因子图时添加的额外噪声
+        isam_params_.evaluateNonlinearError = true; // 控制收敛的阈值
+        isam_params_.factorization = gtsam::ISAM2Params::QR; // 控制求解线性系统的方法
+
         isam_optimizer_ = gtsam::ISAM2(isam_params_);
-//        noise_prior_ = gtsam::Matrix(6,6);
-//        noise_odom_ = gtsam::Matrix(6,6);
-//        noise_boxes_ = gtsam::Matrix(4,4);
-//        noise_prior_ = 0.01 * noise_prior_.setIdentity();
-//        noise_odom_ = 0.01 * noise_prior_.setIdentity();
-//        noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
     }
 };
 } //gtsam_soslam
