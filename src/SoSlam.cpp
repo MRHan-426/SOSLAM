@@ -248,7 +248,7 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
-            try{
+//            try{
                 s.isam_optimizer_.update(
                         utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
                         utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
@@ -271,7 +271,7 @@ namespace gtsam_soslam
 //                std::cout << n->i << std::endl;
 //            }
 //            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-//            s.estimates_ = optimizer.optimize();
+////            s.estimates_ = optimizer.optimize();
 //            s.graph_.print();
 
         }
