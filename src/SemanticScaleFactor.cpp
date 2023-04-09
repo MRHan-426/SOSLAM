@@ -41,22 +41,22 @@ namespace gtsam_soslam
             Eigen::Matrix<double, 2, 1> r0;
             r0 << radii(0) / radii(2), radii(1) / radii(2);
             auto rs = semantic_table.getEntry(label_);
-            gtsam::Vector1 error;
+            gtsam::Vector2 error;
 
-            // cannot figure out a good way of putting variable into <>
-            switch (sigma_scc_) {
-                case 1:
-                    error << (r0 - rs).lpNorm<1>();
-                    break;
-                case 5:
-                    error << (r0 - rs).lpNorm<5>();
-                    break;
-                case 10:
-                    error << (r0 - rs).lpNorm<10>();
-                    break;
-                default:
-                    error << (r0 - rs).lpNorm<1>();
-                    break;}
+            error = r0 - rs;
+//            switch (sigma_scc_) {
+//                case 1:
+//                    error << (r0 - rs).lpNorm<1>();
+//                    break;
+//                case 5:
+//                    error << (r0 - rs).lpNorm<5>();
+//                    break;
+//                case 10:
+//                    error << (r0 - rs).lpNorm<10>();
+//                    break;
+//                default:
+//                    error << (r0 - rs).lpNorm<1>();
+//                    break;}
 
             if (NUMERICAL_DERIVATIVE)
             {
@@ -67,19 +67,21 @@ namespace gtsam_soslam
                                            boost::none, boost::none));
                 if (H1)
                 {
-                    Eigen::Matrix<double, 1, 6> db_dx_ =
+                    Eigen::Matrix<double, 2, 6> db_dx_ =
                             gtsam::numericalDerivative21(funPtr, pose, quadric, 1e-6);
                     *H1 = db_dx_;
                 }
                 if (H2)
                 {
-                    Eigen::Matrix<double, 1, 9> db_dq_ =
+                    Eigen::Matrix<double, 2, 9> db_dq_ =
                             gtsam::numericalDerivative22(funPtr, pose, quadric, 1e-6);
                     *H2 = db_dq_;
                 }
             }
-//            std::cout << "Semantic Error: " << error <<std::endl;
-            return error;
+
+            std::cout << "Semantic Error: " << 100 *error[0]<<"   " <<100 *error[1] <<std::endl;
+
+            return 50 * error;
 
             // check for nans
             if (error.array().isInf().any() || error.array().isNaN().any() ||
@@ -92,19 +94,19 @@ namespace gtsam_soslam
             // handle projection failures
         catch (QuadricProjectionException &e)
         {
-            gtsam::Vector1 error = gtsam::Vector1::Ones() * 1000.0;
+            gtsam::Vector2 error = gtsam::Vector2::Ones() * 1000.0;
             if (H1)
             {
-                *H1 = gtsam::Matrix::Zero(1, 6);
+                *H1 = gtsam::Matrix::Zero(2, 6);
             }
             if (H2)
             {
-                *H2 = gtsam::Matrix::Zero(1, 9);
+                *H2 = gtsam::Matrix::Zero(2, 9);
             }
             return error;
         }
         // Just to avoid warning
-        return gtsam::Vector1::Ones() * 1000.0;
+        return gtsam::Vector2::Ones() * 1000.0;
     }
 
     /* ************************************************************************* */

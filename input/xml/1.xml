@@ -12,6 +12,30 @@
 	</size>
 	<segmented>0</segmented>
 	<object>
+		<name>book</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>496</xmin>
+			<ymin>220</ymin>
+			<xmax>594</xmax>
+			<ymax>279</ymax>
+		</bndbox>
+		<objectkey>4</objectkey></object>
+	<object>
+		<name>tape</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>534</xmin>
+			<ymin>291</ymin>
+			<xmax>611</xmax>
+			<ymax>350</ymax>
+		</bndbox>
+		<objectkey>6</objectkey></object>
+	<object>
 		<name>monitor</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
@@ -59,28 +83,6 @@
 			<ymax>321</ymax>
 		</bndbox>
 	<objectkey>5</objectkey></object>
-	<object>
-		<name>tape</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>534</xmin>
-			<ymin>291</ymin>
-			<xmax>611</xmax>
-			<ymax>350</ymax>
-		</bndbox>
-	<objectkey>6</objectkey></object>
-	<object>
-		<name>book</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>496</xmin>
-			<ymin>220</ymin>
-			<xmax>594</xmax>
-			<ymax>279</ymax>
-		</bndbox>
-	<objectkey>4</objectkey></object>
+
+
 </annotation>

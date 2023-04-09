@@ -141,12 +141,17 @@ namespace gtsam_soslam
                 }
             }
 
-            double temp1 = std::abs(error[0]);
-            double temp2 = std::abs(error[1]);
-            double temp3 = std::abs(error[2]);
-            double temp4 = std::abs(error[3]);
-            error << temp1, temp2, temp3, temp4;
-//            std::cout << error << std::endl;
+//            double temp1 = std::abs(error[0]);
+//            double temp2 = std::abs(error[1]);
+//            double temp3 = std::abs(error[2]);
+//            double temp4 = std::abs(error[3]);
+//            error << temp1, temp2, temp3, temp4;
+
+
+            std::cout <<"BBFactor: " <<error[0]<<"  "<<error[1]<<"  "<<error[2]<<"  "<<error[3] << std::endl;
+
+
+
 
             return error;
 
@@ -168,7 +173,7 @@ namespace gtsam_soslam
 
             // if error cannot be calculated
             // set error vector and jacobians to zero
-            gtsam::Vector4 error = gtsam::Vector4::Ones() * 1000.0;
+            gtsam::Vector4 error = gtsam::Vector4::Ones() * 100000.0;
             if (H1)
             {
                 *H1 = gtsam::Matrix::Zero(4, 6);

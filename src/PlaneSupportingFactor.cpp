@@ -100,7 +100,7 @@ namespace gtsam_soslam
       // gtsam::Vector4 normal_x = gtsam::Vector4::fromEigen(desired_eigenvector_x);
 //      std::cout << "des x size: " << desired_eigenvector_x.size() << std::endl;
 //      std::cout << "des y size: " << desired_eigenvector_y.size() << std::endl;
-      gtsam::Vector1 error;
+      gtsam::Vector3 error;
       if (desired_eigenvector_x.size() == 4 && desired_eigenvector_y.size() == 4)
       {
         gtsam::Vector4 normal_x(desired_eigenvector_x(0), desired_eigenvector_x(1), desired_eigenvector_x(2), desired_eigenvector_x(3));
@@ -115,7 +115,7 @@ namespace gtsam_soslam
         gtsam::Vector1 error_xNormal = normal_x.transpose() * support_plane_normal;
         gtsam::Vector1 error_yNormal = normal_y.transpose() * support_plane_normal;
 
-        error = error_tagent + error_xNormal + error_yNormal;
+        error << error_tagent , error_xNormal , error_yNormal;
       }
       else
       {
@@ -134,18 +134,18 @@ namespace gtsam_soslam
                                boost::none, boost::none));
         if (H1)
         {
-          Eigen::Matrix<double, 1, 6> db_dx_ =
+          Eigen::Matrix<double, 3, 6> db_dx_ =
               gtsam::numericalDerivative21(funPtr, pose, quadric, 1e-6);
           *H1 = db_dx_;
         }
         if (H2)
         {
-          Eigen::Matrix<double, 1, 9> db_dq_ =
+          Eigen::Matrix<double, 3, 9> db_dq_ =
               gtsam::numericalDerivative22(funPtr, pose, quadric, 1e-6);
           *H2 = db_dq_;
         }
       }
-//        std::cout << "PSC Error: " << error <<std::endl;
+        std::cout << "PSC Error: " << error[0] <<std::endl;
 
       return error;
 
@@ -160,23 +160,23 @@ namespace gtsam_soslam
     // handle projection failures
     catch (QuadricProjectionException &e)
     {
-      gtsam::Vector1 error = gtsam::Vector1::Ones() * 1000.0;
+      gtsam::Vector3 error = gtsam::Vector3::Ones() * 1000.0;
       if (H1)
       {
-        *H1 = gtsam::Matrix::Zero(1, 6);
+        *H1 = gtsam::Matrix::Zero(3, 6);
       }
       if (H2)
       {
-        *H2 = gtsam::Matrix::Zero(1, 9);
+        *H2 = gtsam::Matrix::Zero(3, 9);
       }
       return error;
     }
     // Just to avoid warning
-    return gtsam::Vector1::Ones() * 1000.0;
+    return gtsam::Vector3::Ones() * 1000.0;
   }
 
   /* ************************************************************************* */
-  // the derivative of the error wrt camera pose (1x6)
+  // the derivative of the error wrt camera pose (3x6)
   gtsam::Matrix PlaneSupportingFactor::evaluateH1(
       const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const
   {
@@ -186,7 +186,7 @@ namespace gtsam_soslam
   }
 
   /* ************************************************************************* */
-  // the derivative of the error wrt quadric (1x9)
+  // the derivative of the error wrt quadric (3x9)
   gtsam::Matrix PlaneSupportingFactor::evaluateH2(
       const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const
   {

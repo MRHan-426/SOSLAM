@@ -201,10 +201,12 @@ namespace gtsam_soslam
       gtsam::Values initial_estimate;
 
       sub_graph.add(bbs);
-//      std::cout << "bbs" << std::endl;
       sub_graph.add(ssc);
 //      sub_graph.add(psc);
+
 //      sub_graph.add(syc);
+        std::cout << "###############################" << std::endl;
+        std::cout << "BALL: " << bbs.objectKey() << std::endl;
 
       // set a prior quadric
       ConstrainedDualQuadric quadric;

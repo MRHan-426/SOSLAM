@@ -162,11 +162,11 @@ namespace gtsam_soslam
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
                 gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(3.0, 3.0, 3.0, 3.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(1.0, 1.0, 1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0,1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3(1.0,1.0,1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
                 gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
 
@@ -248,8 +248,8 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
-//            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-//            s.estimates_ = optimizer.optimize();
+            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+            s.estimates_ = optimizer.optimize();
             //            s.isam_optimizer_.update(
             //                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
             //                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
@@ -294,8 +294,8 @@ namespace gtsam_soslam
         SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key, huber_syc);
         state_.graph_.add(bbs);
         state_.graph_.add(ssc);
-        state_.graph_.add(psc);
-        state_.graph_.add(syc);
+//        state_.graph_.add(psc);
+//        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 

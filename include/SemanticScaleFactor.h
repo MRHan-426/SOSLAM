@@ -90,8 +90,8 @@ namespace gtsam_soslam
          * Evaluate the error between a quadric and 3D pose
          * @param pose the 6DOF camera position
          * @param quadric the constrained dualquadric
-         * @param H1 the derivative of the error wrt camera pose (1x6)
-         * @param H2 the derivative of the error wrt quadric (1x9)
+         * @param H1 the derivative of the error wrt camera pose (2x6)
+         * @param H2 the derivative of the error wrt quadric (2x9)
          */
         gtsam::Vector evaluateError(
                 const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric,
