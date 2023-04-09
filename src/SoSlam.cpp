@@ -293,7 +293,7 @@ namespace gtsam_soslam
         PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_psc);
         SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key, huber_syc);
         state_.graph_.add(bbs);
-        state_.graph_.add(ssc);
+//        state_.graph_.add(ssc);
 //        state_.graph_.add(psc);
 //        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
