@@ -201,16 +201,18 @@ namespace gtsam_soslam
       gtsam::Values initial_estimate;
 
       sub_graph.add(bbs);
-//      sub_graph.add(ssc);
+      sub_graph.add(ssc);
 //      sub_graph.add(psc);
 
 //      sub_graph.add(syc);
-        std::cout << "###############################" << std::endl;
-        std::cout << "BALL: " << bbs.objectKey() << std::endl;
-
+    std::cout << "###############################" << std::endl;
+    std::cout << "BALL: " << bbs.objectKey() << std::endl;
+    gtsam::Point3 localPoint(0, 0, 5);
+    gtsam::Point3 globalPoint = camera_pose.transformFrom(localPoint);
       // set a prior quadric
-      ConstrainedDualQuadric quadric;
+      ConstrainedDualQuadric quadric(gtsam::Pose3(gtsam::Rot3(), globalPoint),gtsam::Vector3(1, 1, 1));
 
+//        ConstrainedDualQuadric quadric;
       initial_estimate.insert(bbs.objectKey(), quadric);
       initial_estimate.insert(bbs.poseKey(), camera_pose);
 
@@ -219,7 +221,10 @@ namespace gtsam_soslam
       auto result = optimizer.optimize();
 
       ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
-      //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
+        gtsam::Pose3 initial_pose = result.at<gtsam::Pose3>(bbs.poseKey());
+        cout<<"camera pose"<<endl<<camera_pose<<endl;
+        cout<<"inited pose"<<endl<<initial_pose<<endl;
+        //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
       return initial_quadric;
     }
 

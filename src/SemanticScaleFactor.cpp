@@ -39,8 +39,13 @@ namespace gtsam_soslam
             SemanticTable semantic_table;
 
             Eigen::Matrix<double, 2, 1> r0;
+//        double lenth = radii[0];
+//        double width = radii[1];
+//        double height = radii[2];
             r0 << radii(0) / radii(2), radii(1) / radii(2);
             auto rs = semantic_table.getEntry(label_);
+            if(label_ =="tape"||label_ =="mouse")
+            cout<<"SSFactor: "<<label_<<", now ratio: "<<r0<<", antici ratio: "<<rs<<endl;
             gtsam::Vector2 error;
 
             error = r0 - rs;
@@ -79,7 +84,7 @@ namespace gtsam_soslam
                 }
             }
 
-            std::cout << "Semantic Error: " << 100 *error[0]<<"   " <<100 *error[1] <<std::endl;
+//            std::cout << "Semantic Error: " << 100 *error[0]<<"   " <<100 *error[1] <<std::endl;
 
             return 50 * error;
 
@@ -94,7 +99,7 @@ namespace gtsam_soslam
             // handle projection failures
         catch (QuadricProjectionException &e)
         {
-            gtsam::Vector2 error = gtsam::Vector2::Ones() * 1000.0;
+            gtsam::Vector2 error = gtsam::Vector2::Ones() * 100000.0;
             if (H1)
             {
                 *H1 = gtsam::Matrix::Zero(2, 6);

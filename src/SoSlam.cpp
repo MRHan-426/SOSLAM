@@ -127,7 +127,7 @@ namespace gtsam_soslam
             //        cout<<"step once"<<endl;
             step();
             //        cout<<"step end"<<endl;
-            //         usleep(3000000);
+                     usleep(5000000);
         }
 
         if (state_.optimizer_batch_)
@@ -248,8 +248,8 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
-            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-            s.estimates_ = optimizer.optimize();
+//            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+//            s.estimates_ = optimizer.optimize();
             //            s.isam_optimizer_.update(
             //                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
             //                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
@@ -293,10 +293,11 @@ namespace gtsam_soslam
         PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_psc);
         SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key, huber_syc);
         state_.graph_.add(bbs);
-//        state_.graph_.add(ssc);
+        state_.graph_.add(ssc);
 //        state_.graph_.add(psc);
 //        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 
+} // namespace gtsam_soslam
 } // namespace gtsam_soslam
