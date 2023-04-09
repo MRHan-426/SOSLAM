@@ -21,20 +21,20 @@
     - [x] 3.4 Add Quadric Initialization part into "c++ core".
 - [ ] 4. Add visualization part.
     - [x] dependency problems.
-    - [ ] adding quadrics drawing(MapDrawer).
+    - [x] adding quadrics drawing(MapDrawer).
         - [x] Map object that can return all objects to draw.
         - [x] camera pose drawing.
         - [x] graph drawing.
         - [x] verify drawing correctness.
-    - [ ] adding frame drawer(FrameDrawer).
+    - [x] adding frame drawer(FrameDrawer).
         - [x] state == Tracking::NOT_INITIALIZED.
         - [x] quadricimage is in Tracking, move to here. 
         - [x] It also use a Update to update images, find a way to place Update.
         - [x] verify drawing correctness.
-    - [ ] multithread part
+    - [x] multithread part
 - [ ] 5. Writing evaluation function.
     - [ ] 5.1 Rot.
-    - [ ] 5.2 IOU.
+    - [x] 5.2 IOU.
 - [ ] 6. Doing experiments, Record Video.
 - [ ] 7. Write final report.
  
