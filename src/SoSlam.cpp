@@ -158,7 +158,7 @@ namespace gtsam_soslam
         // Define noise model
         auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
         gtsam::Vector6 temp;
-        temp << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+        temp << 1.01, 1.01, 1.01, 1.01, 1.01, 1.01;
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
                 gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
@@ -166,7 +166,7 @@ namespace gtsam_soslam
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
                 gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0,1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3(1.0,1.0,1.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0,1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
                 gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
 
@@ -250,10 +250,11 @@ namespace gtsam_soslam
             }
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
-            //            s.isam_optimizer_.update(
-            //                            utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-            //                            utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-            //            s.estimates_ = s.isam_optimizer_.calculateEstimate();
+//            s.graph_.print();
+//                        s.isam_optimizer_.update(
+//                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+//                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+//                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
         }
         s.prev_step = *n;
     }
@@ -294,7 +295,7 @@ namespace gtsam_soslam
         SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key, huber_syc);
         state_.graph_.add(bbs);
         state_.graph_.add(ssc);
-//        state_.graph_.add(psc);
+        state_.graph_.add(psc);
 //        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }

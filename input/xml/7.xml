@@ -1,7 +1,7 @@
 <annotation>
 	<folder>folder_1</folder>
-	<filename>1311868164.363181.png</filename>
-	<path>/home/flanker/Documents/TUM/ye/folder_1/1311868164.363181.png</path>
+	<filename>1311868164.563004.png</filename>
+	<path>/home/flanker/Documents/TUM/ye/folder_1/1311868164.563004.png</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -17,10 +17,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>233</xmin>
-			<ymin>94</ymin>
-			<xmax>390</xmax>
-			<ymax>259</ymax>
+			<xmin>228</xmin>
+			<ymin>79</ymin>
+			<xmax>384</xmax>
+			<ymax>248</ymax>
 		</bndbox>
 	<objectkey>1</objectkey></object>
 	<object>
@@ -29,10 +29,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>200</xmin>
-			<ymin>253</ymin>
-			<xmax>387</xmax>
-			<ymax>312</ymax>
+			<xmin>191</xmin>
+			<ymin>239</ymin>
+			<xmax>384</xmax>
+			<ymax>304</ymax>
 		</bndbox>
 	<objectkey>2</objectkey></object>
 	<object>
@@ -41,10 +41,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>376</xmin>
-			<ymin>319</ymin>
-			<xmax>410</xmax>
-			<ymax>361</ymax>
+			<xmin>364</xmin>
+			<ymin>309</ymin>
+			<xmax>401</xmax>
+			<ymax>351</ymax>
 		</bndbox>
 	<objectkey>3</objectkey></object>
 	<object>
@@ -53,34 +53,22 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>41</xmin>
-			<ymin>254</ymin>
-			<xmax>88</xmax>
-			<ymax>321</ymax>
+			<xmin>38</xmin>
+			<ymin>238</ymin>
+			<xmax>85</xmax>
+			<ymax>306</ymax>
 		</bndbox>
 	<objectkey>5</objectkey></object>
-	<object>
-		<name>tape</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>534</xmin>
-			<ymin>291</ymin>
-			<xmax>611</xmax>
-			<ymax>350</ymax>
-		</bndbox>
-	<objectkey>6</objectkey></object>
 	<object>
 		<name>book</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>496</xmin>
-			<ymin>220</ymin>
-			<xmax>594</xmax>
-			<ymax>279</ymax>
+			<xmin>491</xmin>
+			<ymin>211</ymin>
+			<xmax>557</xmax>
+			<ymax>271</ymax>
 		</bndbox>
 	<objectkey>4</objectkey></object>
 </annotation>

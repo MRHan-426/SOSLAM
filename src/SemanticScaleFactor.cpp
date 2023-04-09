@@ -7,6 +7,7 @@
 
 #include <gtsam/base/numericalDerivative.h>
 #include <boost/bind/bind.hpp>
+#include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
 
@@ -42,8 +43,8 @@ namespace gtsam_soslam
             r0 << radii(0) / radii(2), radii(1) / radii(2);
             auto rs = semantic_table.getEntry(label_);
             gtsam::Vector2 error;
-
-            error = r0 - rs;
+            error << pow((r0 - rs)[0],2) , pow((r0 - rs)[1],2);
+//            error = r0 - rs;
 //            switch (sigma_scc_) {
 //                case 1:
 //                    error << (r0 - rs).lpNorm<1>();
@@ -79,9 +80,9 @@ namespace gtsam_soslam
                 }
             }
 
-            std::cout << "Semantic Error: " << 100 *error[0]<<"   " <<100 *error[1] <<std::endl;
+//            std::cout << "Semantic Error: " << error[0]<<"   " <<error[1] <<std::endl;
 
-            return 50 * error;
+            return error;
 
             // check for nans
             if (error.array().isInf().any() || error.array().isNaN().any() ||

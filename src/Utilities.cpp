@@ -202,7 +202,7 @@ namespace gtsam_soslam
 
       sub_graph.add(bbs);
       sub_graph.add(ssc);
-//      sub_graph.add(psc);
+      sub_graph.add(psc);
 
 //      sub_graph.add(syc);
         std::cout << "###############################" << std::endl;
