@@ -26,12 +26,12 @@ namespace gtsam_soslam {
 gtsam::Matrix34 QuadricCamera::transformToImage(
     const gtsam::Pose3& pose,
     const boost::shared_ptr<gtsam::Cal3_S2>& calibration) {
-        gtsam::Matrix3 K = calibration->K();
-        gtsam::Matrix4 Xi = pose.matrix();
-        static gtsam::Matrix34 I34 = gtsam::Matrix::Identity(3, 4);
-        gtsam::Matrix34 P = K * I34 * Xi;
+  gtsam::Matrix3 image_T_camera = calibration->K();
+  gtsam::Matrix4 camera_T_world = pose.inverse().matrix();
+  gtsam::Matrix34 image_T_world =
+      image_T_camera * (camera_T_world).block(0, 0, 3, 4);
   // Matrix34 image_T_world = image_T_camera * internal::I34 * camera_T_world;
-  return P;
+  return image_T_world;
 }
 
 /* ************************************************************************* */
@@ -43,7 +43,7 @@ DualConic QuadricCamera::project(
     gtsam::OptionalJacobian<9, 9> dC_dq, gtsam::OptionalJacobian<9, 6> dC_dx) {
   // first retract quadric and pose to compute dX:/dx and dQ:/dq
   gtsam::Matrix3 K = calibration->K();
-  gtsam::Matrix4 Xi = pose.matrix();
+  gtsam::Matrix4 Xi = pose.inverse().matrix();
   static gtsam::Matrix34 I34 = gtsam::Matrix::Identity(3, 4);
   gtsam::Matrix34 P = K * I34 * Xi;
   gtsam::Matrix4 Q = quadric.matrix();

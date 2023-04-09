@@ -1,13 +1,3 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
 
 /**
  * @file BoundingBoxFactor.h
@@ -23,149 +13,150 @@
 #include <gtsam/nonlinear/Expression.h>
 #include <gtsam/nonlinear/NonlinearFactor.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
-#include "AlignedBox2.h"
-#include "ConstrainedDualQuadric.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
+#include <AlignedBox2.h>
+#include <ConstrainedDualQuadric.h>
 
-namespace gtsam_soslam {
+namespace gtsam_soslam
+{
 
-/**
- * @class BoundingBoxFactor
- * AlignedBox3 factor between Pose3 and ConstrainedDualQuadric
- * Projects the quadric at the current pose estimates,
- * Calculates the bounds of the dual conic,
- * and compares this to the measured bounding box.
- */
-class BoundingBoxFactor
-    : public gtsam::NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> {
- public:
-  enum MeasurementModel {
-    STANDARD,
-    TRUNCATED
-  };  ///< enum to declare which error function to use
-
- protected:
-    AlignedBox2 measured_;                           ///< measured bounding box
-    boost::shared_ptr<gtsam::Cal3_S2> calibration_;  ///< camera calibration
-    typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
-      Base;  ///< base class has keys and noisemodel as private members
-    MeasurementModel measurementModel_;
-    int sigma_bbs_;
-
-
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  /// @name Constructors and named constructors
-  /// @{
-
-  /** Default constructor */
-  BoundingBoxFactor()
-      : measured_(0., 0., 0., 0.), measurementModel_(STANDARD), sigma_bbs_(10){};
-
-  /** Constructor from measured box, calbration, dimensions and posekey,
-   * quadrickey, noisemodel */
-  BoundingBoxFactor(const AlignedBox2& measured,
-                    const boost::shared_ptr<gtsam::Cal3_S2>& calibration,
-                    const gtsam::Key& poseKey, const gtsam::Key& quadricKey,
-                    const gtsam::SharedNoiseModel& model,
-                    const MeasurementModel& errorType = STANDARD,
-                    const int &sigma_bbs = 10
-                    )
-      : Base(model, poseKey, quadricKey),
-        measured_(measured),
-        calibration_(calibration),
-        measurementModel_(errorType),
-        sigma_bbs_(sigma_bbs)
-        {};
-
-  /** Constructor from measured box, calbration, dimensions and posekey,
-   * quadrickey, noisemodel */
-  BoundingBoxFactor(const AlignedBox2& measured,
-                    const boost::shared_ptr<gtsam::Cal3_S2>& calibration,
-                    const gtsam::Key& poseKey, const gtsam::Key& quadricKey,
-                    const gtsam::SharedNoiseModel& model,
-                    const std::string& errorString,
-                    const int &sigma_bbs = 10
-                    )
-      : Base(model, poseKey, quadricKey),
-        measured_(measured),
-        calibration_(calibration),
-        sigma_bbs_(sigma_bbs)
+    /**
+     * @class BoundingBoxFactor
+     * AlignedBox3 factor between Pose3 and ConstrainedDualQuadric
+     * Projects the quadric at the current pose estimates,
+     * Calculates the bounds of the dual conic,
+     * and compares this to the measured bounding box.
+     */
+    class BoundingBoxFactor
+            : public gtsam::NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
+    {
+    public:
+        enum MeasurementModel
         {
-    if (errorString == "STANDARD") {
-      measurementModel_ = STANDARD;
-    } else if (errorString == "TRUNCATED") {
-      measurementModel_ = TRUNCATED;
-    } else {
-      throw std::logic_error(
-          "The error type \"" + errorString +
-          "\" is not a valid option for initializing a BoundingBoxFactor");
-    }
-  }
+            STANDARD,
+            TRUNCATED
+        }; ///< enum to declare which error function to use
 
-  /// @}
-  /// @name Class accessors
-  /// @{
+    protected:
+        AlignedBox2 measured_;                          ///< measured bounding box
+        boost::shared_ptr<gtsam::Cal3_S2> calibration_; ///< camera calibration
 
-  /** Returns the measured bounding box */
-  AlignedBox2 measurement() const { return AlignedBox2(measured_.vector()); }
+        // 这段代码定义了一个类型为NoiseModelFactor2的别名。
+        // NoiseModelFactor2是GTSAM中的一个因子类型，用于定义一个非线性约束方程，
+        // 它将一个Pose3变量和一个ConstrainedDualQuadric变量联系起来，同时给定一个噪声模型。
+        // 相机或激光雷达的观测通常可以通过一个Pose3变量来描述，而地图中的物体可以用ConstrainedDualQuadric来表示。
+        typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
+                Base; ///< base class has keys and noisemodel as private members
+        // Base是一个基类类型，用于实现具体的约束方程。
+        // 在这个别名定义中，将Base的模板参数设置为gtsam::Pose3和ConstrainedDualQuadric，
+        // 这样就可以通过继承和实现Base的纯虚函数来定义具体的约束方程。
 
-  /** Returns the pose key */
-  gtsam::Key poseKey() const { return key1(); }
+        MeasurementModel measurementModel_;
 
-  /** Returns the object/landmark key */
-  gtsam::Key objectKey() const { return key2(); }
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  /// @}
-  /// @name Class methods
-  /// @{
+        /// @name Constructors and named constructors
+        /// @{
 
-  /**
-   * Evaluate the error between a quadric and 3D pose
-   * @param pose the 6DOF camera position
-   * @param quadric the constrained dual quadric
-   * @param H1 the derivative of the error wrt camera pose (1x6)
-   * @param H2 the derivative of the error wrt quadric (1x9)
-   */
-  gtsam::Vector evaluateError(
-      const gtsam::Pose3& pose, const ConstrainedDualQuadric& quadric,
-      boost::optional<gtsam::Matrix&> H1 = boost::none,
-      boost::optional<gtsam::Matrix&> H2 = boost::none) const;
+        /** Default constructor */
+        BoundingBoxFactor()
+                : measured_(0., 0., 0., 0.), measurementModel_(STANDARD){};
 
-  /** Evaluates the derivative of the error wrt pose */
-  gtsam::Matrix evaluateH1(const gtsam::Pose3& pose,
-                           const ConstrainedDualQuadric& quadric) const;
+        /** Constructor from measured box, calbration, dimensions and posekey,
+         * quadrickey, noisemodel */
+        // 测量值、相机校准、位姿关键字、对象/地标关键字、噪声模型和测量模型类型。
+        BoundingBoxFactor(const AlignedBox2 &measured,
+                          const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
+                          const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
+                          const gtsam::SharedNoiseModel &model,
+                          const MeasurementModel &errorType = STANDARD)
+                : Base(model, poseKey, quadricKey), // 这里的冒号 : 表示这是一个构造函数的初始化列表，用于初始化类成员变量
+                  measured_(measured),
+                  calibration_(calibration),
+                  measurementModel_(errorType){};
 
-  /** Evaluates the derivative of the error wrt quadric */
-  gtsam::Matrix evaluateH2(const gtsam::Pose3& pose,
-                           const ConstrainedDualQuadric& quadric) const;
+        /** Constructor from measured box, calbration, dimensions and posekey,
+         * quadrickey, noisemodel */
+        BoundingBoxFactor(const AlignedBox2 &measured,
+                          const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
+                          const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
+                          const gtsam::SharedNoiseModel &model,
+                          const std::string &errorString)
+                : Base(model, poseKey, quadricKey),
+                  measured_(measured),
+                  calibration_(calibration)
+        {
+            if (errorString == "STANDARD")
+            {
+                measurementModel_ = STANDARD;
+            }
+            else if (errorString == "TRUNCATED")
+            {
+                measurementModel_ = TRUNCATED;
+            }
+            else
+            {
+                throw std::logic_error(
+                        "The error type \"" + errorString +
+                        "\" is not a valid option for initializing a BoundingBoxFactor");
+            }
+        }
 
-  /** Evaluates the derivative of the error wrt pose */
-  gtsam::Matrix evaluateH1(const gtsam::Values& x) const;
+        /// @}
+        /// @name Class accessors
+        /// @{
 
-  /** Evaluates the derivative of the error wrt quadric */
-  gtsam::Matrix evaluateH2(const gtsam::Values& x) const;
+        /** Returns the measured bounding box */
+        AlignedBox2 measurement() const { return AlignedBox2(measured_.vector()); }
 
-  /// @}
-  /// @name Testable group traits
-  /// @{
+        // poseKey和quadricKey分别指代位姿（Pose）和对象（Object）的Key
+        // 在这个因子模型中，这两个变量的Key被用来描述物体在相机坐标系下的位姿和轮廓，
+        // 从而将这个因子模型与其他因子模型（如视觉因子模型）结合起来，实现多传感器融合的目的。
+        gtsam::Key poseKey() const { return key1(); } // Returns the pose key
 
-  /** Prints the boundingbox factor with optional string */
-  void print(const std::string& s = "",
-             const gtsam::KeyFormatter& keyFormatter =
-                 gtsam::DefaultKeyFormatter) const override;
+        gtsam::Key objectKey() const { return key2(); } // Returns the object/landmark key
 
-  /** Returns true if equal keys, measurement, noisemodel and calibration */
-  bool equals(const BoundingBoxFactor& other, double tol = 1e-9) const;
-};
+        /// @}
+        /// @name Class methods
+        /// @{
 
-}  // namespace gtsam_soslam
+        /**
+         * Evaluate the error between a quadric and 3D pose
+         * @param pose the 6DOF camera position
+         * @param quadric the constrained dual quadric
+         * @param H1 the derivative of the error wrt camera pose (4x6)
+         * @param H2 the derivative of the error wrt quadric (4x9)
+         */
+        gtsam::Vector evaluateError(
+                const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric,
+                boost::optional<gtsam::Matrix &> H1 = boost::none,
+                boost::optional<gtsam::Matrix &> H2 = boost::none) const;
 
-/** \cond PRIVATE */
-// Add to testable group
-template <>
-struct gtsam::traits<gtsam_soslam::BoundingBoxFactor>
-    : public gtsam::Testable<gtsam_soslam::BoundingBoxFactor> {};
-/** \endcond */
+        /** Evaluates the derivative of the error wrt pose */
+        gtsam::Matrix evaluateH1(const gtsam::Pose3 &pose,
+                                 const ConstrainedDualQuadric &quadric) const;
+
+        /** Evaluates the derivative of the error wrt quadric */
+        gtsam::Matrix evaluateH2(const gtsam::Pose3 &pose,
+                                 const ConstrainedDualQuadric &quadric) const;
+
+        /** Evaluates the derivative of the error wrt pose */
+        gtsam::Matrix evaluateH1(const gtsam::Values &x) const;
+
+        /** Evaluates the derivative of the error wrt quadric */
+        gtsam::Matrix evaluateH2(const gtsam::Values &x) const;
+
+        /// @}
+        /// @name Testable group traits
+        /// @{
+
+        /** Prints the boundingbox factor with optional string */
+        void print(const std::string &s = "",
+                   const gtsam::KeyFormatter &keyFormatter =
+                   gtsam::DefaultKeyFormatter) const override;
+
+        /** Returns true if equal keys, measurement, noisemodel and calibration */
+        bool equals(const BoundingBoxFactor &other, double tol = 1e-9) const;
+    };
+
+} // namespace gtsam_quadrics

@@ -27,6 +27,8 @@
 #include "BoundingBoxFactor.h"
 #include "SemanticScaleFactor.h"
 #include "PlaneSupportingFactor.h"
+#include "SymmetryFactor.h"
+#include "Evaluation.h"
 
 #include <gtsam/base/Matrix.h>
 #include <gtsam/geometry/Pose3.h>
@@ -93,14 +95,17 @@ namespace gtsam_soslam
             const std::vector<AlignedBox2> &boxes,
             SoSlamState &state);
 
-        ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
+        ConstrainedDualQuadric initialize_with_ssc_psc_bbs_syc(
             const BoundingBoxFactor &bbs,
             const SemanticScaleFactor &ssc,
             const PlaneSupportingFactor &psc,
-            const gtsam::Point3& center,
+            const SymmetryFactor &syc,
             const gtsam::Pose3 &camera_pose
 
         );
+
+        // visualize
+        void visualize(SoSlamState &state);
 
         std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values);
         // newfactors

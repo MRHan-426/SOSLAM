@@ -187,12 +187,13 @@ namespace gtsam_soslam
           gtsam::Rot3(), gtsam::Point3(quadric_centroid), gtsam::Vector3(1, 1, 0.1));
     }
 
-    ConstrainedDualQuadric initialize_with_ssc_psc_bbs(
+    ConstrainedDualQuadric initialize_with_ssc_psc_bbs_syc(
         const BoundingBoxFactor &bbs,
         const SemanticScaleFactor &ssc,
         const PlaneSupportingFactor &psc,
-        const gtsam::Point3& center,
+        const SymmetryFactor &syc,
         const gtsam::Pose3 &camera_pose
+
     )
     {
 
@@ -200,23 +201,25 @@ namespace gtsam_soslam
       gtsam::Values initial_estimate;
 
       sub_graph.add(bbs);
+//      std::cout << "bbs" << std::endl;
       sub_graph.add(ssc);
-      sub_graph.add(psc);
+//      sub_graph.add(psc);
+//      sub_graph.add(syc);
 
       // set a prior quadric
-    ConstrainedDualQuadric quadric(
-            gtsam::Rot3(), center, gtsam::Vector3(1, 1, 0.1));
-    initial_estimate.insert(bbs.objectKey(), quadric);
-    initial_estimate.insert(bbs.poseKey(), camera_pose);
+      ConstrainedDualQuadric quadric;
 
-    gtsam::LevenbergMarquardtParams params;
-    gtsam::LevenbergMarquardtOptimizer optimizer(sub_graph, initial_estimate, params);
-    auto result = optimizer.optimize();
+      initial_estimate.insert(bbs.objectKey(), quadric);
+      initial_estimate.insert(bbs.poseKey(), camera_pose);
 
-    ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
-    //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
-    return initial_quadric;
-}
+      gtsam::LevenbergMarquardtParams params;
+      gtsam::LevenbergMarquardtOptimizer optimizer(sub_graph, initial_estimate, params);
+      auto result = optimizer.optimize();
+
+      ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
+      //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
+      return initial_quadric;
+    }
 
     std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values)
     {
@@ -314,27 +317,30 @@ namespace gtsam_soslam
 
     double iou(const AlignedBox2& a, const AlignedBox2& b) {
         gtsam::Vector4 intersection_bounds;
-        intersection_bounds[0] = std::max(a.xmin(), b.xmin());
-        intersection_bounds[1] = std::max(a.ymin(), b.ymin());
-        intersection_bounds[2] = std::min(a.xmax(), b.xmax());
-        intersection_bounds[3] = std::min(a.ymax(), b.ymax());
+        intersection_bounds[0] = std::min(a.xmin(), b.xmin());
+        intersection_bounds[1] = std::min(a.ymin(), b.ymin());
+        intersection_bounds[2] = std::max(a.xmax(), b.xmax());
+        intersection_bounds[3] = std::max(a.ymax(), b.ymax());
 
-        double int_area = 0.0;
-
-        if (intersection_bounds[2] - intersection_bounds[0] < 0){
-            int_area = 0;
-        }
-        else if (intersection_bounds[3] - intersection_bounds[1] < 0){
-            int_area = 0;
-        }
-        else{
-            int_area = area(intersection_bounds);
-        }
-
+        double int_area = area(intersection_bounds);
         double union_area = area(a.vector()) + area(b.vector()) - int_area;
-
         return int_area / union_area;
     }
+
+
+
+    void visualize(SoSlamState &state)
+    {
+        gtsam::Values values = state.estimates_;
+        auto labels = state.labels_;
+//        std::vector<double> ious = evaluate::iou_evaluation(state);
+//        int i = 1;
+//        for (auto iou : ious){
+//            std::cout << "quadric " << i << "IOU = " << iou << std::endl;
+//            i++;
+//        }
+    }
+
 
   } // namespace utils
 } // namespace gtsam_soslam
