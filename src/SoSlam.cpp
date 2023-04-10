@@ -122,11 +122,7 @@ namespace gtsam_soslam
     {
         while (!data_source_.done())
         {
-            // should run five times
-            //        cout<<"step once"<<endl;
             step();
-            //        cout<<"step end"<<endl;
-            //         usleep(3000000);
         }
 
         if (state_.optimizer_batch_)
@@ -134,20 +130,15 @@ namespace gtsam_soslam
             guess_initial_values();
             auto &s = state_;
 
-            // Using ISAM2 for optimization
-            /* gtsam::ISAM2 isam(s.optimizer_params_);
-             gtsam::ISAM2Result result = isam.update(s.graph_, s.estimates_);
-             s.estimates_ = isam.calculateEstimate();*/
-
             // s.estimates_.print(); // print estimate values
-            //            s.graph_.print(); // print all factors in current graph
+            // s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
         }
         else
         {
-            //            state_.graph_.print(); // print all factors in current graph
+            // state_.graph_.print(); // print all factors in current graph
             utils::visualize(state_);
         }
     }
@@ -196,7 +187,6 @@ namespace gtsam_soslam
         std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
 
         // Extract labels
-        // TODO handle cases where different labels used for a single quadric???
         for (const auto &d : s.associated_)
         {
             if (d.quadric_key != 66666)
@@ -226,13 +216,13 @@ namespace gtsam_soslam
                 bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
             }
         }
-            // step optimization
+        // step optimization
         else
         {
             guess_initial_values();
             for (const auto &d : n->new_associated)
             {
-                // add bbs, ssc factors into graph
+                // add factors into graph
                 bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
 
                 // quadric initialization
@@ -259,8 +249,8 @@ namespace gtsam_soslam
 
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
-            limitFactorGraphSize(s.graph_, 100);
-            updateInitialEstimates(s.graph_, s.estimates_);
+//            limitFactorGraphSize(s.graph_, 100);
+//            updateInitialEstimates(s.graph_, s.estimates_);
 
         }
         s.prev_step = *n;
@@ -324,7 +314,6 @@ namespace gtsam_soslam
                 keysInGraph.insert(key);
             }
         }
-
         for (const auto& key_value_pair : initialEstimates) {
             if (keysInGraph.find(key_value_pair.key) == keysInGraph.end()) {
                 initialEstimates.erase(key_value_pair.key);

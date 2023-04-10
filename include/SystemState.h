@@ -114,13 +114,23 @@ public:
           optimizer_batch_(optimizer_batch)
     {
 
-        isam_params_.relinearizeThreshold = 0.05; // 控制何时重新线性化因子图
-        isam_params_.relinearizeSkip = 10; // 控制多少次预测步骤后重新线性化因子图
-        isam_params_.enableRelinearization = true; // 控制线性化因子图时添加的额外噪声
-        isam_params_.evaluateNonlinearError = true; // 控制收敛的阈值
-        isam_params_.factorization = gtsam::ISAM2Params::QR; // 控制求解线性系统的方法
-
+        isam_params_.relinearizeThreshold = 0.05;
+        isam_params_.relinearizeSkip = 10;
+        isam_params_.enableRelinearization = true;
+        isam_params_.evaluateNonlinearError = true;
+        isam_params_.factorization = gtsam::ISAM2Params::QR;
         isam_optimizer_ = gtsam::ISAM2(isam_params_);
+
+        optimizer_params_.setAbsoluteErrorTol(1e-8);
+        optimizer_params_.setRelativeErrorTol(1e-8);
+        optimizer_params_.lambdaInitial = 1e-5;
+        optimizer_params_.lambdaFactor = 10.0;
+
+//        optimizer_params_.verbosity = gtsam::NonlinearOptimizerParams::ERROR;
+//        optimizer_params_.verbosityLM = gtsam::LevenbergMarquardtParams::LAMBDA;
+//        optimizer_params_.linearSolverType = gtsam::NonlinearOptimizerParams::Iterative;
+//        auto subgraph_params = boost::shared_ptr<gtsam::IterativeOptimizationParameters>();
+//        optimizer_params_.setIterativeParams(subgraph_params);
     }
 };
 } //gtsam_soslam
