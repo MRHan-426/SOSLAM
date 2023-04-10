@@ -40,15 +40,8 @@ namespace gtsam_soslam
         AlignedBox2 measured_;                          ///< measured bounding box
         boost::shared_ptr<gtsam::Cal3_S2> calibration_; ///< camera calibration
 
-        // 这段代码定义了一个类型为NoiseModelFactor2的别名。
-        // NoiseModelFactor2是GTSAM中的一个因子类型，用于定义一个非线性约束方程，
-        // 它将一个Pose3变量和一个ConstrainedDualQuadric变量联系起来，同时给定一个噪声模型。
-        // 相机或激光雷达的观测通常可以通过一个Pose3变量来描述，而地图中的物体可以用ConstrainedDualQuadric来表示。
         typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
                 Base; ///< base class has keys and noisemodel as private members
-        // Base是一个基类类型，用于实现具体的约束方程。
-        // 在这个别名定义中，将Base的模板参数设置为gtsam::Pose3和ConstrainedDualQuadric，
-        // 这样就可以通过继承和实现Base的纯虚函数来定义具体的约束方程。
 
         MeasurementModel measurementModel_;
 
@@ -62,15 +55,12 @@ namespace gtsam_soslam
         BoundingBoxFactor()
                 : measured_(0., 0., 0., 0.), measurementModel_(STANDARD){};
 
-        /** Constructor from measured box, calbration, dimensions and posekey,
-         * quadrickey, noisemodel */
-        // 测量值、相机校准、位姿关键字、对象/地标关键字、噪声模型和测量模型类型。
         BoundingBoxFactor(const AlignedBox2 &measured,
                           const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
                           const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                           const gtsam::SharedNoiseModel &model,
                           const MeasurementModel &errorType = STANDARD)
-                : Base(model, poseKey, quadricKey), // 这里的冒号 : 表示这是一个构造函数的初始化列表，用于初始化类成员变量
+                : Base(model, poseKey, quadricKey),
                   measured_(measured),
                   calibration_(calibration),
                   measurementModel_(errorType){};
@@ -109,16 +99,10 @@ namespace gtsam_soslam
         /** Returns the measured bounding box */
         AlignedBox2 measurement() const { return AlignedBox2(measured_.vector()); }
 
-        // poseKey和quadricKey分别指代位姿（Pose）和对象（Object）的Key
-        // 在这个因子模型中，这两个变量的Key被用来描述物体在相机坐标系下的位姿和轮廓，
-        // 从而将这个因子模型与其他因子模型（如视觉因子模型）结合起来，实现多传感器融合的目的。
         gtsam::Key poseKey() const { return key1(); } // Returns the pose key
 
         gtsam::Key objectKey() const { return key2(); } // Returns the object/landmark key
 
-        /// @}
-        /// @name Class methods
-        /// @{
 
         /**
          * Evaluate the error between a quadric and 3D pose
