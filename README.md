@@ -33,7 +33,9 @@
         - [x] verify drawing correctness.
     - [x] multithread part
     - [x] world axis
+ 
 ===========================================================================
+
 4.10 ~ 4.13 TODO list
 - [ ] 5. Finish debugging.
     - [ ] 5.1 Debug for the main optimization loop.
@@ -42,7 +44,9 @@
     - [ ] 6.1 Rot.
     - [ ] 6.2 IOU.
 - [ ] 7. Add visual odometry to take place of odom ground truth. [Orb Slam]
+
 ===========================================================================
+
 4.14 ~ 4.16 TODO list
 - [ ] 8. Doing experiments, Record Video. 
 - [ ] 9. Write final report.
