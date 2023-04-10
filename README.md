@@ -33,11 +33,19 @@
         - [x] verify drawing correctness.
     - [x] multithread part
     - [x] world axis
-- [ ] 5. Writing evaluation function.
-    - [ ] 5.1 Rot.
-    - [x] 5.2 IOU.
-- [ ] 6. Doing experiments, Record Video.
-- [ ] 7. Write final report.
+===========================================================================
+4.10 ~ 4.13 TODO list
+- [ ] 5. Finish debugging.
+    - [ ] 5.1 Debug for the main optimization loop.
+    - [ ] 5.2 Debug for symmetry factor.
+- [ ] 6. Evaluation our algrithm. [3D point cloud to get ground truth]
+    - [ ] 6.1 Rot.
+    - [ ] 6.2 IOU.
+- [ ] 7. Add visual odometry to take place of odom ground truth. [Orb Slam]
+===========================================================================
+4.14 ~ 4.16 TODO list
+- [ ] 8. Doing experiments, Record Video. 
+- [ ] 9. Write final report.
  
 
 
