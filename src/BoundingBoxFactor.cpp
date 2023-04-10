@@ -148,7 +148,7 @@ namespace gtsam_soslam
 //            error << temp1, temp2, temp3, temp4;
 
 
-//            std::cout <<"BBFactor: " <<error[0]<<"  "<<error[1]<<"  "<<error[2]<<"  "<<error[3] << std::endl;
+            std::cout <<"BBFactor: " <<error[0]<<"  "<<error[1]<<"  "<<error[2]<<"  "<<error[3] << std::endl;
 
 
 

@@ -2,7 +2,6 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
-
 using namespace std;
 
 namespace gtsam_soslam
@@ -249,30 +248,19 @@ namespace gtsam_soslam
                 }
             }
 //            try{
-                s.isam_optimizer_.update(
-                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-                s.estimates_ = s.isam_optimizer_.calculateEstimate();
-
-            }catch (gtsam::IndeterminantLinearSystemException &e){
-                std::cout << "Collect Data" << std::endl;
-            }
-//            if (n->i % 5 != 0){
-//                std::cout << "Step Single" << std::endl;
-//            }
-//            else if(n->i % 5 == 0){
-//                s.isam_optimizer_.update(s.graph_,s.estimates_);
+//                s.isam_optimizer_.update(
+//                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+//                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
 //                s.estimates_ = s.isam_optimizer_.calculateEstimate();
-//                std::cout << "Step 2" << std::endl;
+//
+//            }catch (gtsam::IndeterminantLinearSystemException &e){
+//                std::cout << "Collect Data" << std::endl;
 //            }
-//            else{
-//                utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()).print() ;
 
-//                std::cout << n->i << std::endl;
-//            }
-//            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-////            s.estimates_ = optimizer.optimize();
-//            s.graph_.print();
+            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+            s.estimates_ = optimizer.optimize();
+            limitFactorGraphSize(s.graph_, 100);
+            updateInitialEstimates(s.graph_, s.estimates_);
 
         }
         s.prev_step = *n;
@@ -280,7 +268,6 @@ namespace gtsam_soslam
 
     void SoSlam::reset()
     {
-
         data_source_.restart();
         auto &s = state_;
         s.associated_.clear();
@@ -297,11 +284,12 @@ namespace gtsam_soslam
     }
 
     // Helper function
-    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> SoSlam::add_detection_factors(const Detection &d,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_boxes,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_ssc,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_psc,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_syc)
+    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor>\
+            SoSlam::add_detection_factors(const Detection &d,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_boxes,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_ssc,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_psc,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_syc)
     {
         if (d.quadric_key == 66666)
         {
@@ -317,6 +305,31 @@ namespace gtsam_soslam
         state_.graph_.add(psc);
 //        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
+    }
+
+    void SoSlam::limitFactorGraphSize(gtsam::NonlinearFactorGraph& graph, size_t maxFactors) {
+        size_t numFactors = graph.size();
+        if (numFactors > maxFactors) {
+            size_t numFactorsToRemove = numFactors - maxFactors;
+            for (size_t i = 0; i < numFactorsToRemove; ++i) {
+                graph.erase(graph.begin());
+            }
+        }
+    }
+
+    void SoSlam::updateInitialEstimates(const gtsam::NonlinearFactorGraph& graph, gtsam::Values& initialEstimates) {
+        std::set<gtsam::Key> keysInGraph;
+        for (const auto& factor : graph) {
+            for (const gtsam::Key& key : factor->keys()) {
+                keysInGraph.insert(key);
+            }
+        }
+
+        for (const auto& key_value_pair : initialEstimates) {
+            if (keysInGraph.find(key_value_pair.key) == keysInGraph.end()) {
+                initialEstimates.erase(key_value_pair.key);
+            }
+        }
     }
 
 } // namespace gtsam_soslam

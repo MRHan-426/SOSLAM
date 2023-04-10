@@ -223,8 +223,8 @@ namespace gtsam_soslam
 
       ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
         gtsam::Pose3 initial_pose = result.at<gtsam::Pose3>(bbs.poseKey());
-        cout<<"camera pose"<<endl<<camera_pose<<endl;
-        cout<<"inited pose"<<endl<<initial_pose<<endl;
+//        cout<<"camera pose"<<endl<<camera_pose<<endl;
+//        cout<<"inited pose"<<endl<<initial_pose<<endl;
         //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
       return initial_quadric;
     }

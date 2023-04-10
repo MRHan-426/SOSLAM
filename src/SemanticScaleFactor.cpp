@@ -45,8 +45,8 @@ namespace gtsam_soslam
 //        double height = radii[2];
             r0 << radii(0) / radii(2), radii(1) / radii(2);
             auto rs = semantic_table.getEntry(label_);
-            if(label_ =="tape"||label_ =="mouse")
-            cout<<"SSFactor: "<<label_<<", now ratio: "<<r0<<", antici ratio: "<<rs<<endl;
+//            if(label_ =="tape"||label_ =="mouse")
+//            cout<<"SSFactor: "<<label_<<", now ratio: "<<r0<<", antici ratio: "<<rs<<endl;
             gtsam::Vector2 error;
             error << pow((r0 - rs)[0],2) , pow((r0 - rs)[1],2);
 //            error = r0 - rs;
