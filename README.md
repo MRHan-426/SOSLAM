@@ -43,7 +43,7 @@
 - [ ] 6. Evaluation our algrithm. [3D point cloud to get ground truth]
     - [ ] 6.1 Rot.
     - [ ] 6.2 IOU.
-- [ ] 7. Add visual odometry to take place of odom ground truth. [Orb Slam]
+- [ ] 7. Add visual odometry to take place of odom ground truth. [Orb Slam] [Optional]
 
 ===========================================================================
 
