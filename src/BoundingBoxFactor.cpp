@@ -1,12 +1,3 @@
-/* ----------------------------------------------------------------------------
-@ Compute fbbox @
-This is a C++ code implementing the BoundingBoxFactor class in the gtsam_quadrics library.
-The BoundingBoxFactor class is used to represent the geometric constraints that the projected quadric bounding box (dual conic) in a camera image should match the given measurements. The measurements are 4D vector, representing the (u,v) position of the upper-left corner of the bounding box and its width and height.
-The class includes an evaluateError method that returns the error between the predicted and measured bounding boxes, given a pose and a constrained dual quadric (a quadric in a world frame). It also calculates the corresponding Jacobians if they are requested.
-The code also includes a numerical derivative option to calculate the Jacobians. The H1 and H2 arguments of evaluateError represent the Jacobians with respect to the pose and the quadric, respectively. The evaluateH1 and evaluateH2 methods are helper methods that return the corresponding Jacobians without the error vector.
-The code uses some classes and functions from the gtsam library, such as Pose3, Matrix, Vector, numericalDerivative21, and numericalDerivative22.
- * -------------------------------------------------------------------------- */
-
 /**
  * @file BoundingBoxFactor.cpp
  * @date Apr 14, 2020
@@ -19,8 +10,7 @@ The code uses some classes and functions from the gtsam library, such as Pose3, 
 #include <BoundingBoxFactor.h>
 #include <QuadricCamera.h>
 
-#include <boost/bind/bind.hpp> //用于支持函数绑定功能。
-// 函数绑定可以让你在定义一个函数对象时，预先绑定部分参数，留下另外一些参数在调用时再指定，从而得到一个类似于函数指针的对象。
+#include <boost/bind/bind.hpp>
 
 #define NUMERICAL_DERIVATIVE true
 
@@ -34,10 +24,6 @@ namespace gtsam_soslam
             boost::optional<gtsam::Matrix &> H1,
             boost::optional<gtsam::Matrix &> H2) const
     {
-        // 在函数内部，首先对输入的相机姿态和二次曲面进行一些检查。
-        // 如果二次曲面在相机后面或者相机在物体内部，就会抛出一个异常。
-        // In the function, the camera pose and quadratic surface inputs are first checked for validity.
-        // An exception is thrown if the quadratic is behind the camera or the camera is inside the object.
         try
         {
             // check pose-quadric pair
@@ -50,17 +36,10 @@ namespace gtsam_soslam
                 throw QuadricProjectionException("Camera is inside quadric");
             }
 
-            // project quadric taking into account partial derivatives
-            // 定义了两个矩阵 dC_dx 和 dC_dq，分别用于存储双二次曲面 quadric 投影到相机姿态 pose 上的导数。
-            // 接着创建了一个 DualConic 对象 dualConic 用于存储 quadric 投影到相机上的双锥体。
-            // DualConic 类是一个代表双锥体的类，它是在计算机视觉中广泛使用的表示椭圆形图像边界的数学工具。
-            // 在这个函数中，dualConic 将被用于计算图像边界并计算误差函数。
             Eigen::Matrix<double, 9, 6> dC_dx;
             Eigen::Matrix<double, 9, 9> dC_dq;
             DualConic dualConic;
 
-            // 然后，函数会通过调用QuadricCamera::project()函数将二次曲面投影到相机平面上，并计算相应的导数矩阵。
-            // 如果开启了数值导数（NUMERICAL_DERIVATIVE），则会使用数值方法计算导数矩阵。
             if (!NUMERICAL_DERIVATIVE)
             {
                 dualConic = QuadricCamera::project(quadric, pose, calibration_,
@@ -72,14 +51,12 @@ namespace gtsam_soslam
             }
 
             // check dual conic is valid for error function
-            // 接着，函数会检查投影后的二次体是否是一个椭圆。
             if (!dualConic.isEllipse())
             {
                 throw QuadricProjectionException("Projected Conic is non-ellipse");
             }
 
             // calculate conic bounds with derivatives
-            // 并计算投影后椭圆的边界框及其导数矩阵
             bool computeJacobians = bool(H1 || H2) && !NUMERICAL_DERIVATIVE;
             Eigen::Matrix<double, 4, 9> db_dC;
             AlignedBox2 predictedBounds;
@@ -101,9 +78,7 @@ namespace gtsam_soslam
             }
 
             // evaluate error
-            // 最后，函数会计算测量与预测边界框之间的误差。
             gtsam::Vector4 error = predictedBounds.vector() - measured_.vector();
-            // 并根据需要计算误差函数对相机姿态和二次曲面的导数矩阵
             if (NUMERICAL_DERIVATIVE)
             {
                 std::function<gtsam::Vector(const gtsam::Pose3 &,
@@ -140,23 +115,10 @@ namespace gtsam_soslam
                     *H2 = db_dC * dC_dq;
                 }
             }
-
-//            double temp1 = std::abs(error[0]);
-//            double temp2 = std::abs(error[1]);
-//            double temp3 = std::abs(error[2]);
-//            double temp4 = std::abs(error[3]);
-//            error << temp1, temp2, temp3, temp4;
-
-
 //            std::cout <<"BBFactor: " <<error[0]<<"  "<<error[1]<<"  "<<error[2]<<"  "<<error[3] << std::endl;
-
-
-
-
             return error;
 
             // check for nans
-            // 如果误差函数或导数矩阵包含无穷大或NaN值，函数会抛出异常。
             if (error.array().isInf().any() || error.array().isNaN().any() ||
                 (H1 && (H1->array().isInf().any() || H1->array().isNaN().any())) ||
                 (H2 && (H2->array().isInf().any() || H2->array().isNaN().any())))
@@ -165,14 +127,8 @@ namespace gtsam_soslam
             }
         }
             // handle projection failures
-            // 如果投影出现了问题，函数会通过设置一个固定的误差向量和零导数矩阵来处理异常。。
         catch (QuadricProjectionException &e)
         {
-            // std::cout << "  Landmark " << symbolIndex(this->objectKey()) << "
-            // received: " << e.what() << std::endl;
-
-            // if error cannot be calculated
-            // set error vector and jacobians to zero
             gtsam::Vector4 error = gtsam::Vector4::Ones() * 100000.0;
             if (H1)
             {
@@ -182,16 +138,12 @@ namespace gtsam_soslam
             {
                 *H2 = gtsam::Matrix::Zero(4, 9);
             }
-            // 最后，函数会返回误差向量
             return error;
         }
     }
 
     /* ************************************************************************* */
     // the derivative of the error wrt camera pose (4x6)
-    // 这个函数计算误差函数对相机姿态的雅可比矩阵H1。
-    // 它的输入是一个位姿和一个受限对偶二次曲面（ConstrainedDualQuadric），输出是一个4×6的雅可比矩阵。
-    // 这个函数首先声明一个空的矩阵H1，计算误差函数对相机姿态的导数矩阵，并将结果存储在H1中。
     gtsam::Matrix BoundingBoxFactor::evaluateH1(
             const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const
     {
@@ -202,9 +154,6 @@ namespace gtsam_soslam
 
     /* ************************************************************************* */
     // the derivative of the error wrt quadric (4x9)
-    // 这个函数计算误差函数对二次曲面的雅可比矩阵H2。
-    // 它的输入是一个位姿和一个受限对偶二次曲面（ConstrainedDualQuadric），输出是一个4×9的雅可比矩阵。
-    // 这个函数首先声明一个空的矩阵H2，计算误差函数对二次曲面的导数矩阵，并将结果存储在H2中。
     gtsam::Matrix BoundingBoxFactor::evaluateH2(
             const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const
     {
@@ -214,9 +163,6 @@ namespace gtsam_soslam
     }
 
     /* ************************************************************************* */
-    // 这个函数计算误差函数对相机姿态的雅可比矩阵H1。
-    // 但它的输入是一个gtsam::Values对象，其中包含了该因子的位姿和受限对偶二次曲面的值。
-    // 它通过从x中提取位姿和对象的值，并将它们传递给evaluateH1函数来计算误差函数对相机姿态的雅可比矩阵H1。
     gtsam::Matrix BoundingBoxFactor::evaluateH1(const gtsam::Values &x) const
     {
         const gtsam::Pose3 pose = x.at<gtsam::Pose3>(this->poseKey());
@@ -226,9 +172,6 @@ namespace gtsam_soslam
     }
 
     /* ************************************************************************* */
-    // 这个函数计算误差函数对二次曲面的雅可比矩阵H2。
-    // 但它的输入是一个gtsam::Values对象，其中包含了该因子的位姿和受限对偶二次曲面的值。
-    // 它通过从x中提取位姿和对象的值，并将它们传递给evaluateH2函数来计算误差函数对相机姿态的雅可比矩阵H2。
     gtsam::Matrix BoundingBoxFactor::evaluateH2(const gtsam::Values &x) const
     {
         const gtsam::Pose3 pose = x.at<gtsam::Pose3>(this->poseKey());
@@ -238,7 +181,6 @@ namespace gtsam_soslam
     }
 
     /* ************************************************************************* */
-    // 这个函数用于打印BoundingBoxFactor的信息。它输出该因子的关键字、测量值和噪声模型。
     void BoundingBoxFactor::print(const std::string &s,
                                   const gtsam::KeyFormatter &keyFormatter) const
     {
@@ -251,10 +193,6 @@ namespace gtsam_soslam
     }
 
     /* ************************************************************************* */
-    // 用于检查当前的BoundingBoxFactor对象是否与另一个BoundingBoxFactor对象other相等。
-    // 函数内部调用了measured_、calibration_和noiseModel()对象的equals方法来检查这三个对象是否分别相等。
-    // 其中measured_表示测量值，calibration_表示相机标定信息，noiseModel()表示误差模型。
-    // 如果它们都相等，则检查当前对象的两个关键字是否与other对象的关键字相同。
     bool BoundingBoxFactor::equals(const BoundingBoxFactor &other,
                                    double tol) const
     {
@@ -265,4 +203,4 @@ namespace gtsam_soslam
         return equal;
     }
 
-} // namespace gtsam_quadrics
+} // namespace gtsam_soslam

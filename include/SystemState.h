@@ -126,13 +126,24 @@ namespace gtsam_soslam
             : initial_pose_(initial_pose),
               optimizer_batch_(optimizer_batch)
         {
+
+            isam_params_.relinearizeThreshold = 0.05;
+            isam_params_.relinearizeSkip = 10;
+            isam_params_.enableRelinearization = true;
+            isam_params_.evaluateNonlinearError = true;
+            isam_params_.factorization = gtsam::ISAM2Params::QR;
             isam_optimizer_ = gtsam::ISAM2(isam_params_);
-            //        noise_prior_ = gtsam::Matrix(6,6);
-            //        noise_odom_ = gtsam::Matrix(6,6);
-            //        noise_boxes_ = gtsam::Matrix(4,4);
-            //        noise_prior_ = 0.01 * noise_prior_.setIdentity();
-            //        noise_odom_ = 0.01 * noise_prior_.setIdentity();
-            //        noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
+
+            optimizer_params_.setAbsoluteErrorTol(1e-8);
+            optimizer_params_.setRelativeErrorTol(1e-8);
+            optimizer_params_.lambdaInitial = 1e-5;
+            optimizer_params_.lambdaFactor = 10.0;
+
+            //        optimizer_params_.verbosity = gtsam::NonlinearOptimizerParams::ERROR;
+            //        optimizer_params_.verbosityLM = gtsam::LevenbergMarquardtParams::LAMBDA;
+            //        optimizer_params_.linearSolverType = gtsam::NonlinearOptimizerParams::Iterative;
+            //        auto subgraph_params = boost::shared_ptr<gtsam::IterativeOptimizationParameters>();
+            //        optimizer_params_.setIterativeParams(subgraph_params);
         }
     };
 } // gtsam_soslam

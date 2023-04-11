@@ -56,9 +56,12 @@ namespace gtsam_soslam
         void reset();
         std::vector<std::vector<std::pair<double, double>>> findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y);
 
-        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> add_detection_factors(const Detection &d, const gtsam::noiseModel::Robust::shared_ptr &noise_boxes,
-                                                                                                                        const gtsam::noiseModel::Robust::shared_ptr &noise_scc,
-                                                                                                                        const gtsam::noiseModel::Robust::shared_ptr &noise_psc,
-                                                                                                                        const gtsam::noiseModel::Robust::shared_ptr &noise_syc);
+        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor>
+        add_detection_factors(const Detection &d, const gtsam::noiseModel::Robust::shared_ptr &noise_boxes,
+                              const gtsam::noiseModel::Robust::shared_ptr &noise_scc,
+                              const gtsam::noiseModel::Robust::shared_ptr &noise_psc,
+                              const gtsam::noiseModel::Robust::shared_ptr &noise_syc);
+        void updateInitialEstimates(const gtsam::NonlinearFactorGraph &graph, gtsam::Values &initialEstimates);
+        void limitFactorGraphSize(gtsam::NonlinearFactorGraph &graph, size_t maxFactors);
     };
 } // namespace gtsam_soslam

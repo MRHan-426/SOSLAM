@@ -2,7 +2,6 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
-
 using namespace std;
 
 namespace gtsam_soslam
@@ -123,11 +122,7 @@ namespace gtsam_soslam
     {
         while (!data_source_.done())
         {
-            // should run five times
-            //        cout<<"step once"<<endl;
             step();
-            //        cout<<"step end"<<endl;
-            //         usleep(3000000);
         }
 
         if (state_.optimizer_batch_)
@@ -135,20 +130,15 @@ namespace gtsam_soslam
             guess_initial_values();
             auto &s = state_;
 
-            // Using ISAM2 for optimization
-            /* gtsam::ISAM2 isam(s.optimizer_params_);
-             gtsam::ISAM2Result result = isam.update(s.graph_, s.estimates_);
-             s.estimates_ = isam.calculateEstimate();*/
-
             // s.estimates_.print(); // print estimate values
-            //            s.graph_.print(); // print all factors in current graph
+            // s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
         }
         else
         {
-            //            state_.graph_.print(); // print all factors in current graph
+            // state_.graph_.print(); // print all factors in current graph
             utils::visualize(state_);
         }
     }
@@ -197,7 +187,6 @@ namespace gtsam_soslam
         std::tie(n->new_associated, s.associated_, s.unassociated_) = associator_.associate(s);
 
         // Extract labels
-        // TODO handle cases where different labels used for a single quadric???
         for (const auto &d : s.associated_)
         {
             if (d.quadric_key != 66666)
@@ -210,13 +199,21 @@ namespace gtsam_soslam
         if (!p.isValid())
         {
             s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
+            guess_initial_values();
         }
         else
         {
+<<<<<<< HEAD
             // gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+=======
+            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
+            s.estimates_.insert(n->pose_key,n->odom);
+            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+>>>>>>> c66264798039c757770b4e906d7d06bf7a8112d2
             s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
         }
-
+//        s.graph_.print();
+//        s.estimates_.print();
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
         //---------------------------------------------------------------------------------------------
 
@@ -258,10 +255,10 @@ namespace gtsam_soslam
         // step optimization
         else
         {
-            guess_initial_values();
+//            guess_initial_values();
             for (const auto &d : n->new_associated)
             {
-                // add bbs, ssc factors into graph
+                // add factors into graph
                 bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
 
                 // quadric initialization
@@ -276,20 +273,36 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
+//            try{
+//                s.isam_optimizer_.update(
+//                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+//                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+//                s.estimates_ = s.isam_optimizer_.calculateEstimate();
+//
+//            }catch (gtsam::IndeterminantLinearSystemException &e){
+//                std::cout << "Collect Data" << std::endl;
+//            }
+
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
+<<<<<<< HEAD
             //            s.graph_.print();
             //                        s.isam_optimizer_.update(
             //                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
             //                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
             //                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
+=======
+            std::cout << s.graph_.error(s.estimates_) << std::endl;
+//            limitFactorGraphSize(s.graph_, 100);
+//            updateInitialEstimates(s.graph_, s.estimates_);
+
+>>>>>>> c66264798039c757770b4e906d7d06bf7a8112d2
         }
         s.prev_step = *n;
     }
 
     void SoSlam::reset()
     {
-
         data_source_.restart();
         auto &s = state_;
         s.associated_.clear();
@@ -306,11 +319,12 @@ namespace gtsam_soslam
     }
 
     // Helper function
-    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> SoSlam::add_detection_factors(const Detection &d,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_boxes,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_ssc,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_psc,
-                                                                                                                            const gtsam::noiseModel::Robust::shared_ptr &huber_syc)
+    std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor>\
+            SoSlam::add_detection_factors(const Detection &d,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_boxes,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_ssc,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_psc,\
+            const gtsam::noiseModel::Robust::shared_ptr &huber_syc)
     {
         if (d.quadric_key == 66666)
         {
@@ -328,6 +342,7 @@ namespace gtsam_soslam
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 
+<<<<<<< HEAD
     std::vector<std::vector<std::pair<double, double>>> SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y)
     {
         std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
@@ -351,4 +366,30 @@ namespace gtsam_soslam
         }
         return nearest;
     }
+=======
+    void SoSlam::limitFactorGraphSize(gtsam::NonlinearFactorGraph& graph, size_t maxFactors) {
+        size_t numFactors = graph.size();
+        if (numFactors > maxFactors) {
+            size_t numFactorsToRemove = numFactors - maxFactors;
+            for (size_t i = 0; i < numFactorsToRemove; ++i) {
+                graph.erase(graph.begin());
+            }
+        }
+    }
+
+    void SoSlam::updateInitialEstimates(const gtsam::NonlinearFactorGraph& graph, gtsam::Values& initialEstimates) {
+        std::set<gtsam::Key> keysInGraph;
+        for (const auto& factor : graph) {
+            for (const gtsam::Key& key : factor->keys()) {
+                keysInGraph.insert(key);
+            }
+        }
+        for (const auto& key_value_pair : initialEstimates) {
+            if (keysInGraph.find(key_value_pair.key) == keysInGraph.end()) {
+                initialEstimates.erase(key_value_pair.key);
+            }
+        }
+    }
+
+>>>>>>> c66264798039c757770b4e906d7d06bf7a8112d2
 } // namespace gtsam_soslam

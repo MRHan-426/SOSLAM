@@ -487,6 +487,5 @@ namespace gtsam_soslam
         return equal;
     }
 
-} // namespace gtsam_quadrics//
-// Created by ziqihan on 4/8/23.
-//
+}
+
