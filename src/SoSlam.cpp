@@ -146,19 +146,21 @@ namespace gtsam_soslam
     void SoSlam::step()
     {
         // Define noise model
-        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
+//        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
         gtsam::Vector6 temp;
-        temp << 1.01, 1.01, 1.01, 1.01, 1.01, 1.01;
+        temp << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+        gtsam::noiseModel::Diagonal::shared_ptr noise_prior =
+                gtsam::noiseModel::Diagonal::Sigmas(0.001 * temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
             gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(1.0, 1.0, 1.0, 1.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(10.0, 10.0, 10.0, 10.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
             gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
-            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(10.0, 10.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
-            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(5.0));
 
         // Huber kernel
         auto huber_boxes = gtsam::noiseModel::Robust::Create(
@@ -203,13 +205,9 @@ namespace gtsam_soslam
         }
         else
         {
-<<<<<<< HEAD
-            // gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
-=======
             s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
             s.estimates_.insert(n->pose_key,n->odom);
             gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
->>>>>>> c66264798039c757770b4e906d7d06bf7a8112d2
             s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
         }
 //        s.graph_.print();
@@ -273,6 +271,7 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
+
 //            try{
 //                s.isam_optimizer_.update(
 //                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
@@ -285,18 +284,15 @@ namespace gtsam_soslam
 
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
-<<<<<<< HEAD
             //            s.graph_.print();
             //                        s.isam_optimizer_.update(
             //                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
             //                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
             //                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
-=======
             std::cout << s.graph_.error(s.estimates_) << std::endl;
 //            limitFactorGraphSize(s.graph_, 100);
 //            updateInitialEstimates(s.graph_, s.estimates_);
 
->>>>>>> c66264798039c757770b4e906d7d06bf7a8112d2
         }
         s.prev_step = *n;
     }
@@ -342,7 +338,6 @@ namespace gtsam_soslam
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 
-<<<<<<< HEAD
     std::vector<std::vector<std::pair<double, double>>> SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y)
     {
         std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
@@ -366,7 +361,6 @@ namespace gtsam_soslam
         }
         return nearest;
     }
-=======
     void SoSlam::limitFactorGraphSize(gtsam::NonlinearFactorGraph& graph, size_t maxFactors) {
         size_t numFactors = graph.size();
         if (numFactors > maxFactors) {
@@ -391,5 +385,4 @@ namespace gtsam_soslam
         }
     }
 
->>>>>>> c66264798039c757770b4e906d7d06bf7a8112d2
 } // namespace gtsam_soslam

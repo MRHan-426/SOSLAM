@@ -367,9 +367,9 @@ namespace gtsam_soslam
                 error[0] += std::pow((distance1 - distance2), 2);
                 // std::cout << "percentage: " << (float)count / (float)uniform_sample_points.size() << std::endl;
             }
-            error[0] /= 1000;
+//            error[0] /= 1000;
 
-            std::cout << "syc error: " << error[0] << std::endl;
+//            std::cout << "syc error: " << error[0] << std::endl;
 
             //--------------------------------------------------------------------------------------------------
 
