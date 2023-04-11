@@ -199,13 +199,17 @@ namespace gtsam_soslam
         if (!p.isValid())
         {
             s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
+            guess_initial_values();
         }
         else
         {
+            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
+            s.estimates_.insert(n->pose_key,n->odom);
             gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
             s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
         }
-
+//        s.graph_.print();
+//        s.estimates_.print();
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
 
         // batch optimization
@@ -219,7 +223,7 @@ namespace gtsam_soslam
         // step optimization
         else
         {
-            guess_initial_values();
+//            guess_initial_values();
             for (const auto &d : n->new_associated)
             {
                 // add factors into graph
@@ -249,6 +253,7 @@ namespace gtsam_soslam
 
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
+            std::cout << s.graph_.error(s.estimates_) << std::endl;
 //            limitFactorGraphSize(s.graph_, 100);
 //            updateInitialEstimates(s.graph_, s.estimates_);
 
