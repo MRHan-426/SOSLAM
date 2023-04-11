@@ -21,7 +21,7 @@
 #include <gtsam/nonlinear/ISAM2Params.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Cal3_S2.h>
-//#include "FrameDrawer.h"
+// #include "FrameDrawer.h"
 
 //
 // Created by ziqihan on 3/2/23.
@@ -42,18 +42,20 @@ namespace gtsam_soslam
         SoSlamState state_;
 
         SoSlam(
-                DataSource &data_source,
-                BaseAssociator &associator,
-                BaseDetector &detector,
-                // VisualOdometry visual_odometry = std::nullptr, //Optional
-                const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
-                const bool &optimizer_batch = true);
+            DataSource &data_source,
+            BaseAssociator &associator,
+            BaseDetector &detector,
+            // VisualOdometry visual_odometry = std::nullptr, //Optional
+            const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
+            const bool &optimizer_batch = true);
 
         // private:
         void guess_initial_values();
         void spin();
         void step();
         void reset();
+        std::vector<std::vector<std::pair<double, double>>> findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y);
+
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> add_detection_factors(const Detection &d, const gtsam::noiseModel::Robust::shared_ptr &noise_boxes,
                                                                                                                         const gtsam::noiseModel::Robust::shared_ptr &noise_scc,
                                                                                                                         const gtsam::noiseModel::Robust::shared_ptr &noise_psc,

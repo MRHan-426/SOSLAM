@@ -204,15 +204,15 @@ namespace gtsam_soslam
       sub_graph.add(ssc);
       sub_graph.add(psc);
 
-//      sub_graph.add(syc);
-    std::cout << "###############################" << std::endl;
-    std::cout << "BALL: " << bbs.objectKey() << std::endl;
-    gtsam::Point3 localPoint(0, 0, 5);
-    gtsam::Point3 globalPoint = camera_pose.transformFrom(localPoint);
+      //      sub_graph.add(syc);
+      std::cout << "###############################" << std::endl;
+      std::cout << "BALL: " << bbs.objectKey() << std::endl;
+      gtsam::Point3 localPoint(0, 0, 5);
+      gtsam::Point3 globalPoint = camera_pose.transformFrom(localPoint);
       // set a prior quadric
-      ConstrainedDualQuadric quadric(gtsam::Pose3(gtsam::Rot3(), globalPoint),gtsam::Vector3(1, 1, 1));
+      ConstrainedDualQuadric quadric(gtsam::Pose3(gtsam::Rot3(), globalPoint), gtsam::Vector3(1, 1, 1));
 
-//        ConstrainedDualQuadric quadric;
+      //        ConstrainedDualQuadric quadric;
       initial_estimate.insert(bbs.objectKey(), quadric);
       initial_estimate.insert(bbs.poseKey(), camera_pose);
 
@@ -221,10 +221,12 @@ namespace gtsam_soslam
       auto result = optimizer.optimize();
 
       ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
-        gtsam::Pose3 initial_pose = result.at<gtsam::Pose3>(bbs.poseKey());
-        cout<<"camera pose"<<endl<<camera_pose<<endl;
-        cout<<"inited pose"<<endl<<initial_pose<<endl;
-        //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
+      gtsam::Pose3 initial_pose = result.at<gtsam::Pose3>(bbs.poseKey());
+      cout << "camera pose" << endl
+           << camera_pose << endl;
+      cout << "inited pose" << endl
+           << initial_pose << endl;
+      //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
       return initial_quadric;
     }
 
@@ -317,37 +319,35 @@ namespace gtsam_soslam
       }
       return out;
     }
-    double area(const gtsam::Vector4& bounds) {
-        return (bounds[2] - bounds[0]) * (bounds[3] - bounds[1]);
+    double area(const gtsam::Vector4 &bounds)
+    {
+      return (bounds[2] - bounds[0]) * (bounds[3] - bounds[1]);
     }
 
+    double iou(const AlignedBox2 &a, const AlignedBox2 &b)
+    {
+      gtsam::Vector4 intersection_bounds;
+      intersection_bounds[0] = std::min(a.xmin(), b.xmin());
+      intersection_bounds[1] = std::min(a.ymin(), b.ymin());
+      intersection_bounds[2] = std::max(a.xmax(), b.xmax());
+      intersection_bounds[3] = std::max(a.ymax(), b.ymax());
 
-    double iou(const AlignedBox2& a, const AlignedBox2& b) {
-        gtsam::Vector4 intersection_bounds;
-        intersection_bounds[0] = std::min(a.xmin(), b.xmin());
-        intersection_bounds[1] = std::min(a.ymin(), b.ymin());
-        intersection_bounds[2] = std::max(a.xmax(), b.xmax());
-        intersection_bounds[3] = std::max(a.ymax(), b.ymax());
-
-        double int_area = area(intersection_bounds);
-        double union_area = area(a.vector()) + area(b.vector()) - int_area;
-        return int_area / union_area;
+      double int_area = area(intersection_bounds);
+      double union_area = area(a.vector()) + area(b.vector()) - int_area;
+      return int_area / union_area;
     }
-
-
 
     void visualize(SoSlamState &state)
     {
-        gtsam::Values values = state.estimates_;
-        auto labels = state.labels_;
-//        std::vector<double> ious = evaluate::iou_evaluation(state);
-//        int i = 1;
-//        for (auto iou : ious){
-//            std::cout << "quadric " << i << "IOU = " << iou << std::endl;
-//            i++;
-//        }
+      gtsam::Values values = state.estimates_;
+      auto labels = state.labels_;
+      //        std::vector<double> ious = evaluate::iou_evaluation(state);
+      //        int i = 1;
+      //        for (auto iou : ious){
+      //            std::cout << "quadric " << i << "IOU = " << iou << std::endl;
+      //            i++;
+      //        }
     }
-
 
   } // namespace utils
 } // namespace gtsam_soslam

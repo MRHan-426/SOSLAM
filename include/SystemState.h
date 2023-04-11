@@ -23,104 +23,117 @@
 #include <gtsam/nonlinear/Values.h>
 #include <gtsam/geometry/Cal3.h>
 
-namespace gtsam_soslam{
+namespace gtsam_soslam
+{
 
-class Detection {
-public:
-    std::string label;
-    gtsam::Vector4 bounds;
-    gtsam::Key pose_key;
-    gtsam::Key quadric_key;
-    
-    bool operator==(const Detection& other) const
+    class Detection
     {
-        if (label == other.label && bounds == other.bounds && pose_key == other.pose_key && quadric_key == other.quadric_key)
-            {return true;}
-        else
-            {return false;}
-    }
+    public:
+        std::string label;
+        gtsam::Vector4 bounds;
+        gtsam::Key pose_key;
+        gtsam::Key quadric_key;
 
-    Detection(const Detection& other) = default;
-
-    Detection& operator=(const Detection& other) {
-        if (this != &other) {
-            label = other.label;
-            bounds << other.bounds[0], other.bounds[1], other.bounds[2], other.bounds[3];
-            pose_key = other.pose_key;
-            quadric_key = other.quadric_key;
+        bool operator==(const Detection &other) const
+        {
+            if (label == other.label && bounds == other.bounds && pose_key == other.pose_key && quadric_key == other.quadric_key)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
-        return *this;
-    }
 
-    explicit Detection(std::string label = "None", gtsam::Vector4 bounds = gtsam::Vector4::Zero(), gtsam::Key pose_key = 0, gtsam::Key quadric_key = 66666) :
-            label(std::move(label)), bounds(std::move(bounds)), pose_key(pose_key), quadric_key(quadric_key) {}
-};
+        Detection(const Detection &other) = default;
 
-class StepState {
-public:
-    int i;
-    gtsam::Key pose_key;
-    cv::Mat rgb;
-    gtsam::Matrix3 depth;
-    gtsam::Pose3 odom;
-    std::vector<Detection> detections;
-    std::vector<Detection> new_associated;
-
-    explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i)) {
-    }
-
-    StepState(const StepState& other) = default;
-    StepState& operator=(const StepState& other) {
-        if (this != &other) {
-            i = other.i;
-            pose_key = other.pose_key;
-            rgb = other.rgb;
-            depth = other.depth;
-            odom = other.odom;
-            detections = other.detections;
-            new_associated = other.new_associated;
+        Detection &operator=(const Detection &other)
+        {
+            if (this != &other)
+            {
+                label = other.label;
+                bounds << other.bounds[0], other.bounds[1], other.bounds[2], other.bounds[3];
+                pose_key = other.pose_key;
+                quadric_key = other.quadric_key;
+            }
+            return *this;
         }
-        return *this;
-    }
 
-    bool isValid() const {
-        return i != 0;
-    }
-};
+        explicit Detection(std::string label = "None", gtsam::Vector4 bounds = gtsam::Vector4::Zero(), gtsam::Key pose_key = 0, gtsam::Key quadric_key = 66666) : label(std::move(label)), bounds(std::move(bounds)), pose_key(pose_key), quadric_key(quadric_key) {}
+    };
 
-class SoSlamState {
-public:
-
-    gtsam::Pose3 initial_pose_;
-    gtsam::Matrix noise_prior_;
-    gtsam::Matrix noise_odom_;
-    gtsam::Matrix noise_boxes_;
-    bool optimizer_batch_;
-    gtsam::ISAM2 isam_optimizer_;
-    gtsam::LevenbergMarquardtParams optimizer_params_;
-    gtsam::ISAM2Params isam_params_;
-    std::vector<Detection> associated_;
-    std::vector<Detection> unassociated_;
-    std::map<gtsam::Key, std::string> labels_;
-    gtsam::NonlinearFactorGraph graph_;
-    gtsam::Values estimates_;
-    // double calib_depth_;
-    gtsam::Cal3_S2 calib_rgb_;
-    StepState prev_step;
-    StepState this_step;
-
-    explicit SoSlamState(const gtsam::Pose3& initial_pose = Constants::POSES[0], const bool& optimizer_batch = true)
-        : initial_pose_(initial_pose),
-          optimizer_batch_(optimizer_batch)
+    class StepState
     {
-        isam_optimizer_ = gtsam::ISAM2(isam_params_);
-//        noise_prior_ = gtsam::Matrix(6,6);
-//        noise_odom_ = gtsam::Matrix(6,6);
-//        noise_boxes_ = gtsam::Matrix(4,4);
-//        noise_prior_ = 0.01 * noise_prior_.setIdentity();
-//        noise_odom_ = 0.01 * noise_prior_.setIdentity();
-//        noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
-    }
-};
-} //gtsam_soslam
+    public:
+        int i;
+        gtsam::Key pose_key;
+        cv::Mat rgb;
+        gtsam::Matrix3 depth;
+        gtsam::Pose3 odom;
+        std::vector<Detection> detections;
+        std::vector<Detection> new_associated;
+        std::vector<std::vector<std::pair<double, double>>> nearest_edge_point;
+
+        explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i))
+        {
+        }
+
+        StepState(const StepState &other) = default;
+        StepState &operator=(const StepState &other)
+        {
+            if (this != &other)
+            {
+                i = other.i;
+                pose_key = other.pose_key;
+                rgb = other.rgb;
+                depth = other.depth;
+                odom = other.odom;
+                detections = other.detections;
+                new_associated = other.new_associated;
+            }
+            return *this;
+        }
+
+        bool isValid() const
+        {
+            return i != 0;
+        }
+    };
+
+    class SoSlamState
+    {
+    public:
+        gtsam::Pose3 initial_pose_;
+        gtsam::Matrix noise_prior_;
+        gtsam::Matrix noise_odom_;
+        gtsam::Matrix noise_boxes_;
+        bool optimizer_batch_;
+        gtsam::ISAM2 isam_optimizer_;
+        gtsam::LevenbergMarquardtParams optimizer_params_;
+        gtsam::ISAM2Params isam_params_;
+        std::vector<Detection> associated_;
+        std::vector<Detection> unassociated_;
+        std::map<gtsam::Key, std::string> labels_;
+        gtsam::NonlinearFactorGraph graph_;
+        gtsam::Values estimates_;
+        // double calib_depth_;
+        gtsam::Cal3_S2 calib_rgb_;
+        StepState prev_step;
+        StepState this_step;
+
+        explicit SoSlamState(const gtsam::Pose3 &initial_pose = Constants::POSES[0], const bool &optimizer_batch = true)
+            : initial_pose_(initial_pose),
+              optimizer_batch_(optimizer_batch)
+        {
+            isam_optimizer_ = gtsam::ISAM2(isam_params_);
+            //        noise_prior_ = gtsam::Matrix(6,6);
+            //        noise_odom_ = gtsam::Matrix(6,6);
+            //        noise_boxes_ = gtsam::Matrix(4,4);
+            //        noise_prior_ = 0.01 * noise_prior_.setIdentity();
+            //        noise_odom_ = 0.01 * noise_prior_.setIdentity();
+            //        noise_boxes_ = 3.00 * noise_boxes_.setIdentity();
+        }
+    };
+} // gtsam_soslam
 #endif // SYSTEMSTATE_H

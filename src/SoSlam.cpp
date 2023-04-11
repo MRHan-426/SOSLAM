@@ -8,15 +8,15 @@ using namespace std;
 namespace gtsam_soslam
 {
     SoSlam::SoSlam(
-            DataSource &data_source,
-            BaseAssociator &associator,
-            BaseDetector &detector,
-            const gtsam::Pose3 &initial_pose,
-            const bool &optimizer_batch) : data_source_(data_source),
-                                           associator_(associator),
-                                           detector_(detector),
-                                           initial_pose_(initial_pose),
-                                           optimizer_batch_(optimizer_batch)
+        DataSource &data_source,
+        BaseAssociator &associator,
+        BaseDetector &detector,
+        const gtsam::Pose3 &initial_pose,
+        const bool &optimizer_batch) : data_source_(data_source),
+                                       associator_(associator),
+                                       detector_(detector),
+                                       initial_pose_(initial_pose),
+                                       optimizer_batch_(optimizer_batch)
     {
         state_ = SoSlamState(initial_pose, optimizer_batch);
         reset();
@@ -160,25 +160,25 @@ namespace gtsam_soslam
         gtsam::Vector6 temp;
         temp << 1.01, 1.01, 1.01, 1.01, 1.01, 1.01;
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
-                gtsam::noiseModel::Diagonal::Sigmas(temp);
+            gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(1.0, 1.0, 1.0, 1.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(1.0, 1.0, 1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0,1.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0,1.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+            gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
 
         // Huber kernel
         auto huber_boxes = gtsam::noiseModel::Robust::Create(
-                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_boxes);
+            gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_boxes);
         auto huber_ssc = gtsam::noiseModel::Robust::Create(
-                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_ssc);
+            gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_ssc);
         auto huber_psc = gtsam::noiseModel::Robust::Create(
-                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_psc);
+            gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_psc);
         auto huber_syc = gtsam::noiseModel::Robust::Create(
-                gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_syc);
+            gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_syc);
 
         // Setup state for the current step
         auto &s = state_;
@@ -213,11 +213,39 @@ namespace gtsam_soslam
         }
         else
         {
-            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+            // gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
             s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
         }
 
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
+        //---------------------------------------------------------------------------------------------
+
+        int blockSize = 2;
+        int apertureSize = 3;
+        // adjust this to get different # of keypoints
+        int thresh = 180;
+        double k = 0.04;
+        std::vector<std::pair<double, double>> feature_points;
+        cv::Mat gray_image;
+        cv::cvtColor(n->rgb, gray_image, cv::COLOR_BGR2GRAY);
+        cv::Mat detected_image = cv::Mat::zeros(gray_image.size(), CV_32FC1);
+        cv::cornerHarris(gray_image, detected_image, blockSize, apertureSize, k);
+        cv::Mat detected_norm, detected_norm_scaled;
+        cv::normalize(detected_image, detected_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+        cv::convertScaleAbs(detected_norm, detected_norm_scaled);
+
+        for (int i = 0; i < detected_norm.rows; i++)
+        {
+            for (int j = 0; j < detected_norm.cols; j++)
+            {
+                if ((int)detected_norm.at<float>(i, j) > thresh)
+                {
+                    feature_points.push_back(std::make_pair((int)i, (int)j)); // x, y coordinate in matrix form
+                }
+            }
+        }
+        n->nearest_edge_point = findNearestEdge(feature_points, gray_image.size().height, gray_image.size().width);
+        //---------------------------------------------------------------------------------------------
 
         // batch optimization
         if (s.optimizer_batch_)
@@ -227,7 +255,7 @@ namespace gtsam_soslam
                 bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
             }
         }
-            // step optimization
+        // step optimization
         else
         {
             guess_initial_values();
@@ -250,11 +278,11 @@ namespace gtsam_soslam
             }
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
-//            s.graph_.print();
-//                        s.isam_optimizer_.update(
-//                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-//                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-//                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
+            //            s.graph_.print();
+            //                        s.isam_optimizer_.update(
+            //                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+            //                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+            //                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
         }
         s.prev_step = *n;
     }
@@ -292,12 +320,35 @@ namespace gtsam_soslam
         BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, huber_boxes, "STANDARD");
         SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_ssc);
         PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_psc);
-        SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key, huber_syc);
+        SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key, huber_syc, state_.this_step.nearest_edge_point);
         state_.graph_.add(bbs);
         state_.graph_.add(ssc);
         state_.graph_.add(psc);
-//        state_.graph_.add(syc);
+        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 
+    std::vector<std::vector<std::pair<double, double>>> SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y)
+    {
+        std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
+        for (int i = 0; i < int(max_x); i++)
+        {
+            for (int j = 0; j < int(max_y); j++)
+            {
+                double min = DBL_MAX;
+                std::pair<double, double> nearest_edge;
+                for (int k = 0; k < feature_points.size(); k++)
+                {
+                    double distance = pow(pow(feature_points[k].first - i, 2) + pow(feature_points[k].second - j, 2), 0.5);
+                    if (distance < min)
+                    {
+                        nearest_edge = feature_points[k];
+                        min = distance;
+                    }
+                }
+                nearest[i][j] = nearest_edge;
+            }
+        }
+        return nearest;
+    }
 } // namespace gtsam_soslam

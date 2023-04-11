@@ -25,7 +25,7 @@ namespace gtsam_soslam
      * factor between Pose3 and ConstrainedDualQuadric
      */
     class SymmetryFactor
-            : public gtsam::NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
+        : public gtsam::NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
     {
     public:
         enum MeasurementModel
@@ -41,6 +41,7 @@ namespace gtsam_soslam
         boost::shared_ptr<gtsam::Cal3_S2> calibration_; //< camera calibration
         typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> Base;
         MeasurementModel measurementModel_;
+        std::vector<std::vector<std::pair<double, double>>> nearest_edge_point_;
         int sigma_scc_;
 
     public:
@@ -48,7 +49,7 @@ namespace gtsam_soslam
 
         /** Default constructor */
         SymmetryFactor()
-                : label_("None"), measurementModel_(STANDARD), sigma_scc_(1){};
+            : label_("None"), measurementModel_(STANDARD), sigma_scc_(1){};
 
         SymmetryFactor(const AlignedBox2 &measured,
                        const cv::Mat &image,
@@ -56,15 +57,18 @@ namespace gtsam_soslam
                        const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
                        const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                        const gtsam::SharedNoiseModel &model,
+                       const std::vector<std::vector<std::pair<double, double>>> &nearest_edge_point,
                        const MeasurementModel &errorType = STANDARD,
+
                        const int &sigma_scc = 1)
-                : Base(model, poseKey, quadricKey),
-                  image_(image),
-                  measured_(measured),
-                  label_(label),
-                  calibration_(calibration),
-                  measurementModel_(errorType),
-                  sigma_scc_(sigma_scc){};
+            : Base(model, poseKey, quadricKey),
+              image_(image),
+              measured_(measured),
+              label_(label),
+              calibration_(calibration),
+              measurementModel_(errorType),
+              nearest_edge_point_(nearest_edge_point),
+              sigma_scc_(sigma_scc){};
 
         SymmetryFactor(const AlignedBox2 &measured,
                        const cv::Mat &image,
@@ -73,13 +77,15 @@ namespace gtsam_soslam
                        const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                        const gtsam::SharedNoiseModel &model,
                        const std::string &errorString,
+                       const std::vector<std::vector<std::pair<double, double>>> &nearest_edge_point,
                        const int &sigma_scc = 1)
-                : Base(model, poseKey, quadricKey),
-                  image_(image),
-                  measured_(measured),
-                  label_(label),
-                  calibration_(calibration),
-                  sigma_scc_(sigma_scc)
+            : Base(model, poseKey, quadricKey),
+              image_(image),
+              measured_(measured),
+              label_(label),
+              calibration_(calibration),
+              nearest_edge_point_(nearest_edge_point),
+              sigma_scc_(sigma_scc)
         {
             if (errorString == "STANDARD")
             {
@@ -92,8 +98,8 @@ namespace gtsam_soslam
             else
             {
                 throw std::logic_error(
-                        "The error type \"" + errorString +
-                        "\" is not a valid option for initializing a SymmetryFactor");
+                    "The error type \"" + errorString +
+                    "\" is not a valid option for initializing a SymmetryFactor");
             }
         }
 
@@ -109,9 +115,9 @@ namespace gtsam_soslam
          * @param H2 the derivative of the error wrt quadric (1x9)
          */
         gtsam::Vector evaluateError(
-                const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric,
-                boost::optional<gtsam::Matrix &> H1 = boost::none,
-                boost::optional<gtsam::Matrix &> H2 = boost::none) const override;
+            const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric,
+            boost::optional<gtsam::Matrix &> H1 = boost::none,
+            boost::optional<gtsam::Matrix &> H2 = boost::none) const override;
 
         /** Evaluates the derivative of the error wrt pose */
         gtsam::Matrix evaluateH1(const gtsam::Pose3 &pose,
@@ -130,7 +136,7 @@ namespace gtsam_soslam
         /** Prints the SymmetryFactor with optional string */
         void print(const std::string &s = "",
                    const gtsam::KeyFormatter &keyFormatter =
-                   gtsam::DefaultKeyFormatter) const override;
+                       gtsam::DefaultKeyFormatter) const override;
 
         /** Returns true if equal keys, measurement, noisemodel and calibration */
         bool equals(const SymmetryFactor &other, double tol = 1e-9) const;
@@ -141,8 +147,7 @@ namespace gtsam_soslam
 // Add to testable group
 template <>
 struct gtsam::traits<gtsam_soslam::SymmetryFactor>
-        : public gtsam::Testable<gtsam_soslam::SymmetryFactor>
+    : public gtsam::Testable<gtsam_soslam::SymmetryFactor>
 {
 };
-#endif //GTSAM_SOSLAM_SYMMETRYFACTOR_H
-
+#endif // GTSAM_SOSLAM_SYMMETRYFACTOR_H
