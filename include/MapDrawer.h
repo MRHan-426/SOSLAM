@@ -21,50 +21,57 @@
 
 #include<mutex>
 #include "SoSlam.h"
+
 using namespace std;
-namespace gtsam_soslam
-{
+namespace gtsam_soslam {
 
-class MapDrawer
-{
-public:
-    MapDrawer(SoSlamState* sState, const string &strSettingPath);
+    class MapDrawer {
+    public:
+        MapDrawer(SoSlamState *sState, const string &strSettingPath);
 
-    SoSlamState* s;
+        SoSlamState *s;
 
-    void DrawSemiDense(const double sigma);
-    void DrawModel();
-    void DrawTriangles(pangolin::OpenGlMatrix &Twc);
-    void DrawFrame();
+        void DrawSemiDense(const double sigma);
 
-    void DrawMapPoints();
-    void Coordinate();
-    void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph);
+        void DrawModel();
 
-    // BRIEF [EAO-SLAM] draw objects.
-    void DrawObject(const bool bCubeObj, const bool QuadricObj,
+        void DrawTriangles(pangolin::OpenGlMatrix &Twc);
+
+        void DrawFrame();
+
+        void DrawMapPoints();
+
+        void Coordinate();
+
+        void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph);
+
+        // BRIEF [EAO-SLAM] draw objects.
+        void DrawObject(const bool bCubeObj, const bool QuadricObj,
 //                    const string &flag,
-                    const bool bShowBottle,  const bool bShowChair, const bool bShowTvmonitors,
-                    const bool bShowKeyboard,const bool bShowMouse, const bool bShowBook,   const bool bShowBear);
+                        const bool bShowBottle, const bool bShowChair, const bool bShowTvmonitors,
+                        const bool bShowKeyboard, const bool bShowMouse, const bool bShowBook, const bool bShowBear);
 
-    void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
-    void SetCurrentCameraPose(const cv::Mat &Tcw);
-    // void SetReferenceKeyFrame(KeyFrame *pKF);
-    void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M);
-    pangolin::OpenGlMatrix GetOpenGLCameraMatrixFromPose3(gtsam::Pose3 &ps);
+        void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
 
-private:
-    float mKeyFrameSize;
-    float mKeyFrameLineWidth;
-    float mGraphLineWidth;
-    float mPointSize;
-    float mCameraSize;
-    float mCameraLineWidth;
+        void SetCurrentCameraPose(const cv::Mat &Tcw);
 
-    cv::Mat mCameraPose;
+        // void SetReferenceKeyFrame(KeyFrame *pKF);
+        void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M);
 
-    std::mutex mMutexCamera;
-};
+        pangolin::OpenGlMatrix GetOpenGLCameraMatrixFromPose3(gtsam::Pose3 &ps);
+
+    private:
+        float mKeyFrameSize;
+        float mKeyFrameLineWidth;
+        float mGraphLineWidth;
+        float mPointSize;
+        float mCameraSize;
+        float mCameraLineWidth;
+
+        cv::Mat mCameraPose;
+
+        std::mutex mMutexCamera;
+    };
 
 } //namespace ORB_SLAM
 

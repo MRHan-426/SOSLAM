@@ -16,8 +16,7 @@
 #include <AlignedBox2.h>
 #include <ConstrainedDualQuadric.h>
 
-namespace gtsam_soslam
-{
+namespace gtsam_soslam {
 
     /**
      * @class BoundingBoxFactor
@@ -27,11 +26,9 @@ namespace gtsam_soslam
      * and compares this to the measured bounding box.
      */
     class BoundingBoxFactor
-            : public gtsam::NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
-    {
+            : public gtsam::NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> {
     public:
-        enum MeasurementModel
-        {
+        enum MeasurementModel {
             STANDARD,
             TRUNCATED
         }; ///< enum to declare which error function to use
@@ -40,7 +37,7 @@ namespace gtsam_soslam
         AlignedBox2 measured_;                          ///< measured bounding box
         boost::shared_ptr<gtsam::Cal3_S2> calibration_; ///< camera calibration
 
-        typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric>
+        typedef NoiseModelFactor2 <gtsam::Pose3, ConstrainedDualQuadric>
                 Base; ///< base class has keys and noisemodel as private members
 
         MeasurementModel measurementModel_;
@@ -53,7 +50,7 @@ namespace gtsam_soslam
 
         /** Default constructor */
         BoundingBoxFactor()
-                : measured_(0., 0., 0., 0.), measurementModel_(STANDARD){};
+                : measured_(0., 0., 0., 0.), measurementModel_(STANDARD) {};
 
         BoundingBoxFactor(const AlignedBox2 &measured,
                           const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
@@ -63,7 +60,7 @@ namespace gtsam_soslam
                 : Base(model, poseKey, quadricKey),
                   measured_(measured),
                   calibration_(calibration),
-                  measurementModel_(errorType){};
+                  measurementModel_(errorType) {};
 
         /** Constructor from measured box, calbration, dimensions and posekey,
          * quadrickey, noisemodel */
@@ -74,18 +71,12 @@ namespace gtsam_soslam
                           const std::string &errorString)
                 : Base(model, poseKey, quadricKey),
                   measured_(measured),
-                  calibration_(calibration)
-        {
-            if (errorString == "STANDARD")
-            {
+                  calibration_(calibration) {
+            if (errorString == "STANDARD") {
                 measurementModel_ = STANDARD;
-            }
-            else if (errorString == "TRUNCATED")
-            {
+            } else if (errorString == "TRUNCATED") {
                 measurementModel_ = TRUNCATED;
-            }
-            else
-            {
+            } else {
                 throw std::logic_error(
                         "The error type \"" + errorString +
                         "\" is not a valid option for initializing a BoundingBoxFactor");

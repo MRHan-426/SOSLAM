@@ -21,7 +21,7 @@
 
 namespace gtsam_soslam {
 
-class DataSource {
+    class DataSource {
     public:
         virtual void restart() = 0;
 
@@ -32,19 +32,22 @@ class DataSource {
         virtual std::tuple<gtsam::Pose3, gtsam::Matrix3, cv::Mat> next(SoSlamState &state) = 0;
 
         virtual ~DataSource() = default;
-};
+    };
 
-class BaseAssociator {
+    class BaseAssociator {
     public:
-        virtual std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state) = 0;
+        virtual std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>>
+        associate(SoSlamState &state) = 0;
+
         virtual ~BaseAssociator() = default;
     };
 
-class BaseDetector {
+    class BaseDetector {
     public:
-        virtual std::vector<Detection> detect(SoSlamState& state) = 0;
+        virtual std::vector<Detection> detect(SoSlamState &state) = 0;
+
         virtual ~BaseDetector() = default;
-};
+    };
 
 } // namespace gtsam_soslam
 #endif //GTSAM_SOSLAM_BASECLASS_H

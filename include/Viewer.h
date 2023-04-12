@@ -30,65 +30,68 @@
 
 #include <mutex>
 #include "SoSlam.h"
-namespace gtsam_soslam
-{
+
+namespace gtsam_soslam {
 
 // class Tracking;
-class FrameDrawer;
-class MapDrawer;
+    class FrameDrawer;
+
+    class MapDrawer;
 //class
 // class System;
-using namespace std;
-class Viewer
-{
-public:
-    Viewer( SoSlamState* sState,  FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
-            const string &strSettingPath);
+    using namespace std;
 
-    // Main thread function. Draw points, keyframes, the current camera pose and the last processed
-    // frame. Drawing is refreshed according to the camera fps. We use Pangolin.
-    void Run();
+    class Viewer {
+    public:
+        Viewer(SoSlamState *sState, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer,
+               const string &strSettingPath);
 
-    void RequestFinish();
+        // Main thread function. Draw points, keyframes, the current camera pose and the last processed
+        // frame. Drawing is refreshed according to the camera fps. We use Pangolin.
+        void Run();
 
-    void RequestStop();
+        void RequestFinish();
 
-    bool isFinished();
+        void RequestStop();
 
-    bool isStopped();
+        bool isFinished();
 
-    void Release();
+        bool isStopped();
 
-private:
+        void Release();
 
-    bool Stop();
+    private:
 
-    // System* mpSystem;
-    SoSlamState* s;
-    FrameDrawer* mpFrameDrawer;
-    MapDrawer* mpMapDrawer;
-    // Tracking* mpTracker;
+        bool Stop();
 
-    // 1/fps in ms
-    double mT;
-    float mImageWidth, mImageHeight;
+        // System* mpSystem;
+        SoSlamState *s;
+        FrameDrawer *mpFrameDrawer;
+        MapDrawer *mpMapDrawer;
+        // Tracking* mpTracker;
 
-    float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
-    float mfx, mfy, mcx, mcy;
+        // 1/fps in ms
+        double mT;
+        float mImageWidth, mImageHeight;
 
-    bool CheckFinish();
-    void SetFinish();
-    bool mbFinishRequested;
-    bool mbFinished;
-    std::mutex mMutexFinish;
+        float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
+        float mfx, mfy, mcx, mcy;
 
-    bool mbStopped;
-    bool mbStopRequested;
-    std::mutex mMutexStop;
+        bool CheckFinish();
 
-    // demo.
+        void SetFinish();
+
+        bool mbFinishRequested;
+        bool mbFinished;
+        std::mutex mMutexFinish;
+
+        bool mbStopped;
+        bool mbStopRequested;
+        std::mutex mMutexStop;
+
+        // demo.
 //    string mflag;
-};
+    };
 
 }
 
