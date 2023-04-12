@@ -4,6 +4,7 @@ cmake-build-debug*/
 cmake-build-release
 input/
 input_10/
+output/
 input_full/
 
 dist/

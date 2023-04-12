@@ -29,7 +29,7 @@ namespace gtsam_soslam
 
 Viewer::Viewer( SoSlamState* sState, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer,
                 const string &strSettingPath):
-    s(s),
+    s(sState),
     mpFrameDrawer(pFrameDrawer),mpMapDrawer(pMapDrawer),
     mbFinishRequested(false), mbFinished(true), mbStopped(false), mbStopRequested(false)
 {
@@ -77,7 +77,7 @@ void Viewer::Run()
 
     pangolin::CreatePanel("menu").SetBounds(0.0,1.0,0.0,pangolin::Attach::Pix(175));
     pangolin::Var<bool> menuFollowCamera("menu.Follow Camera",true,true);
-    pangolin::Var<bool> menuShowCamera("menu.Show Camera",true,true);           
+    pangolin::Var<bool> menuShowCamera("menu.Show Camera",true,true);
     pangolin::Var<bool> menuShowPoints("menu.Show Points",true,true);
     pangolin::Var<bool> menuShowKeyFrames("menu.Show KeyFrames",true,true);
     pangolin::Var<bool> menuShowGraph("menu.Show Graph",true,true);
@@ -243,6 +243,16 @@ void Viewer::Run()
         cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage();
         if(!QuadricImage.empty())
         {
+            static int i=0;
+            if(s->this_step.needSave()){
+               cout<<"now i:"<<s->this_step.i<<endl;
+                std::string filename = "../output/outputimage" + std::to_string(++i) + ".png";
+                bool success = cv::imwrite(filename, QuadricImage);
+                if (success) {
+                    std::cout << "successfully store image" << std::endl;
+                    s->this_step.imageSaved();
+                }
+            }
             cv::Mat resizeimg;
             cv::resize(QuadricImage, resizeimg, cv::Size(640*0.7, 480*0.7), 0, 0, cv::INTER_CUBIC);
             cv::imshow("Quadric Projection", resizeimg);

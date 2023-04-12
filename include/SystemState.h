@@ -65,6 +65,8 @@ namespace gtsam_soslam
 
     class StepState
     {
+    private:
+        bool image_ready_=false;
     public:
         int i;
         gtsam::Key pose_key;
@@ -94,7 +96,9 @@ namespace gtsam_soslam
             }
             return *this;
         }
-
+        void imageprepared(){ image_ready_=true;}
+        bool needSave() const{return image_ready_;}
+        void imageSaved(){ image_ready_=false;}
         bool isValid() const
         {
             return i != 0;
@@ -103,6 +107,7 @@ namespace gtsam_soslam
 
     class SoSlamState
     {
+
     public:
         gtsam::Pose3 initial_pose_;
         gtsam::Matrix noise_prior_;
@@ -121,6 +126,7 @@ namespace gtsam_soslam
         gtsam::Cal3_S2 calib_rgb_;
         StepState prev_step;
         StepState this_step;
+
 
         explicit SoSlamState(const gtsam::Pose3 &initial_pose = Constants::POSES[0], const bool &optimizer_batch = true)
             : initial_pose_(initial_pose),

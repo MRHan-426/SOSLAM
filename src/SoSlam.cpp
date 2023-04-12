@@ -295,6 +295,7 @@ namespace gtsam_soslam
 
         }
         s.prev_step = *n;
+        s.this_step.imageprepared();
     }
 
     void SoSlam::reset()
