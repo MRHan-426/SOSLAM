@@ -27,40 +27,40 @@ using namespace std;
 namespace gtsam_soslam {
 
 /* ************************************************************************* */
-gtsam::Vector QuadricAngleFactor::evaluateError(
-    const ConstrainedDualQuadric& quadric,
-    boost::optional<gtsam::Matrix&> H) const {
-  // evaluate error
-  gtsam::Rot3 QRot = quadric.pose().rotation();
-  gtsam::Vector3 error = measured_.localCoordinates(QRot);
-  // Rot3::LocalCoordinates(quadric.pose().rotation());
+    gtsam::Vector QuadricAngleFactor::evaluateError(
+            const ConstrainedDualQuadric &quadric,
+            boost::optional<gtsam::Matrix &> H) const {
+        // evaluate error
+        gtsam::Rot3 QRot = quadric.pose().rotation();
+        gtsam::Vector3 error = measured_.localCoordinates(QRot);
+        // Rot3::LocalCoordinates(quadric.pose().rotation());
 
-  std::function<gtsam::Vector(const ConstrainedDualQuadric&)> funPtr(
-      boost::bind(&QuadricAngleFactor::evaluateError, this,
-                  boost::placeholders::_1, boost::none));
-  if (H) {
-    Eigen::Matrix<double, 3, 9> de_dr =
-        gtsam::numericalDerivative11(funPtr, quadric, 1e-6);
-    *H = de_dr;
-  }
-  return error;
-}
-
-/* ************************************************************************* */
-void QuadricAngleFactor::print(const std::string& s,
-                               const gtsam::KeyFormatter& keyFormatter) const {
-  cout << s << "QuadricAngleFactor(" << keyFormatter(key()) << ")" << endl;
-  cout << "    NoiseModel: ";
-  noiseModel()->print();
-  cout << endl;
-}
+        std::function<gtsam::Vector(const ConstrainedDualQuadric &)> funPtr(
+                boost::bind(&QuadricAngleFactor::evaluateError, this,
+                            boost::placeholders::_1, boost::none));
+        if (H) {
+            Eigen::Matrix<double, 3, 9> de_dr =
+                    gtsam::numericalDerivative11(funPtr, quadric, 1e-6);
+            *H = de_dr;
+        }
+        return error;
+    }
 
 /* ************************************************************************* */
-bool QuadricAngleFactor::equals(const QuadricAngleFactor& other,
-                                double tol) const {
-  bool equal =
-      noiseModel()->equals(*other.noiseModel(), tol) && key() == other.key();
-  return equal;
-}
+    void QuadricAngleFactor::print(const std::string &s,
+                                   const gtsam::KeyFormatter &keyFormatter) const {
+        cout << s << "QuadricAngleFactor(" << keyFormatter(key()) << ")" << endl;
+        cout << "    NoiseModel: ";
+        noiseModel()->print();
+        cout << endl;
+    }
+
+/* ************************************************************************* */
+    bool QuadricAngleFactor::equals(const QuadricAngleFactor &other,
+                                    double tol) const {
+        bool equal =
+                noiseModel()->equals(*other.noiseModel(), tol) && key() == other.key();
+        return equal;
+    }
 
 }  // namespace gtsam_soslam

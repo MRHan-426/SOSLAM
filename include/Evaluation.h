@@ -19,7 +19,7 @@
 #include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Cal3_S2.h>
 
-namespace gtsam_soslam{
+namespace gtsam_soslam {
     namespace evaluate {
 
         // Function to calculate 2D IOU

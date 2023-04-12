@@ -17,6 +17,7 @@
  */
 
 #pragma once
+
 #include <map>
 #include <set>
 #include <vector>
@@ -38,10 +39,8 @@
 #include <boost/optional.hpp>
 #include <Eigen/Dense>
 
-namespace gtsam_soslam
-{
-    namespace utils
-    {
+namespace gtsam_soslam {
+    namespace utils {
 
         /**
          * Returns the real roots of the polynomial
@@ -53,10 +52,10 @@ namespace gtsam_soslam
                                        const double &c);
 
         gtsam::Vector2 getConicPointsAtX(
-            const Eigen::Matrix<long double, 3, 3> &pointConic, const double &x);
+                const Eigen::Matrix<long double, 3, 3> &pointConic, const double &x);
 
         gtsam::Vector2 getConicPointsAtY(
-            const Eigen::Matrix<long double, 3, 3> &pointConic, const double &y);
+                const Eigen::Matrix<long double, 3, 3> &pointConic, const double &y);
 
         /** Interpolate poses */
         gtsam::Pose3 interpolate(const gtsam::Pose3 &p1, const gtsam::Pose3 &p2,
@@ -91,31 +90,34 @@ namespace gtsam_soslam
         gtsam::Matrix TVEC(int m, int n);
 
         ConstrainedDualQuadric initialize_quadric_ray_intersection(
-            const std::vector<gtsam::Pose3> &obs_poses,
-            const std::vector<AlignedBox2> &boxes,
-            SoSlamState &state);
+                const std::vector<gtsam::Pose3> &obs_poses,
+                const std::vector<AlignedBox2> &boxes,
+                SoSlamState &state);
 
         ConstrainedDualQuadric initialize_with_ssc_psc_bbs_syc(
-            const BoundingBoxFactor &bbs,
-            const SemanticScaleFactor &ssc,
-            const PlaneSupportingFactor &psc,
-            const SymmetryFactor &syc,
-            const gtsam::Pose3 &camera_pose
+                const BoundingBoxFactor &bbs,
+                const SemanticScaleFactor &ssc,
+                const PlaneSupportingFactor &psc,
+                const SymmetryFactor &syc,
+                const gtsam::Pose3 &camera_pose
 
         );
 
         // visualize
         void visualize(SoSlamState &state);
 
-        std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>> ps_and_qs_from_values(const gtsam::Values &values);
+        std::pair<std::map<gtsam::Key, gtsam::Pose3>, std::map<gtsam::Key, ConstrainedDualQuadric>>
+        ps_and_qs_from_values(const gtsam::Values &values);
+
         // newfactors
         gtsam::NonlinearFactorGraph new_factors(const gtsam::NonlinearFactorGraph &current,
                                                 const gtsam::NonlinearFactorGraph &previous);
+
         // newvalues
         gtsam::Values new_values(const gtsam::Values &current, const gtsam::Values &previous);
 
-        double area(const gtsam::Vector4&);
+        double area(const gtsam::Vector4 &);
 
-        double iou(const AlignedBox2&, const AlignedBox2&);
+        double iou(const AlignedBox2 &, const AlignedBox2 &);
     } // namespace utils
 } // namespace gtsam_soslam

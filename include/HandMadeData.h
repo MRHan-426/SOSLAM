@@ -4,6 +4,7 @@
 
 #ifndef GTSAM_SOSLAM_HANDMADEDATA_H
 #define GTSAM_SOSLAM_HANDMADEDATA_H
+
 #include "Constants.h"
 #include "QuadricCamera.h"
 #include "SystemState.h"
@@ -25,59 +26,61 @@
 #include <opencv4/opencv2/opencv.hpp> // 4.7.0
 
 namespace gtsam_soslam {
-class HandMadeData : public DataSource
-{
-public:
-    std::string img_path_;
-    std::string xml_path_;
-    std::string calib_file_;
-    std::vector<std::string> odom_data_;
-    int num_img_;
+    class HandMadeData : public DataSource {
+    public:
+        std::string img_path_;
+        std::string xml_path_;
+        std::string calib_file_;
+        std::vector<std::string> odom_data_;
+        int num_img_;
 
-    void restart() override {
-        i = 0;
-    }
-    explicit HandMadeData(const std::string& img_path = "../input/img/", const std::string& xml_path = "../input/xml/", const std::string& calib_file= "../input/calib_params.txt", const std::string& odom_file= "../input/odom.txt");
+        void restart() override {
+            i = 0;
+        }
 
-    int file_num(const std::string& folder_path);
+        explicit HandMadeData(const std::string &img_path = "../input/img/",
+                              const std::string &xml_path = "../input/xml/",
+                              const std::string &calib_file = "../input/calib_params.txt",
+                              const std::string &odom_file = "../input/odom.txt");
 
-    gtsam::Vector5 calib_rgb() override;
+        int file_num(const std::string &folder_path);
 
-    bool done() const override {
-        return i == num_img_;
-    }
+        gtsam::Vector5 calib_rgb() override;
 
-    std::tuple<gtsam::Pose3, gtsam::Matrix3 , cv::Mat> next(SoSlamState& state) override;
+        bool done() const override {
+            return i == num_img_;
+        }
 
-private:
-    int i;
-};
+        std::tuple<gtsam::Pose3, gtsam::Matrix3, cv::Mat> next(SoSlamState &state) override;
 
-
-class HandMadeDetector : public BaseDetector
-{
-public:
-    std::string xml_path_;
-
-    explicit HandMadeDetector(const std::string& xml_path = "../input/xml/") : xml_path_(xml_path), i(0){}
-
-    std::vector<Detection> detect(SoSlamState& state) override;
-
-private:
-    int i;
-};
+    private:
+        int i;
+    };
 
 
-class HandMadeAssociator : public BaseAssociator
-{
-public:
-    HandMadeAssociator() = default;
+    class HandMadeDetector : public BaseDetector {
+    public:
+        std::string xml_path_;
 
-    static std::vector<Detection> flat(const std::vector<std::vector<Detection>>& list_of_lists);
+        explicit HandMadeDetector(const std::string &xml_path = "../input/xml/") : xml_path_(xml_path), i(0) {}
 
-    std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>> associate(SoSlamState& state) override;
+        std::vector<Detection> detect(SoSlamState &state) override;
 
-};
+    private:
+        int i;
+    };
+
+
+    class HandMadeAssociator : public BaseAssociator {
+    public:
+        HandMadeAssociator() = default;
+
+        static std::vector<Detection> flat(const std::vector<std::vector<Detection>> &list_of_lists);
+
+        std::tuple<std::vector<Detection>, std::vector<Detection>, std::vector<Detection>>
+        associate(SoSlamState &state) override;
+
+    };
 } // namespace gtsam_soslam
 
 #endif //GTSAM_SOSLAM_HANDMADEDATA_H

@@ -1,5 +1,6 @@
 #ifndef SYSTEMSTATE_H
 #define SYSTEMSTATE_H
+
 #include "Constants.h"
 
 #include <vector>
@@ -23,35 +24,28 @@
 #include <gtsam/nonlinear/Values.h>
 #include <gtsam/geometry/Cal3.h>
 
-namespace gtsam_soslam
-{
+namespace gtsam_soslam {
 
-    class Detection
-    {
+    class Detection {
     public:
         std::string label;
         gtsam::Vector4 bounds;
         gtsam::Key pose_key;
         gtsam::Key quadric_key;
 
-        bool operator==(const Detection &other) const
-        {
-            if (label == other.label && bounds == other.bounds && pose_key == other.pose_key && quadric_key == other.quadric_key)
-            {
+        bool operator==(const Detection &other) const {
+            if (label == other.label && bounds == other.bounds && pose_key == other.pose_key &&
+                quadric_key == other.quadric_key) {
                 return true;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
 
         Detection(const Detection &other) = default;
 
-        Detection &operator=(const Detection &other)
-        {
-            if (this != &other)
-            {
+        Detection &operator=(const Detection &other) {
+            if (this != &other) {
                 label = other.label;
                 bounds << other.bounds[0], other.bounds[1], other.bounds[2], other.bounds[3];
                 pose_key = other.pose_key;
@@ -60,7 +54,11 @@ namespace gtsam_soslam
             return *this;
         }
 
-        explicit Detection(std::string label = "None", gtsam::Vector4 bounds = gtsam::Vector4::Zero(), gtsam::Key pose_key = 0, gtsam::Key quadric_key = 66666) : label(std::move(label)), bounds(std::move(bounds)), pose_key(pose_key), quadric_key(quadric_key) {}
+        explicit Detection(std::string label = "None", gtsam::Vector4 bounds = gtsam::Vector4::Zero(),
+                           gtsam::Key pose_key = 0, gtsam::Key quadric_key = 66666) : label(std::move(label)),
+                                                                                      bounds(std::move(bounds)),
+                                                                                      pose_key(pose_key),
+                                                                                      quadric_key(quadric_key) {}
     };
 
     class StepState
@@ -77,15 +75,13 @@ namespace gtsam_soslam
         std::vector<Detection> new_associated;
         std::vector<std::vector<std::pair<double, double>>> nearest_edge_point;
 
-        explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i))
-        {
+        explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i)) {
         }
 
         StepState(const StepState &other) = default;
-        StepState &operator=(const StepState &other)
-        {
-            if (this != &other)
-            {
+
+        StepState &operator=(const StepState &other) {
+            if (this != &other) {
                 i = other.i;
                 pose_key = other.pose_key;
                 rgb = other.rgb;
@@ -105,9 +101,7 @@ namespace gtsam_soslam
         }
     };
 
-    class SoSlamState
-    {
-
+    class SoSlamState {
     public:
         gtsam::Pose3 initial_pose_;
         gtsam::Matrix noise_prior_;
@@ -129,9 +123,8 @@ namespace gtsam_soslam
 
 
         explicit SoSlamState(const gtsam::Pose3 &initial_pose = Constants::POSES[0], const bool &optimizer_batch = true)
-            : initial_pose_(initial_pose),
-              optimizer_batch_(optimizer_batch)
-        {
+                : initial_pose_(initial_pose),
+                  optimizer_batch_(optimizer_batch) {
 
             isam_params_.relinearizeThreshold = 0.05;
             isam_params_.relinearizeSkip = 10;

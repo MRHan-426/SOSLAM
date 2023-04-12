@@ -12,24 +12,19 @@
 
 using namespace std;
 
-namespace gtsam_soslam
-{
+namespace gtsam_soslam {
     gtsam::Vector SymmetryFactor::evaluateError(
-        const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric,
-        boost::optional<gtsam::Matrix &> H1,
-        boost::optional<gtsam::Matrix &> H2) const
-    {
+            const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric,
+            boost::optional<gtsam::Matrix &> H1,
+            boost::optional<gtsam::Matrix &> H2) const {
         // In the function, the camera pose and quadratic surface inputs are first checked for validity.
         // An exception is thrown if the quadratic is behind the camera or the camera is inside the object.
-        try
-        {
+        try {
             // check pose-quadric pair
-            if (quadric.isBehind(pose))
-            {
+            if (quadric.isBehind(pose)) {
                 throw QuadricProjectionException("Quadric is behind camera");
             }
-            if (quadric.contains(pose))
-            {
+            if (quadric.contains(pose)) {
                 throw QuadricProjectionException("Camera is inside quadric");
             }
             //--------------------------------------------------------------------------------------------------
@@ -80,10 +75,8 @@ namespace gtsam_soslam
             std::vector<pair<double, double>> uniform_sample_points;
             int x_step = bounding_box_width / 5;
             int y_step = bounding_box_height / 3;
-            for (int i = bounding_box_x; i <= bounding_box_x + bounding_box_width; i += x_step)
-            {
-                for (int j = bounding_box_y; j <= bounding_box_y + bounding_box_height; j += y_step)
-                {
+            for (int i = bounding_box_x; i <= bounding_box_x + bounding_box_width; i += x_step) {
+                for (int j = bounding_box_y; j <= bounding_box_y + bounding_box_height; j += y_step) {
                     uniform_sample_points.push_back(std::make_pair(j, i)); // transfer to matrix form
                 }
             }
@@ -105,8 +98,7 @@ namespace gtsam_soslam
             /// for loop
             int count = 0;
             // std::cout << "uniform_sample_points: " << uniform_sample_points.size() << std::endl;
-            for (const auto &[i, j] : uniform_sample_points)
-            {
+            for (const auto &[i, j]: uniform_sample_points) {
                 // std::vector<pair<double, double>> feature_points_temp = feature_points;
                 double min_dis = -1;
                 // pair<double, double> nearest_edge_point = nearest_edge_point_[i][j];
@@ -156,22 +148,19 @@ namespace gtsam_soslam
                 sample_ray[3] = 0;
                 double a = sample_ray.transpose() * quadric.matrix() * sample_ray;
                 double b = 2.0 * sample_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                           gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
                 double discriminant = b * b - 4.0 * a * c;
-                if (discriminant < 0.0)
-                {
+                if (discriminant < 0.0) {
                     std::cout << "No Sample Intersection" << std::endl;
                 }
                 double t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
                 double t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
                 gtsam::Vector4 intersection1 = sample_ray * t1;
                 gtsam::Vector4 intersection2 = sample_ray * t2;
-                if (intersection1.head<3>().dot(camera_translation) > 0)
-                {
+                if (intersection1.head<3>().dot(camera_translation) > 0) {
                     sample_3D = intersection1;
-                }
-                else
-                {
+                } else {
                     sample_3D = intersection2;
                 }
 
@@ -204,22 +193,19 @@ namespace gtsam_soslam
                 edge_ray[3] = 0;
                 a = edge_ray.transpose() * quadric.matrix() * edge_ray;
                 b = 2.0 * edge_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                    gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
                 discriminant = b * b - 4.0 * a * c;
-                if (discriminant < 0.0)
-                {
+                if (discriminant < 0.0) {
                     std::cout << "No Edge Intersection" << std::endl;
                 }
                 t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
                 t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
                 intersection1 = edge_ray * t1;
                 intersection2 = edge_ray * t2;
-                if (intersection1.head<3>().dot(camera_translation) > 0)
-                {
+                if (intersection1.head<3>().dot(camera_translation) > 0) {
                     edge_3D = intersection1;
-                }
-                else
-                {
+                } else {
                     edge_3D = intersection2;
                 }
                 sample_3D[3] = 1;
@@ -323,15 +309,17 @@ namespace gtsam_soslam
                 // std::cout << "3D sample" << sample_point_sym(0) << " " << sample_point_sym(1) << " " << sample_point_sym(2) << std::endl;
 
                 symmetry_sample_2D = world2image * symmetry_sample_3D;
-                double symmtery_sample_2D_x = (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] / symmetry_sample_2D[2] : 0;
-                double symmtery_sample_2D_y = symmetry_sample_2D[1] / symmetry_sample_2D[2] > 0 ? symmetry_sample_2D[1] / symmetry_sample_2D[2] : 0;
+                double symmtery_sample_2D_x =
+                        (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] /
+                                                                              symmetry_sample_2D[2] : 0;
+                double symmtery_sample_2D_y =
+                        symmetry_sample_2D[1] / symmetry_sample_2D[2] > 0 ? symmetry_sample_2D[1] /
+                                                                            symmetry_sample_2D[2] : 0;
 
-                if ((symmtery_sample_2D_x) >= image_.rows)
-                {
+                if ((symmtery_sample_2D_x) >= image_.rows) {
                     symmtery_sample_2D_x = image_.rows - 1;
                 }
-                if ((symmtery_sample_2D_y) >= image_.cols)
-                {
+                if ((symmtery_sample_2D_y) >= image_.cols) {
                     symmtery_sample_2D_y = image_.cols - 1;
                 }
 
@@ -347,7 +335,8 @@ namespace gtsam_soslam
                 //     }
                 // }
 
-                std::pair<double, double> edge_2D_q = nearest_edge_point_[int(symmtery_sample_2D_x)][int(symmtery_sample_2D_y)];
+                std::pair<double, double> edge_2D_q = nearest_edge_point_[int(symmtery_sample_2D_x)][int(
+                        symmtery_sample_2D_y)];
                 // std::pair<double, double> edge_2D_q = {1, 1};
                 symmetry_edge_2D << edge_2D_q.first, edge_2D_q.second, 1;
 
@@ -373,23 +362,20 @@ namespace gtsam_soslam
 
             //--------------------------------------------------------------------------------------------------
 
-            if (NUMERICAL_DERIVATIVE)
-            {
+            if (NUMERICAL_DERIVATIVE) {
                 std::function<gtsam::Vector(const gtsam::Pose3 &,
                                             const ConstrainedDualQuadric &)>
-                    funPtr(boost::bind(&SymmetryFactor::evaluateError, this,
-                                       boost::placeholders::_1, boost::placeholders::_2,
-                                       boost::none, boost::none));
-                if (H1)
-                {
+                        funPtr(boost::bind(&SymmetryFactor::evaluateError, this,
+                                           boost::placeholders::_1, boost::placeholders::_2,
+                                           boost::none, boost::none));
+                if (H1) {
                     Eigen::Matrix<double, 1, 6> db_dx_ =
-                        gtsam::numericalDerivative21(funPtr, pose, quadric, 1e-6);
+                            gtsam::numericalDerivative21(funPtr, pose, quadric, 1e-6);
                     *H1 = db_dx_;
                 }
-                if (H2)
-                {
+                if (H2) {
                     Eigen::Matrix<double, 1, 9> db_dq_ =
-                        gtsam::numericalDerivative22(funPtr, pose, quadric, 1e-6);
+                            gtsam::numericalDerivative22(funPtr, pose, quadric, 1e-6);
                     *H2 = db_dq_;
                 }
             }
@@ -399,21 +385,17 @@ namespace gtsam_soslam
             // check for nans
             if (error.array().isInf().any() || error.array().isNaN().any() ||
                 (H1 && (H1->array().isInf().any() || H1->array().isNaN().any())) ||
-                (H2 && (H2->array().isInf().any() || H2->array().isNaN().any())))
-            {
+                (H2 && (H2->array().isInf().any() || H2->array().isNaN().any()))) {
                 throw std::runtime_error("nan/inf error in bbf");
             }
         }
-        // handle projection failures
-        catch (QuadricProjectionException &e)
-        {
+            // handle projection failures
+        catch (QuadricProjectionException &e) {
             gtsam::Vector1 error = gtsam::Vector1::Ones() * 1000.0;
-            if (H1)
-            {
+            if (H1) {
                 *H1 = gtsam::Matrix::Zero(1, 6);
             }
-            if (H2)
-            {
+            if (H2) {
                 *H2 = gtsam::Matrix::Zero(1, 9);
             }
             return error;
@@ -425,8 +407,7 @@ namespace gtsam_soslam
     /* ************************************************************************* */
     // the derivative of the error wrt camera pose (1x6)
     gtsam::Matrix SymmetryFactor::evaluateH1(
-        const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const
-    {
+            const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const {
         gtsam::Matrix H1;
         this->evaluateError(pose, quadric, H1, boost::none);
         return H1;
@@ -435,8 +416,7 @@ namespace gtsam_soslam
     /* ************************************************************************* */
     // the derivative of the error wrt quadric (1x9)
     gtsam::Matrix SymmetryFactor::evaluateH2(
-        const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const
-    {
+            const gtsam::Pose3 &pose, const ConstrainedDualQuadric &quadric) const {
         gtsam::Matrix H2;
         this->evaluateError(pose, quadric, boost::none, H2);
         return H2;
@@ -444,29 +424,26 @@ namespace gtsam_soslam
 
     /* ************************************************************************* */
     /** Evaluates the derivative of the error wrt pose */
-    gtsam::Matrix SymmetryFactor::evaluateH1(const gtsam::Values &x) const
-    {
+    gtsam::Matrix SymmetryFactor::evaluateH1(const gtsam::Values &x) const {
         const gtsam::Pose3 pose = x.at<gtsam::Pose3>(this->poseKey());
         const ConstrainedDualQuadric quadric =
-            x.at<ConstrainedDualQuadric>(this->objectKey());
+                x.at<ConstrainedDualQuadric>(this->objectKey());
         return this->evaluateH1(pose, quadric);
     }
 
     /* ************************************************************************* */
     /** Evaluates the derivative of the error wrt quadric */
-    gtsam::Matrix SymmetryFactor::evaluateH2(const gtsam::Values &x) const
-    {
+    gtsam::Matrix SymmetryFactor::evaluateH2(const gtsam::Values &x) const {
         const gtsam::Pose3 pose = x.at<gtsam::Pose3>(this->poseKey());
         const ConstrainedDualQuadric quadric =
-            x.at<ConstrainedDualQuadric>(this->objectKey());
+                x.at<ConstrainedDualQuadric>(this->objectKey());
         return this->evaluateH2(pose, quadric);
     }
 
     /* ************************************************************************* */
     // Print function
     void SymmetryFactor::print(const std::string &s,
-                               const gtsam::KeyFormatter &keyFormatter) const
-    {
+                               const gtsam::KeyFormatter &keyFormatter) const {
         cout << s << "SymmetryFactor(" << keyFormatter(key1()) << ","
              << keyFormatter(key2()) << ")" << endl;
         cout << "    Label: " << label_ << endl;
@@ -478,8 +455,7 @@ namespace gtsam_soslam
     /* ************************************************************************* */
     // Judge function
     bool SymmetryFactor::equals(const SymmetryFactor &other,
-                                double tol) const
-    {
+                                double tol) const {
         bool equal = label_ == other.label_ &&
                      calibration_->equals(*other.calibration_, tol) &&
                      noiseModel()->equals(*other.noiseModel(), tol) &&

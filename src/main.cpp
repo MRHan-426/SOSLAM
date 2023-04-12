@@ -4,7 +4,7 @@
 namespace gtsam_soslam {
 
     void run(DataSource &data_source, BaseAssociator &associator, BaseDetector &detector, \
-        const gtsam::Pose3 &initial_pose, const bool& use_3D_visualization) {
+        const gtsam::Pose3 &initial_pose, const bool &use_3D_visualization) {
 
         SoSlam *q = new SoSlam(
                 data_source, //DataSource
@@ -31,7 +31,7 @@ namespace gtsam_soslam {
 }
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     // Check if the "--dummy" command-line argument is present
     bool use_dummy_data = false;
     bool use_3D_visualization = false;
@@ -39,8 +39,7 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--dummy") == 0) {
             use_dummy_data = true;
-        }
-        else if (strcmp(argv[i], "--3d") == 0){
+        } else if (strcmp(argv[i], "--3d") == 0) {
             use_3D_visualization = true;
         }
     }
@@ -51,13 +50,13 @@ int main(int argc, char* argv[]) {
         gtsam_soslam::DummyAssociator associator;
         gtsam_soslam::DummyDetector detector;
         gtsam_soslam::run(data_source, associator, detector, initial_pose, use_3D_visualization);
-    }
-    else{
-        const std::string& img_path = "../input/img/";
-        const std::string& xml_path = "../input/xml/";
-        const std::string& calib_file = "../input/calib_params.txt";
-        const std::string& odom_file = "../input/odom.txt";
-        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(-0.4095, 0.6529, -0.5483, 0.3248), gtsam::Point3(-0.1546, -1.4445, 1.4773));
+    } else {
+        const std::string &img_path = "../input/img/";
+        const std::string &xml_path = "../input/xml/";
+        const std::string &calib_file = "../input/calib_params.txt";
+        const std::string &odom_file = "../input/odom.txt";
+        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(-0.4095, 0.6529, -0.5483, 0.3248),
+                          gtsam::Point3(-0.1546, -1.4445, 1.4773));
         const gtsam::Pose3 &initial_pose = pose;
 
         gtsam_soslam::HandMadeData data_source(img_path, xml_path, calib_file, odom_file);
