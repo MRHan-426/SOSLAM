@@ -256,7 +256,32 @@ namespace gtsam_soslam {
             std::cout << s.graph_.error(s.estimates_) << std::endl;
 //            limitFactorGraphSize(s.graph_, 100);
 //            updateInitialEstimates(s.graph_, s.estimates_);
+            auto current_ps_qs = utils::ps_and_qs_from_values(s.estimates_);
+            std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
+            int i = -1;
+//        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+            for (auto &key_value: cqs) {
+                i++;
 
+                gtsam::Key ObjKey = key_value.first;
+                cout<<gtsam::Symbol(ObjKey)<<endl;
+                ConstrainedDualQuadric *Obj = &(key_value.second);
+                gtsam::Vector3 radii = Obj->radii();
+                double lenth = radii[0];
+                double width = radii[1];
+                double height = radii[2];
+                cout<<"len: "<<lenth<<", "<<width<<", "<<height<<endl;
+                gtsam::Point3 centroid = Obj->centroid();
+                cout<<"center: "<<centroid[0]<<", "<<centroid[1]<<", "<<centroid[2]<<endl;
+                gtsam::Pose3 pose = Obj->pose();
+                gtsam::Rot3 rot = pose.rotation();
+                gtsam::Vector3 ypr = rot.ypr();
+                double yaw_deg = ypr(0) * 180.0 / M_PI;
+                double pitch_deg = ypr(1) * 180.0 / M_PI;
+                double roll_deg = ypr(2) * 180.0 / M_PI;
+//                cout<<"rot: "<<rot<<endl;
+                cout<<"yaw: "<<yaw_deg<<" *M_PI/180.0, "<<pitch_deg<<" *M_PI/180.0, "<<roll_deg<<endl;
+            }
         }
         s.prev_step = *n;
         s.this_step.imageprepared();

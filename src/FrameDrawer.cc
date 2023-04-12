@@ -189,6 +189,47 @@ namespace gtsam_soslam {
             }
         }
 
+        std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
+        for (auto &Obj: groundTruthQuad) {
+            gtsam::Vector3 radii = Obj.radii();
+            double lenth = radii[0];
+            double width = radii[1];
+            double height = radii[2];
+
+            // step 10.7 project quadrics to the image (only for visualization).
+            cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
+            axe.at<float>(0) = lenth;
+            axe.at<float>(1) = width;
+            axe.at<float>(2) = height;
+
+            gtsam::Pose3 pose = Obj.pose(); // assume pose is initialized
+            cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
+            cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
+
+// set translation matrix
+            T.at<float>(0, 3) = pose.translation().x();
+            T.at<float>(1, 3) = pose.translation().y();
+            T.at<float>(2, 3) = pose.translation().z();
+
+// set rotation matrix
+            gtsam::Rot3 rot = pose.rotation();
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    R.at<float>(i, j) = rot.matrix()(i, j);
+                }
+            }
+
+// concatenate rotation and translation matrices
+            cv::Mat Twq = T * R;
+            // create a quadric.
+            cv::Mat Twq_t = Twq.t();
+
+            mQuadricIm = DrawQuadricProject(mQuadricIm,
+                                            cv_mat,
+                                            axe,
+                                            Twq,
+                                            5);
+        }
         int i = -1;
 //    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
         for (auto &key_value: cqs) {

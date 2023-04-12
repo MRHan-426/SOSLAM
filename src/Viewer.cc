@@ -189,6 +189,7 @@ namespace gtsam_soslam {
             // step draw objects.
 //        if(menuShowCubeObj || menuShowQuadricObj)
 //        {
+            mpMapDrawer->DrawGroundTruthObject(menuShowCubeObj, menuShowQuadricObj);
             mpMapDrawer->DrawObject(menuShowCubeObj, menuShowQuadricObj,
                     //    mflag,
                                     menuShowBottle, menuShowChair, menuShowTvmonitors,

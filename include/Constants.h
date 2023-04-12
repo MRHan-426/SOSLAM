@@ -13,6 +13,7 @@ namespace gtsam_soslam {
         // Function to initialize POSES
         std::vector<gtsam::Pose3> initPoses();
 
+        std::vector<gtsam_soslam::ConstrainedDualQuadric> groundTruthQuadrics();
         // Function to initialize QUADRICS
         std::vector<gtsam_soslam::ConstrainedDualQuadric> initQuadrics();
 

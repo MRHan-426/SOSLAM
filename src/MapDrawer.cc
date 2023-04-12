@@ -302,24 +302,7 @@ namespace gtsam_soslam {
 ////        gtsam::Key ObjKey = key_value.first;
 //            ConstrainedDualQuadric *Obj = &(q);
 
-//    for (auto& key_value : cqs) {
-//        i ++;
-//        gtsam::Key ObjKey = key_value.first;
-//        ConstrainedDualQuadric * Obj =&(key_value.second);
 
-            // Do something with the key and value
-//    }
-//    for(size_t i = 0; i < vObjs.size(); ++i)
-//    {
-//        Object_Map* Obj = vObjs[i];
-
-            // if((Obj->mObjectFrame.size() < 5) && (flag != "NA"))
-            //     continue;
-
-            // if((Obj->mvpMapObjectMappoints.size() < 10) || (Obj->bBadErase == true))
-            // {
-            //     continue;
-            // }
 
 
             // color.
@@ -410,7 +393,82 @@ namespace gtsam_soslam {
         }
 
     } // draw objects END ----------------------------------------------------------------------------
+    void MapDrawer::DrawGroundTruthObject(const bool bCubeObj, const bool QuadricObj)
+    {
+        std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
+        vector<cv::Mat> object_cen;
 
+        int i = -1;
+        for (auto &Obj: groundTruthQuad) {
+            i++;
+            glColor3f(0.5, 0.5, 0.5);
+
+            glLineWidth(mCameraLineWidth);
+
+            // ****************************************
+            //    STEP 2. [EAO-SLAM] Draw quadrics.   *
+            // ****************************************
+//        if(QuadricObj && !((Obj->mnClass == 73) || (Obj->mnClass == 64) || (Obj->mnClass == 65)
+//                || (Obj->mnClass == 66) || (Obj->mnClass == 56) || (Obj->mnClass == 72)))
+//        {
+            // half axial length.
+            gtsam::Vector3 radii = Obj.radii();
+            double lenth = radii[0];
+            double width = radii[1];
+            double height = radii[2];
+
+
+            cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
+            axe.at<float>(0) = lenth;
+            axe.at<float>(1) = width;
+            axe.at<float>(2) = height;
+
+            gtsam::Point3 centroid = Obj.centroid();
+            // quadrcis pose.
+            ;
+//        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
+//        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
+            gtsam::Pose3 pose = Obj.pose();
+            gtsam::Rot3 rot = pose.rotation();
+            gtsam::Matrix33 rot_matrix = rot.matrix();
+
+//            gtsam::Matrix44 homogeneous_matrix = gtsam::Matrix44::Identity();
+//            homogeneous_matrix.block<3, 3>(0, 0) = rot_matrix;
+            gtsam::Matrix44 homogeneous_matrix = pose.matrix();
+            std::vector<GLfloat> gl_matrix(homogeneous_matrix.data(),
+                                           homogeneous_matrix.data() + homogeneous_matrix.size());
+
+            // create a quadric.
+            GLUquadricObj *pObj = gluNewQuadric();
+//        cv::Mat Twq_t = Twq;
+
+            // color
+            cv::Scalar sc;
+            sc = cv::Scalar(0, 255, 0);
+
+            // add to display list
+            glPushMatrix();
+//        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
+            glMultMatrixf(gl_matrix.data());
+
+            glScalef(
+                    (GLfloat) (axe.at<float>(0, 0)),
+                    (GLfloat) (axe.at<float>(0, 1)),
+                    (GLfloat) (axe.at<float>(0, 2))
+            );
+
+            gluQuadricDrawStyle(pObj, GLU_LINE);
+            gluQuadricNormals(pObj, GLU_NONE);
+            glBegin(GL_COMPILE);
+            gluSphere(pObj, 1., 15, 10);
+
+            glEnd();
+            glPopMatrix();
+            // draw quadrics END ---------------------------------------------------------------------
+//        }
+        }
+
+    } // draw objects END ----------------------------------------------------------------------------
 
     void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc) {
 
