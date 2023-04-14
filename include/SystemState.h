@@ -82,7 +82,7 @@ namespace gtsam_soslam
         gtsam::Pose3 odom;
         std::vector<Detection> detections;
         std::vector<Detection> new_associated;
-        std::vector<std::vector<std::pair<int, int>>> nearest_edge_point;
+        std::map<std::pair<int, int>, std::pair<int, int>> nearest_edge_point;
 
         explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i))
         {

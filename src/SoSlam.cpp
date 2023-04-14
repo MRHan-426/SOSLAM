@@ -2,6 +2,8 @@
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
+#include <thread>
+#include <mutex>
 
 using namespace std;
 
@@ -123,6 +125,7 @@ namespace gtsam_soslam
 
     void SoSlam::spin()
     {
+
         while (!data_source_.done())
         {
             step();
@@ -248,11 +251,9 @@ namespace gtsam_soslam
             cv::Mat detected_norm, detected_norm_scaled;
             cv::normalize(detected_image, detected_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
             cv::convertScaleAbs(detected_norm, detected_norm_scaled);
-
-            cv::imshow("Normalized Image", detected_norm_scaled);
-
             // ====================================================================================================== //
             // Add the featured points
+
             std::vector<std::pair<int, int>> feature_points;
             int thresh = 108;
             for (int i = 0; i < detected_norm.rows; i++)
@@ -268,25 +269,10 @@ namespace gtsam_soslam
                 }
             }
 
-            cv::Mat feature_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
-
-            // Draw circles of the feature points
-            int radius = 1;
-            cv::Scalar color(0, 0, 255); // red color
-            int thickness = -1;          // filled circle
-            for (const auto &feature_point : feature_points)
-            {
-                //                std::cout << "(" << feature_point.second << ", " << feature_point.first << ")" << std::endl;
-                cv::Point center(feature_point.second, feature_point.first); // Note: OpenCV uses (y,x) indexing
-                cv::circle(feature_image, center, radius, color, thickness);
-            }
-            std::cout << "feature points" << std::endl;
-
-            // feature point image
-            cv::imshow("feature_image", feature_image);
-            // cv::waitKey(0);
             //---------------------------------------------------------------------------------------------
 
+            // calculate the closest point
+            std::map<std::pair<int, int>, std::pair<int, int>> closest_map;
             std::vector<pair<int, int>> uniform_sample_points;
             int x_step = (int)bounding_box_width / 5;
             int y_step = (int)bounding_box_height / 5;
@@ -297,10 +283,8 @@ namespace gtsam_soslam
                     uniform_sample_points.emplace_back(std::make_pair(j, i)); // transfer to matrix form
                 }
             }
-
-            // calculate the closest point
-            std::map<std::pair<int, int>, std::pair<int, int>> closest_map;
             closest_map = findClosest(uniform_sample_points, feature_points);
+            n->nearest_edge_point = closest_map;
 
             cv::Mat uniform_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
             cv::Mat nearest_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
@@ -308,19 +292,141 @@ namespace gtsam_soslam
             for (const auto &uniform_sample_point : uniform_sample_points)
             {
                 // draw uniform point
+                int radius = 1;
+                cv::Scalar color(255, 0, 0);
                 cv::Point center(uniform_sample_point.second, uniform_sample_point.first); // Note: OpenCV uses (y,x) indexing
                 cv::circle(nearest_image, center, radius, color, 2);
 
-                // draw closest to uniform point
-                // std::pair<int, int> closest_to_uniform_point = n->nearest_edge_point[uniform_sample_point.second][uniform_sample_point.first];
-                // cv::Point center_edge(closest_to_uniform_point.second, closest_to_uniform_point.first); // Note: OpenCV uses (y,x) indexing
-                // cv::circle(nearest_image, center_edge, radius, (255, 0, 0), 5);
-
                 // draw new version
-                cv::Point center_edge(closest_map[uniform_sample_point].first, closest_map[uniform_sample_point].second);
+                cv::Point center_edge(closest_map[uniform_sample_point].second, closest_map[uniform_sample_point].first);
                 cv::circle(nearest_image, center_edge, radius, cv::Scalar(255, 0, 0), 5);
                 cv::imshow("nearest_image", nearest_image);
-                cv::waitKey(0);
+
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                // s.associated_[0] gtsam::Pose3 pose = s.estimates_.at<gtsam::Pose3>(s.associated_[0].pose_key);
+                // gtsam::Matrix33 camera_rotation = pose.rotation().matrix();
+                // gtsam::Vector3 camera_translation = pose.translation();
+                // gtsam::Vector3 sample_2D(uniform_sample_point.first, uniform_sample_point.second, 1);
+                // gtsam::Vector3 edge_2D(closest_map[uniform_sample_point].first, closest_map[uniform_sample_point].second);
+                // gtsam::Vector3 symmetry_sample_2D(3);
+                // gtsam::Vector3 symmetry_edge_2D(3);
+                // gtsam::Vector4 project_line_sample(4);
+                // gtsam::Vector4 project_line_edge(4);
+                // gtsam::Vector4 sample_3D = QuadricCamera::transformToImage(pose, calibration_).transpose() * sample_2D;
+                // gtsam::Vector4 edge_3D = QuadricCamera::transformToImage(pose, calibration_).transpose() * edge_2D;
+                // gtsam::Vector4 symmetry_sample_3D;
+                // gtsam::Vector4 symmetry_edge_3D;
+
+                // gtsam::Matrix3 K = calibration_->K();
+                // static gtsam::Matrix34 I34 = gtsam::Matrix::Identity(3, 4);
+                // gtsam::Matrix34 extrinsic = I34 * pose.inverse().matrix();
+                // gtsam::Matrix43 ex_inverse = extrinsic.transpose() * (extrinsic * extrinsic.transpose()).inverse();
+                // gtsam::Matrix43 image2world = ex_inverse * K.inverse();
+                // gtsam::Matrix34 world2image = K * extrinsic;
+
+                // project_line_sample = image2world * pose.translation();
+
+                // gtsam::Vector4 sample_ray = image2world * sample_2D;
+                // sample_ray[3] = 0;
+                // double a = sample_ray.transpose() * quadric.matrix() * sample_ray;
+                // double b = 2.0 * sample_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                //            gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // double discriminant = b * b - 4.0 * a * c;
+                // if (discriminant < 0.0)
+                // {
+                //     std::cout << "No Sample Intersection" << std::endl;
+                // }
+                // double t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
+                // double t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
+                // gtsam::Vector4 intersection1 = sample_ray * t1;
+                // gtsam::Vector4 intersection2 = sample_ray * t2;
+                // if (intersection1.head<3>().dot(camera_translation) > 0)
+                // {
+                //     sample_3D = intersection1;
+                // }
+                // else
+                // {
+                //     sample_3D = intersection2;
+                // }
+
+                // // sample_3D = image2world * sample_2D;
+                // // sample_3D /= sample_3D[3];
+                // sample_3D[3] = 1;
+
+                // gtsam::Vector4 edge_ray = image2world * edge_2D;
+                // edge_ray[3] = 0;
+                // a = edge_ray.transpose() * quadric.matrix() * edge_ray;
+                // b = 2.0 * edge_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                //     gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // discriminant = b * b - 4.0 * a * c;
+                // if (discriminant < 0.0)
+                // {
+                //     std::cout << "No Edge Intersection" << std::endl;
+                // }
+                // t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
+                // t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
+                // intersection1 = edge_ray * t1;
+                // intersection2 = edge_ray * t2;
+                // if (intersection1.head<3>().dot(camera_translation) > 0)
+                // {
+                //     edge_3D = intersection1;
+                // }
+                // else
+                // {
+                //     edge_3D = intersection2;
+                // }
+                // sample_3D[3] = 1;
+
+                // gtsam::Vector3 x_unit(1, 0, 0);
+                // gtsam::Vector3 x_dir = (quadric_rotation * x_unit).normalized();
+                // gtsam::Vector3 y_unit(0, 1, 0);
+                // gtsam::Vector3 y_dir = (quadric_rotation * y_unit).normalized();
+                // gtsam::Vector3 z_unit(0, 0, 1);
+                // gtsam::Vector3 z_dir = (quadric_rotation * z_unit).normalized();
+                // gtsam::Vector3 camera_face_dir = camera_rotation * x_unit;
+                // gtsam::Vector3 symmetry_plane(3);
+
+                // if (std::abs(x_dir.dot(camera_face_dir)) > std::abs(y_dir.dot(camera_face_dir)))
+                //     symmetry_plane = y_dir;
+                // else
+                //     symmetry_plane = x_dir;
+
+                // double distance = sample_3D.head(3).dot(symmetry_plane);
+                // symmetry_sample_3D.head(3) = sample_3D.head(3) - 2 * distance * symmetry_plane;
+                // symmetry_sample_3D[3] = 1;
+
+                // symmetry_sample_2D = world2image * symmetry_sample_3D;
+                // double symmtery_sample_2D_x =
+                //     (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] /
+                //                                                               symmetry_sample_2D[2]
+                //                                                         : 0;
+                // double symmtery_sample_2D_y =
+                //     symmetry_sample_2D[1] / symmetry_sample_2D[2] > 0 ? symmetry_sample_2D[1] /
+                //                                                             symmetry_sample_2D[2]
+                //                                                       : 0;
+
+                // if ((symmtery_sample_2D_x) >= image_.rows)
+                // {
+                //     symmtery_sample_2D_x = image_.rows - 1;
+                // }
+                // if ((symmtery_sample_2D_y) >= image_.cols)
+                // {
+                //     symmtery_sample_2D_y = image_.cols - 1;
+                // }
+
+                // std::pair<double, double> edge_2D_q = nearest_edge_point_[int(symmtery_sample_2D_x)][int(
+                //     symmtery_sample_2D_y)];
+                // // std::pair<double, double> edge_2D_q = {1, 1};
+                // symmetry_edge_2D << edge_2D_q.first, edge_2D_q.second, 1;
+
+                // cv::Point center_sym_sample(edge_2D_q.second, edge_2D_q.first);
+                // cv::circle(nearest_image, center_sym_sample, radius, cv::Scalar(0, 255, 0), 5);
+                // cv::imshow("nearest_image", nearest_image);
+
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                // cv::waitKey(0);
             }
 
             // batch optimization
@@ -485,22 +591,31 @@ namespace gtsam_soslam
     std::map<std::pair<int, int>, std::pair<int, int>> SoSlam::findClosest(std::vector<std::pair<int, int>> uniform_points,
                                                                            std::vector<std::pair<int, int>> feature_points)
     {
+        // for (int i = 0; i < feature_points.size(); i++)
+        // {
+        //     std::cout << feature_points[i].first << ": " << feature_points[i].second << ": ";
+        // }
+        // std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         std::map<std::pair<int, int>, std::pair<int, int>> closest_map;
         for (const auto &uniform_point : uniform_points)
         {
+            // std::cout << "uniform_point: " << uniform_point.first << ": " << uniform_point.second << std::endl;
             double min_distance = std::numeric_limits<double>::max();
             std::pair<int, int> closest_feature_point;
 
             for (const auto &feature_point : feature_points)
             {
-                double distance = cv::norm(cv::Point2d(feature_point.first - uniform_point.first, feature_point.second - uniform_point.first));
-
+                double distance = cv::norm(cv::Point2d(feature_point.first - uniform_point.first, feature_point.second - uniform_point.second));
+                // double distance = std::pow(std::pow(feature_point.first - uniform_point.first, 2) + std::pow(feature_point.second - uniform_point.second, 2), 0.5);
                 if (distance < min_distance)
                 {
+                    std::cout << distance << std::endl;
                     min_distance = distance;
                     closest_feature_point = feature_point;
                 }
             }
+            // std::cout << min_distance << std::endl;
+            // std::cout << closest_feature_point.first << ": " << closest_feature_point.second << std::endl;
 
             closest_map[uniform_point] = closest_feature_point;
         }

@@ -42,7 +42,7 @@ namespace gtsam_soslam
         boost::shared_ptr<gtsam::Cal3_S2> calibration_; //< camera calibration
         typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> Base;
         MeasurementModel measurementModel_;
-        std::vector<std::vector<std::pair<int, int>>> nearest_edge_point_;
+        std::map<std::pair<int, int>, std::pair<int, int>> nearest_edge_point_;
         int sigma_scc_;
 
     public:
@@ -58,7 +58,7 @@ namespace gtsam_soslam
                        const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
                        const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                        const gtsam::SharedNoiseModel &model,
-                       const std::vector<std::vector<std::pair<int, int>>> &nearest_edge_point,
+                       const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
                        const MeasurementModel &errorType = STANDARD,
 
                        const int &sigma_scc = 1)
@@ -78,7 +78,7 @@ namespace gtsam_soslam
                        const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                        const gtsam::SharedNoiseModel &model,
                        const std::string &errorString,
-                       const std::vector<std::vector<std::pair<int, int>>> &nearest_edge_point,
+                       const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
                        const int &sigma_scc = 1)
             : Base(model, poseKey, quadricKey),
               image_(image),
