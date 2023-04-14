@@ -49,122 +49,121 @@ namespace gtsam_soslam
                 cv::imshow("nearest_image", nearest_image);
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                // s.associated_[0] gtsam::Pose3 pose = s.estimates_.at<gtsam::Pose3>(s.associated_[0].pose_key);
-                // gtsam::Matrix33 camera_rotation = pose.rotation().matrix();
-                // gtsam::Vector3 camera_translation = pose.translation();
-                // gtsam::Vector3 sample_2D(uniform_sample_point.first, uniform_sample_point.second, 1);
-                // gtsam::Vector3 edge_2D(closest_map[uniform_sample_point].first, closest_map[uniform_sample_point].second);
-                // gtsam::Vector3 symmetry_sample_2D(3);
-                // gtsam::Vector3 symmetry_edge_2D(3);
-                // gtsam::Vector4 project_line_sample(4);
-                // gtsam::Vector4 project_line_edge(4);
-                // gtsam::Vector4 sample_3D = QuadricCamera::transformToImage(pose, calibration_).transpose() * sample_2D;
-                // gtsam::Vector4 edge_3D = QuadricCamera::transformToImage(pose, calibration_).transpose() * edge_2D;
-                // gtsam::Vector4 symmetry_sample_3D;
-                // gtsam::Vector4 symmetry_edge_3D;
+                gtsam::Pose3 quadric_pose = quadric.pose();
+                gtsam::Matrix33 quadric_rotation = quadric.pose().rotation().matrix();
+                gtsam::Vector3 quadric_translation = quadric.pose().translation();
+                gtsam::Matrix33 camera_rotation = pose.rotation().matrix();
+                gtsam::Vector3 camera_translation = pose.translation();
+                gtsam::Vector3 sample_2D(uniform_sample_point.first, uniform_sample_point.second, 1);
+                gtsam::Vector3 edge_2D(nearest_edge_point_.at(uniform_sample_point).first, nearest_edge_point_.at(uniform_sample_point).second, 1);
+                gtsam::Vector3 symmetry_sample_2D(3);
+                gtsam::Vector3 symmetry_edge_2D(3);
+                gtsam::Vector4 project_line_sample(4);
+                gtsam::Vector4 project_line_edge(4);
+                gtsam::Vector4 sample_3D(4);
+                gtsam::Vector4 edge_3D(4);
+                gtsam::Vector4 symmetry_sample_3D;
+                gtsam::Vector4 symmetry_edge_3D;
 
-                // gtsam::Matrix3 K = calibration_->K();
-                // static gtsam::Matrix34 I34 = gtsam::Matrix::Identity(3, 4);
-                // gtsam::Matrix34 extrinsic = I34 * pose.inverse().matrix();
-                // gtsam::Matrix43 ex_inverse = extrinsic.transpose() * (extrinsic * extrinsic.transpose()).inverse();
-                // gtsam::Matrix43 image2world = ex_inverse * K.inverse();
-                // gtsam::Matrix34 world2image = K * extrinsic;
+                gtsam::Matrix3 K = calibration_->K();
+                static gtsam::Matrix34 I34 = gtsam::Matrix::Identity(3, 4);
+                gtsam::Matrix34 extrinsic = I34 * pose.inverse().matrix();
+                gtsam::Matrix43 ex_inverse = extrinsic.transpose() * (extrinsic * extrinsic.transpose()).inverse();
+                gtsam::Matrix43 image2world = ex_inverse * K.inverse();
+                gtsam::Matrix34 world2image = K * extrinsic;
 
                 // project_line_sample = image2world * pose.translation();
 
-                // gtsam::Vector4 sample_ray = image2world * sample_2D;
-                // sample_ray[3] = 0;
-                // double a = sample_ray.transpose() * quadric.matrix() * sample_ray;
-                // double b = 2.0 * sample_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                // double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
-                //            gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                // double discriminant = b * b - 4.0 * a * c;
-                // if (discriminant < 0.0)
-                // {
-                //     std::cout << "No Sample Intersection" << std::endl;
-                // }
-                // double t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
-                // double t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
-                // gtsam::Vector4 intersection1 = sample_ray * t1;
-                // gtsam::Vector4 intersection2 = sample_ray * t2;
-                // if (intersection1.head<3>().dot(camera_translation) > 0)
-                // {
-                //     sample_3D = intersection1;
-                // }
-                // else
-                // {
-                //     sample_3D = intersection2;
-                // }
+                gtsam::Vector4 sample_ray = image2world * sample_2D;
+                sample_ray[3] = 0;
+                double a = sample_ray.transpose() * quadric.matrix() * sample_ray;
+                double b = 2.0 * sample_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                           gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                double discriminant = b * b - 4.0 * a * c;
+                if (discriminant < 0.0)
+                {
+                    std::cout << "No Sample Intersection" << std::endl;
+                }
+                double t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
+                double t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
+                gtsam::Vector4 intersection1 = sample_ray * t1;
+                gtsam::Vector4 intersection2 = sample_ray * t2;
+                if (intersection1.head<3>().dot(camera_translation) > 0)
+                {
+                    sample_3D = intersection1;
+                }
+                else
+                {
+                    sample_3D = intersection2;
+                }
+                sample_3D[3] = 1;
 
-                // // sample_3D = image2world * sample_2D;
-                // // sample_3D /= sample_3D[3];
-                // sample_3D[3] = 1;
+                gtsam::Vector4 edge_ray = image2world * edge_2D;
+                edge_ray[3] = 0;
+                a = edge_ray.transpose() * quadric.matrix() * edge_ray;
+                b = 2.0 * edge_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                    gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                discriminant = b * b - 4.0 * a * c;
+                if (discriminant < 0.0)
+                {
+                    std::cout << "No Edge Intersection" << std::endl;
+                }
+                t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
+                t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
+                intersection1 = edge_ray * t1;
+                intersection2 = edge_ray * t2;
+                if (intersection1.head<3>().dot(camera_translation) > 0)
+                {
+                    edge_3D = intersection1;
+                }
+                else
+                {
+                    edge_3D = intersection2;
+                }
+                sample_3D[3] = 1;
 
-                // gtsam::Vector4 edge_ray = image2world * edge_2D;
-                // edge_ray[3] = 0;
-                // a = edge_ray.transpose() * quadric.matrix() * edge_ray;
-                // b = 2.0 * edge_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                // c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
-                //     gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                // discriminant = b * b - 4.0 * a * c;
-                // if (discriminant < 0.0)
-                // {
-                //     std::cout << "No Edge Intersection" << std::endl;
-                // }
-                // t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
-                // t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
-                // intersection1 = edge_ray * t1;
-                // intersection2 = edge_ray * t2;
-                // if (intersection1.head<3>().dot(camera_translation) > 0)
-                // {
-                //     edge_3D = intersection1;
-                // }
-                // else
-                // {
-                //     edge_3D = intersection2;
-                // }
-                // sample_3D[3] = 1;
+                gtsam::Vector3 x_unit(1, 0, 0);
+                gtsam::Vector3 x_dir = (quadric_rotation * x_unit).normalized();
+                gtsam::Vector3 y_unit(0, 1, 0);
+                gtsam::Vector3 y_dir = (quadric_rotation * y_unit).normalized();
+                gtsam::Vector3 z_unit(0, 0, 1);
+                gtsam::Vector3 z_dir = (quadric_rotation * z_unit).normalized();
+                gtsam::Vector3 camera_face_dir = camera_rotation * x_unit;
+                gtsam::Vector3 symmetry_plane(3);
 
-                // gtsam::Vector3 x_unit(1, 0, 0);
-                // gtsam::Vector3 x_dir = (quadric_rotation * x_unit).normalized();
-                // gtsam::Vector3 y_unit(0, 1, 0);
-                // gtsam::Vector3 y_dir = (quadric_rotation * y_unit).normalized();
-                // gtsam::Vector3 z_unit(0, 0, 1);
-                // gtsam::Vector3 z_dir = (quadric_rotation * z_unit).normalized();
-                // gtsam::Vector3 camera_face_dir = camera_rotation * x_unit;
-                // gtsam::Vector3 symmetry_plane(3);
+                if (std::abs(x_dir.dot(camera_face_dir)) > std::abs(y_dir.dot(camera_face_dir)))
+                    symmetry_plane = y_dir;
+                else
+                    symmetry_plane = x_dir;
 
-                // if (std::abs(x_dir.dot(camera_face_dir)) > std::abs(y_dir.dot(camera_face_dir)))
-                //     symmetry_plane = y_dir;
-                // else
-                //     symmetry_plane = x_dir;
+                double distance = sample_3D.head(3).dot(symmetry_plane);
+                symmetry_sample_3D.head(3) = sample_3D.head(3) - 2 * distance * symmetry_plane;
+                symmetry_sample_3D[3] = 1;
 
-                // double distance = sample_3D.head(3).dot(symmetry_plane);
-                // symmetry_sample_3D.head(3) = sample_3D.head(3) - 2 * distance * symmetry_plane;
-                // symmetry_sample_3D[3] = 1;
+                symmetry_sample_2D = world2image * symmetry_sample_3D;
+                double symmtery_sample_2D_x =
+                    (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] /
+                                                                              symmetry_sample_2D[2]
+                                                                        : 0;
+                double symmtery_sample_2D_y =
+                    symmetry_sample_2D[1] / symmetry_sample_2D[2] > 0 ? symmetry_sample_2D[1] /
+                                                                            symmetry_sample_2D[2]
+                                                                      : 0;
 
-                // symmetry_sample_2D = world2image * symmetry_sample_3D;
-                // double symmtery_sample_2D_x =
-                //     (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] /
-                //                                                               symmetry_sample_2D[2]
-                //                                                         : 0;
-                // double symmtery_sample_2D_y =
-                //     symmetry_sample_2D[1] / symmetry_sample_2D[2] > 0 ? symmetry_sample_2D[1] /
-                //                                                             symmetry_sample_2D[2]
-                //                                                       : 0;
+                if ((symmtery_sample_2D_x) >= image_.rows)
+                {
+                    symmtery_sample_2D_x = image_.rows - 1;
+                }
+                if ((symmtery_sample_2D_y) >= image_.cols)
+                {
+                    symmtery_sample_2D_y = image_.cols - 1;
+                }
 
-                // if ((symmtery_sample_2D_x) >= image_.rows)
-                // {
-                //     symmtery_sample_2D_x = image_.rows - 1;
-                // }
-                // if ((symmtery_sample_2D_y) >= image_.cols)
-                // {
-                //     symmtery_sample_2D_y = image_.cols - 1;
-                // }
-
-                // std::pair<double, double> edge_2D_q = nearest_edge_point_[int(symmtery_sample_2D_x)][int(
-                //     symmtery_sample_2D_y)];
-                // // std::pair<double, double> edge_2D_q = {1, 1};
+                std::pair<int, int> symmetry_2D = std::make_pair((int)symmtery_sample_2D_x, (int)symmtery_sample_2D_y);
+                std::cout << symmetry_2D.first << ", " << symmetry_2D.second << std::endl;
+                // std::pair<int, int> edge_2D_q = nearest_edge_point_.at(symmetry_2D);
                 // symmetry_edge_2D << edge_2D_q.first, edge_2D_q.second, 1;
 
                 // cv::Point center_sym_sample(edge_2D_q.second, edge_2D_q.first);
@@ -172,7 +171,7 @@ namespace gtsam_soslam
                 // cv::imshow("nearest_image", nearest_image);
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                // cv::waitKey(0);
+                cv::waitKey(0);
             }
             gtsam::Vector1 error(1);
 

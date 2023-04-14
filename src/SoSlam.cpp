@@ -286,6 +286,7 @@ namespace gtsam_soslam
             closest_map = findClosest(sample_points, feature_points);
             n->nearest_edge_point = closest_map;
             n->uniform_sample_points = sample_points;
+            cv::waitKey(0);
 
             // batch optimization
             if (s.optimizer_batch_)
