@@ -27,8 +27,10 @@
 // Created by ziqihan on 3/2/23.
 //
 
-namespace gtsam_soslam {
-    class SoSlam {
+namespace gtsam_soslam
+{
+    class SoSlam
+    {
     public:
         // TODO：Class Associator, DataSource, DummyDetector
         DataSource &data_source_;
@@ -40,12 +42,12 @@ namespace gtsam_soslam {
         SoSlamState state_;
 
         SoSlam(
-                DataSource &data_source,
-                BaseAssociator &associator,
-                BaseDetector &detector,
-                // VisualOdometry visual_odometry = std::nullptr, //Optional
-                const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
-                const bool &optimizer_batch = true);
+            DataSource &data_source,
+            BaseAssociator &associator,
+            BaseDetector &detector,
+            // VisualOdometry visual_odometry = std::nullptr, //Optional
+            const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
+            const bool &optimizer_batch = true);
 
         // private:
         void guess_initial_values();
@@ -68,5 +70,8 @@ namespace gtsam_soslam {
         void updateInitialEstimates(const gtsam::NonlinearFactorGraph &graph, gtsam::Values &initialEstimates);
 
         void limitFactorGraphSize(gtsam::NonlinearFactorGraph &graph, size_t maxFactors);
+
+        std::map<std::pair<int, int>, std::pair<int, int>> findClosest(std::vector<std::pair<int, int>> uniform_points,
+                                                                       std::vector<std::pair<int, int>> feature_points);
     };
 } // namespace gtsam_soslam
