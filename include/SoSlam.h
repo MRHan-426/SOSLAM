@@ -58,9 +58,6 @@ namespace gtsam_soslam
 
         void reset();
 
-        std::vector<std::vector<std::pair<double, double>>>
-        findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y);
-
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor>
         add_detection_factors(const Detection &d, const gtsam::noiseModel::Robust::shared_ptr &noise_boxes,
                               const gtsam::noiseModel::Robust::shared_ptr &noise_scc,

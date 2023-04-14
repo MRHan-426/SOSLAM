@@ -83,6 +83,7 @@ namespace gtsam_soslam
         std::vector<Detection> detections;
         std::vector<Detection> new_associated;
         std::map<std::pair<int, int>, std::pair<int, int>> nearest_edge_point;
+        std::vector<std::pair<int, int>> uniform_sample_points;
 
         explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i))
         {

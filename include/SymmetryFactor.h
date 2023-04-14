@@ -43,6 +43,8 @@ namespace gtsam_soslam
         typedef NoiseModelFactor2<gtsam::Pose3, ConstrainedDualQuadric> Base;
         MeasurementModel measurementModel_;
         std::map<std::pair<int, int>, std::pair<int, int>> nearest_edge_point_;
+        std::vector<std::pair<int, int>> uniform_sample_points_;
+
         int sigma_scc_;
 
     public:
@@ -59,6 +61,7 @@ namespace gtsam_soslam
                        const gtsam::Key &poseKey, const gtsam::Key &quadricKey,
                        const gtsam::SharedNoiseModel &model,
                        const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
+                       const std::vector<std::pair<int, int>> uniform_sample_points,
                        const MeasurementModel &errorType = STANDARD,
 
                        const int &sigma_scc = 1)
@@ -69,6 +72,7 @@ namespace gtsam_soslam
               calibration_(calibration),
               measurementModel_(errorType),
               nearest_edge_point_(nearest_edge_point),
+              uniform_sample_points_(uniform_sample_points),
               sigma_scc_(sigma_scc){};
 
         SymmetryFactor(const AlignedBox2 &measured,
@@ -79,6 +83,7 @@ namespace gtsam_soslam
                        const gtsam::SharedNoiseModel &model,
                        const std::string &errorString,
                        const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
+                       const std::vector<std::pair<int, int>> uniform_sample_points,
                        const int &sigma_scc = 1)
             : Base(model, poseKey, quadricKey),
               image_(image),
@@ -86,6 +91,7 @@ namespace gtsam_soslam
               label_(label),
               calibration_(calibration),
               nearest_edge_point_(nearest_edge_point),
+              uniform_sample_points_(uniform_sample_points),
               sigma_scc_(sigma_scc)
         {
             if (errorString == "STANDARD")
