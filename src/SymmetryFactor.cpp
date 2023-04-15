@@ -33,7 +33,7 @@ namespace gtsam_soslam
                 throw QuadricProjectionException("Camera is inside quadric");
             }
             //--------------------------------------------------------------------------------------------------
-            cv::Mat uniform_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
+            cv::Mat symmetry_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
             cv::Mat nearest_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
 
             for (std::pair<int, int> uniform_sample_point : uniform_sample_points_)
@@ -51,15 +51,14 @@ namespace gtsam_soslam
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 gtsam::Pose3 quadric_pose = quadric.pose();
                 gtsam::Matrix33 quadric_rotation = quadric.pose().rotation().matrix();
-                gtsam::Vector3 quadric_translation = quadric.pose().translation();
                 gtsam::Matrix33 camera_rotation = pose.rotation().matrix();
+                gtsam::Vector3 quadric_translation = quadric.pose().translation();
                 gtsam::Vector3 camera_translation = pose.translation();
+
                 gtsam::Vector3 sample_2D(uniform_sample_point.first, uniform_sample_point.second, 1);
                 gtsam::Vector3 edge_2D(nearest_edge_point_.at(uniform_sample_point).first, nearest_edge_point_.at(uniform_sample_point).second, 1);
                 gtsam::Vector3 symmetry_sample_2D(3);
                 gtsam::Vector3 symmetry_edge_2D(3);
-                gtsam::Vector4 project_line_sample(4);
-                gtsam::Vector4 project_line_edge(4);
                 gtsam::Vector4 sample_3D(4);
                 gtsam::Vector4 edge_3D(4);
                 gtsam::Vector4 symmetry_sample_3D;
@@ -72,58 +71,95 @@ namespace gtsam_soslam
                 gtsam::Matrix43 image2world = ex_inverse * K.inverse();
                 gtsam::Matrix34 world2image = K * extrinsic;
 
-                // project_line_sample = image2world * pose.translation();
+                world2image = QuadricCamera::transformToImage(pose, calibration_);
+                image2world = world2image.transpose();
 
+                // calculate sample point in 3d space
                 gtsam::Vector4 sample_ray = image2world * sample_2D;
-                sample_ray[3] = 0;
-                double a = sample_ray.transpose() * quadric.matrix() * sample_ray;
-                double b = 2.0 * sample_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
-                           gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                double discriminant = b * b - 4.0 * a * c;
-                if (discriminant < 0.0)
+                sample_ray.normalize();
+
+                // Assume sample_ray is a gtsam::Vector4 representing the line in 3D space.
+                // Assume box is an AlignedBox3 representing the box in 3D space.
+
+                gtsam::Vector3 ray_dir = sample_ray.head<3>();
+                gtsam::Vector3 ray_origin = camera_translation;
+
+                gtsam::Vector3 box_min(quadric.bounds().xmin(), quadric.bounds().ymin(), quadric.bounds().zmin());
+                gtsam::Vector3 box_max(quadric.bounds().xmax(), quadric.bounds().ymax(), quadric.bounds().zmax());
+                // std::cout << box_min[0] << ", " << box_min[1] << ", " << box_min[2] << std::endl;
+
+                double tmin = -std::numeric_limits<double>::infinity();
+                double tmax = std::numeric_limits<double>::infinity();
+
+                for (int i = 0; i < 3; i++)
                 {
-                    std::cout << "No Sample Intersection" << std::endl;
+                    double t1 = (box_min(i) - ray_origin(i)) / ray_dir(i);
+                    double t2 = (box_max(i) - ray_origin(i)) / ray_dir(i);
+                    tmin = std::max(tmin, std::min(t1, t2));
+                    tmax = std::min(tmax, std::max(t1, t2));
                 }
-                double t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
-                double t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
-                gtsam::Vector4 intersection1 = sample_ray * t1;
-                gtsam::Vector4 intersection2 = sample_ray * t2;
-                if (intersection1.head<3>().dot(camera_translation) > 0)
-                {
-                    sample_3D = intersection1;
-                }
-                else
-                {
-                    sample_3D = intersection2;
-                }
+                gtsam::Vector3 intersection_point;
+                intersection_point = ray_origin + tmin * ray_dir;
+                // if (tmax >= tmin)
+                // {
+                //     // Line intersects box, compute intersection point.
+                //     intersection_point = ray_origin + tmin * ray_dir;
+                // }
+
+                sample_3D.head(3) = intersection_point;
                 sample_3D[3] = 1;
 
-                gtsam::Vector4 edge_ray = image2world * edge_2D;
-                edge_ray[3] = 0;
-                a = edge_ray.transpose() * quadric.matrix() * edge_ray;
-                b = 2.0 * edge_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
-                    gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
-                discriminant = b * b - 4.0 * a * c;
-                if (discriminant < 0.0)
-                {
-                    std::cout << "No Edge Intersection" << std::endl;
-                }
-                t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
-                t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
-                intersection1 = edge_ray * t1;
-                intersection2 = edge_ray * t2;
-                if (intersection1.head<3>().dot(camera_translation) > 0)
-                {
-                    edge_3D = intersection1;
-                }
-                else
-                {
-                    edge_3D = intersection2;
-                }
-                sample_3D[3] = 1;
+                // sample_ray[3] = 0;
+                // double a = sample_ray.transpose() * quadric.matrix() * sample_ray;
+                // double b = 2.0 * sample_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // double c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                //            gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // double discriminant = b * b - 4.0 * a * c;
+                // if (discriminant < 0.0)
+                // {
+                //     std::cout << "No Sample Intersection" << std::endl;
+                // }
+                // double t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
+                // double t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
+                // gtsam::Vector4 intersection1 = sample_ray * t1;
+                // gtsam::Vector4 intersection2 = sample_ray * t2;
+                // if (intersection1.head<3>().dot(camera_translation) > 0)
+                // {
+                //     sample_3D = intersection1;
+                // }
+                // else
+                // {
+                //     sample_3D = intersection2;
+                // }
+                // sample_3D[3] = 1;
 
+                // calculate edge point in 3d space
+                // gtsam::Vector4 edge_ray = (image2world * edge_2D).normalize();
+                // edge_ray[3] = 0;
+                // a = edge_ray.transpose() * quadric.matrix() * edge_ray;
+                // b = 2.0 * edge_ray.transpose() * quadric.matrix() * gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // c = gtsam::Vector4(0.0, 0.0, 0.0, 1.0).transpose() * quadric.matrix() *
+                //     gtsam::Vector4(0.0, 0.0, 0.0, 1.0);
+                // discriminant = b * b - 4.0 * a * c;
+                // if (discriminant < 0.0)
+                // {
+                //     std::cout << "No Edge Intersection" << std::endl;
+                // }
+                // t1 = (-b + std::sqrt(discriminant)) / (2.0 * a);
+                // t2 = (-b - std::sqrt(discriminant)) / (2.0 * a);
+                // intersection1 = edge_ray * t1;
+                // intersection2 = edge_ray * t2;
+                // if (intersection1.head<3>().dot(camera_translation) > 0)
+                // {
+                //     edge_3D = intersection1;
+                // }
+                // else
+                // {
+                //     edge_3D = intersection2;
+                // }
+                // edge_3D[3] = 1;
+
+                // calculate symmetry point in 3D space
                 gtsam::Vector3 x_unit(1, 0, 0);
                 gtsam::Vector3 x_dir = (quadric_rotation * x_unit).normalized();
                 gtsam::Vector3 y_unit(0, 1, 0);
@@ -137,12 +173,56 @@ namespace gtsam_soslam
                     symmetry_plane = y_dir;
                 else
                     symmetry_plane = x_dir;
+                double d = std::pow(std::pow(quadric_translation[0], 2) + std::pow(quadric_translation[1], 2), 0.5);
+                double numerator = std::abs(symmetry_plane.dot(sample_3D.head(3)) - d);
+                double denominator = std::sqrt(symmetry_plane.dot(symmetry_plane));
+                double distance = numerator / denominator;
 
-                double distance = sample_3D.head(3).dot(symmetry_plane);
-                symmetry_sample_3D.head(3) = sample_3D.head(3) - 2 * distance * symmetry_plane;
+                // double distance = sample_3D.head(3).dot(symmetry_plane);
+                symmetry_sample_3D.head(3) = sample_3D.head(3) + 2 * distance * symmetry_plane;
                 symmetry_sample_3D[3] = 1;
 
+                // x, y, z points
+                double intersection_point_x = intersection_point[0] / intersection_point[2];
+                double intersection_point_y = intersection_point[1] / intersection_point[2];
+                double intersection_point_z = intersection_point[2] / intersection_point[2];
+                double center_point_x = quadric_translation[0] / quadric_translation[2];
+                double center_point_y = quadric_translation[1] / quadric_translation[2];
+                double center_point_z = quadric_translation[2] / quadric_translation[2];
+                double symmetry_point_x = symmetry_sample_3D[0] / symmetry_sample_3D[3];
+                double symmetry_point_y = symmetry_sample_3D[1] / symmetry_sample_3D[3];
+                double symmetry_point_z = symmetry_sample_3D[2] / symmetry_sample_3D[3];
+
+                std::cout << "sample_3D:              " << intersection_point_x << ", " << intersection_point_y << ", " << intersection_point_z << std::endl;
+                std::cout << "----------------------  " << center_point_x << ", " << center_point_y << ", " << center_point_z << std::endl;
+                std::cout << "symmetry_sample_3D:     " << symmetry_point_x << ", " << symmetry_point_y << ", " << symmetry_point_z << std::endl;
+
+                // Find the distance
+
+                double sample_distance = std::sqrt(std::pow(center_point_x - intersection_point_x, 2) + std::pow(center_point_y - intersection_point_y, 2) + std::pow(center_point_z - intersection_point_z, 2));
+                double symmetry_distance = std::sqrt(std::pow(center_point_x - symmetry_point_x, 2) + std::pow(center_point_y - symmetry_point_y, 2) + std::pow(center_point_z - symmetry_point_z, 2));
+                // std::cout << "========================" << std::endl;
+                // std::cout << "sample distance:        " << sample_distance << std::endl;
+                // std::cout << "symmetry distance :     " << symmetry_distance << std::endl;
+                // std::cout << "||||||||||||||||||||||||" << std::endl;
+
+                // print out the symmetry point
+                // cv::Mat symmetry_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
+                // cv::Point center_sample_3D(sample_ray[1] + 100, sample_ray[0] + 100);
+                // cv::circle(symmetry_image, center_sample_3D, radius, cv::Scalar(0, 255, 255), 5); // symmetry point
+
+                // std::cout << symmetry_sample_3D[1] << ", " << symmetry_sample_3D[0] << std::endl;
+
+                // draw 3d points in 2d plane
+                cv::Point center_sample_3D(sample_ray[1] + 100, sample_ray[0] + 100);
+                cv::circle(nearest_image, center_sample_3D, radius, cv::Scalar(0, 255, 255), 5);
+                // cv::Point center_symmetry_sample_3D(symmetry_sample_3D[1], symmetry_sample_3D[0]);
+                // cv::circle(nearest_image, center_symmetry_sample_3D, radius, cv::Scalar(255, 255, 0), 5);
+                cv::imshow("nearest_image", nearest_image);
+
                 symmetry_sample_2D = world2image * symmetry_sample_3D;
+                std::cout << symmetry_sample_2D[0] / symmetry_sample_2D[2] << ", " << symmetry_sample_2D[1] / symmetry_sample_2D[2] << std::endl;
+
                 double symmtery_sample_2D_x =
                     (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] /
                                                                               symmetry_sample_2D[2]
@@ -162,7 +242,7 @@ namespace gtsam_soslam
                 }
 
                 std::pair<int, int> symmetry_2D = std::make_pair((int)symmtery_sample_2D_x, (int)symmtery_sample_2D_y);
-                std::cout << symmetry_2D.first << ", " << symmetry_2D.second << std::endl;
+                std::cout << "symmetry_2D: " << symmetry_2D.first << ", " << symmetry_2D.second << std::endl;
                 // std::pair<int, int> edge_2D_q = nearest_edge_point_.at(symmetry_2D);
                 // symmetry_edge_2D << edge_2D_q.first, edge_2D_q.second, 1;
 
