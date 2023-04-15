@@ -23,23 +23,23 @@ namespace gtsam_soslam {
         std::vector<ConstrainedDualQuadric> groundTruthQuadrics() {
             std::vector<ConstrainedDualQuadric> quadrics{
                     ConstrainedDualQuadric(gtsam::Pose3(
-                        gtsam::Rot3::RzRyRx(4.10157 *M_PI/180.0, 0 *M_PI/180.0, 0* M_PI / 180.0),
-                        { 0.945999, -1.19049, 1.07373}), {0.0894989, 0.181131, 0.201142}),
+                        gtsam::Rot3::RzRyRx(2 *M_PI/180.0, 20 *M_PI/180.0, 0* M_PI / 180.0),
+                        { 1.25, -1.07, 0.98}), {0.06, 0.21, 0.19}), //monitor
                     ConstrainedDualQuadric(gtsam::Pose3(
-                        gtsam::Rot3::RzRyRx(-6.47381 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
-                        {0.717539, -1.196, 0.943438}), {0.105458, 0.201747, 0.0102198}),
+                        gtsam::Rot3::RzRyRx(2 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
+                        {1, -1.09, 0.77}), {0.105458, 0.22, 0.0102198}), //keyboard
                     ConstrainedDualQuadric(gtsam::Pose3(
-                        gtsam::Rot3::RzRyRx(-2.79001 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
-                        {0.769214, -1.39832, 0.788364}), {0.066934, 0.0370221, 0.0324774}),
+                        gtsam::Rot3::RzRyRx(2 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
+                        {0.8, -1.36, 0.775}), {0.066934, 0.0370221, 0.0324774}), //mouse
                     ConstrainedDualQuadric(gtsam::Pose3(
-                            gtsam::Rot3::RzRyRx(-6.0229 *M_PI/180.0, 0.0565107 *M_PI/180.0, 0 * M_PI / 180.0),
-                            {0.864449, -1.69637, 0.985251}), {0.139547, 0.0941773, 0.0180347}),
+                            gtsam::Rot3::RzRyRx(2 *M_PI/180.0, -2 *M_PI/180.0, 0 * M_PI / 180.0),
+                            {1.30, -1.75, 0.77}), {0.15, 0.1, 0.02}), //book
                     ConstrainedDualQuadric(gtsam::Pose3(
-                            gtsam::Rot3::RzRyRx(7.11472 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
-                            {0.889008, -0.512086, 0.7607}), {0.0839582, 0.0427019, 0.0943408}),
+                            gtsam::Rot3::RzRyRx(2 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
+                            {0.8, -0.55, 0.8}), {0.04, 0.04, 0.09}), //cup
                     ConstrainedDualQuadric(gtsam::Pose3(
-                            gtsam::Rot3::RzRyRx(-99.6177 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
-                            {0.733733, -1.73657, 0.892947}), {0.0642692, 0.0227489, 0.0650887})
+                            gtsam::Rot3::RzRyRx(2 *M_PI/180.0, 0 *M_PI/180.0, 0 * M_PI / 180.0),
+                            {0.95, -1.78, 0.77}), {0.075, 0.075, 0.025}) //tape
 
             };
 

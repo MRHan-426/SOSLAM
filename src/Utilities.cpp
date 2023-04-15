@@ -20,6 +20,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace Eigen;
 
 namespace gtsam_soslam {
     namespace utils {
@@ -180,8 +181,8 @@ namespace gtsam_soslam {
             auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
             sub_graph.add(gtsam::PriorFactor<gtsam::Pose3>(bbs.poseKey(), camera_pose, noise_prior));
             sub_graph.add(bbs);
-            sub_graph.add(ssc);
-            sub_graph.add(psc);
+//            sub_graph.add(ssc);
+//            sub_graph.add(psc);
 
             //      sub_graph.add(syc);
             std::cout << "###############################" << std::endl;
@@ -306,6 +307,39 @@ namespace gtsam_soslam {
             //            i++;
             //        }
         }
+        Matrix4d getTransformFromVector(VectorXd& pose)
+        {
+            if( pose.rows() == 7)
+            {
+                // x y z qx qy qz qw
+                Matrix4d homogeneous_matrix;
+                Quaterniond _r(pose(6),pose(3),pose(4),pose(5));   // w x y z
+                homogeneous_matrix.setIdentity();
+                homogeneous_matrix.block(0,0,3,3) = _r.toRotationMatrix();
+                homogeneous_matrix.col(3).head(3) = pose.head(3);
 
+                return homogeneous_matrix;
+            }
+        }
+        PointCloud* pclToQuadricPointCloudPtr(PointCloudPCL::Ptr &pCloud)
+        {
+            PointCloud* cloudPtr = new PointCloud;
+            PointCloud& cloud = *cloudPtr;
+            int num = pCloud->points.size();
+            for(int i=0;i<num;i++){
+                PointXYZRGB p;
+                PointT pT = pCloud->points[i];
+                p.r = pT.r;
+                p.g = pT.g;
+                p.b = pT.b;
+
+                p.x = pT.x;
+                p.y = pT.y;
+                p.z = pT.z;
+                cloud.push_back(p);
+            }
+
+            return cloudPtr;
+        }
     } // namespace utils
 } // namespace gtsam_soslam

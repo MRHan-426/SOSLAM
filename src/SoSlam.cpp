@@ -10,14 +10,36 @@ namespace gtsam_soslam {
             DataSource &data_source,
             BaseAssociator &associator,
             BaseDetector &detector,
+            Map* mMap,
+            SoSlamState state,
+            const string &strSettingPath,
             const gtsam::Pose3 &initial_pose,
-            const bool &optimizer_batch) : data_source_(data_source),
+            const bool &optimizer_batch,
+            const bool &output_quadrics_image) : data_source_(data_source),
                                            associator_(associator),
                                            detector_(detector),
+                                           mpMap(mMap),
+                                           state_(std::move(state)),
                                            initial_pose_(initial_pose),
-                                           optimizer_batch_(optimizer_batch) {
-        state_ = SoSlamState(initial_pose, optimizer_batch);
+                                           optimizer_batch_(optimizer_batch),
+                                           output_quadrics_image_(output_quadrics_image){
+//        state_ = SoSlamState(mMap, initial_pose, optimizer_batch);
         reset();
+        cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+        float fx = fSettings["Camera.fx"];
+        float fy = fSettings["Camera.fy"];
+        float cx = fSettings["Camera.cx"];
+        float cy = fSettings["Camera.cy"];
+
+
+        Eigen::Matrix3d mCalib;
+        mCalib << fx,  0,  cx,
+                  0,  fy,  cy,
+                  0,   0,   1;
+
+        double scale = fSettings["Camera.scale"];
+        mpBuilder = new Builder();
+        mpBuilder->setCameraIntrinsic(mCalib, scale);
     }
 
     void SoSlam::guess_initial_values() {
@@ -102,6 +124,7 @@ namespace gtsam_soslam {
     void SoSlam::spin() {
         while (!data_source_.done()) {
             step();
+            usleep(30000);
         }
 
         if (state_.optimizer_batch_) {
@@ -150,9 +173,11 @@ namespace gtsam_soslam {
         // Setup state for the current step
         auto &s = state_;
         auto p = state_.prev_step;
-
+        static int count = 0;
         // step index is initialized with zero
         int new_step_index = p.i + 1;
+        count++;
+//        cout<<"step_index"<<new_step_index<<endl;
         StepState *n;
         n = &(s.this_step);
         n->i = new_step_index;
@@ -170,20 +195,40 @@ namespace gtsam_soslam {
             }
         }
 
-        // Add new pose to the factor graph
-        if (!p.isValid()) {
-            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
-            guess_initial_values();
-        } else {
-            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
-            s.estimates_.insert(n->pose_key, n->odom);
-            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
-            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
+//        // Add new pose to the factor graph
+//        if (!p.isValid()) {
+//            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
+//            guess_initial_values();
+//        } else {
+//            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
+//            s.estimates_.insert(n->pose_key, n->odom);
+//            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+//            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
+//        }
+        if (count % 40 != 0 || count>400) {
+            s.prev_step = *n;
+            return;
         }
 //        s.graph_.print();
 //        s.estimates_.print();
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
         //---------------------------------------------------------------------------------------------
+
+        // point cloud process
+        if(!n->rgb.empty()){    // RGB images are needed.
+//            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
+            mpBuilder->processFrame(n->rgb, n->depth, n->odom, 3.0); //depth thresh grab from object slam
+
+//            mpBuilder->voxelFilter(0.1);   // Down sample threshold; smaller the finer; depend on the hardware.
+            PointCloudPCL::Ptr pCloudPCL = mpBuilder->getMap();
+            PointCloudPCL::Ptr pCurrentCloudPCL = mpBuilder->getCurrentMap();
+
+            auto pCloud = utils::pclToQuadricPointCloudPtr(pCloudPCL);
+            auto pCloudLocal = utils::pclToQuadricPointCloudPtr(pCurrentCloudPCL);
+            mpMap->AddPointCloudList("Builder.Global Points", pCloud);
+            mpMap->AddPointCloudList("Builder.Local Points", pCloudLocal);
+            mpMap->addPointCloud(pCloudLocal);
+        }
 
         int blockSize = 2;
         int apertureSize = 3;
@@ -209,32 +254,32 @@ namespace gtsam_soslam {
         n->nearest_edge_point = findNearestEdge(feature_points, gray_image.size().height, gray_image.size().width);
         //---------------------------------------------------------------------------------------------
 
-        // batch optimization
-        if (s.optimizer_batch_) {
-            for (const auto &d: n->new_associated) {
-                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
-            }
-        }
-            // step optimization
-        else {
-//            guess_initial_values();
-            for (const auto &d: n->new_associated) {
-                // add factors into graph
-                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
-
-                // quadric initialization
-                gtsam::KeyVector keys = s.estimates_.keys();
-                auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
-                bool found = (iter != keys.end());
-                if (!found) {
-                    gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
-                    ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs_syc(
-                            std::get<0>(bbs_scc_psc_syc), std::get<1>(bbs_scc_psc_syc), std::get<2>(bbs_scc_psc_syc),
-                            std::get<3>(bbs_scc_psc_syc), camera_pose);
-                    // those factors have the same quadric key, just add once
-                    initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
-                }
-            }
+//        // batch optimization
+//        if (s.optimizer_batch_) {
+//            for (const auto &d: n->new_associated) {
+//                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
+//            }
+//        }
+//            // step optimization
+//        else {
+////            guess_initial_values();
+//            for (const auto &d: n->new_associated) {
+//                // add factors into graph
+//                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
+//
+//                // quadric initialization
+//                gtsam::KeyVector keys = s.estimates_.keys();
+//                auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
+//                bool found = (iter != keys.end());
+//                if (!found) {
+//                    gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
+//                    ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs_syc(
+//                            std::get<0>(bbs_scc_psc_syc), std::get<1>(bbs_scc_psc_syc), std::get<2>(bbs_scc_psc_syc),
+//                            std::get<3>(bbs_scc_psc_syc), camera_pose);
+//                    // those factors have the same quadric key, just add once
+//                    initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
+//                }
+//            }
 
 //            try{
 //                s.isam_optimizer_.update(
@@ -245,46 +290,47 @@ namespace gtsam_soslam {
 //            }catch (gtsam::IndeterminantLinearSystemException &e){
 //                std::cout << "Collect Data" << std::endl;
 //            }
-
-            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-            s.estimates_ = optimizer.optimize();
-            //            s.graph_.print();
-            //                        s.isam_optimizer_.update(
-            //                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-            //                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-            //                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
-            std::cout << s.graph_.error(s.estimates_) << std::endl;
-//            limitFactorGraphSize(s.graph_, 100);
-//            updateInitialEstimates(s.graph_, s.estimates_);
-            auto current_ps_qs = utils::ps_and_qs_from_values(s.estimates_);
-            std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
-            int i = -1;
-//        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
-            for (auto &key_value: cqs) {
-                i++;
-
-                gtsam::Key ObjKey = key_value.first;
-                cout<<gtsam::Symbol(ObjKey)<<endl;
-                ConstrainedDualQuadric *Obj = &(key_value.second);
-                gtsam::Vector3 radii = Obj->radii();
-                double lenth = radii[0];
-                double width = radii[1];
-                double height = radii[2];
-                cout<<"len: "<<lenth<<", "<<width<<", "<<height<<endl;
-                gtsam::Point3 centroid = Obj->centroid();
-                cout<<"center: "<<centroid[0]<<", "<<centroid[1]<<", "<<centroid[2]<<endl;
-                gtsam::Pose3 pose = Obj->pose();
-                gtsam::Rot3 rot = pose.rotation();
-                gtsam::Vector3 ypr = rot.ypr();
-                double yaw_deg = ypr(0) * 180.0 / M_PI;
-                double pitch_deg = ypr(1) * 180.0 / M_PI;
-                double roll_deg = ypr(2) * 180.0 / M_PI;
-//                cout<<"rot: "<<rot<<endl;
-                cout<<"yaw: "<<yaw_deg<<" *M_PI/180.0, "<<pitch_deg<<" *M_PI/180.0, "<<roll_deg<<endl;
-            }
-        }
+//
+//            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+//            s.estimates_ = optimizer.optimize();
+//            //            s.graph_.print();
+//            //                        s.isam_optimizer_.update(
+//            //                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
+//            //                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
+//            //                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
+//            std::cout << s.graph_.error(s.estimates_) << std::endl;
+////            limitFactorGraphSize(s.graph_, 100);
+////            updateInitialEstimates(s.graph_, s.estimates_);
+//            auto current_ps_qs = utils::ps_and_qs_from_values(s.estimates_);
+//            std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
+//            int i = -1;
+////        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+//            for (auto &key_value: cqs) {
+//                i++;
+//
+//                gtsam::Key ObjKey = key_value.first;
+//                cout<<gtsam::Symbol(ObjKey)<<endl;
+//                ConstrainedDualQuadric *Obj = &(key_value.second);
+//                gtsam::Vector3 radii = Obj->radii();
+//                double lenth = radii[0];
+//                double width = radii[1];
+//                double height = radii[2];
+//                cout<<"len: "<<lenth<<", "<<width<<", "<<height<<endl;
+//                gtsam::Point3 centroid = Obj->centroid();
+//                cout<<"center: "<<centroid[0]<<", "<<centroid[1]<<", "<<centroid[2]<<endl;
+//                gtsam::Pose3 pose = Obj->pose();
+//                gtsam::Rot3 rot = pose.rotation();
+//                gtsam::Vector3 ypr = rot.ypr();
+//                double yaw_deg = ypr(0) * 180.0 / M_PI;
+//                double pitch_deg = ypr(1) * 180.0 / M_PI;
+//                double roll_deg = ypr(2) * 180.0 / M_PI;
+////                cout<<"rot: "<<rot<<endl;
+//                cout<<"yaw: "<<yaw_deg<<" *M_PI/180.0, "<<pitch_deg<<" *M_PI/180.0, "<<roll_deg<<endl;
+//            }
+//        }
         s.prev_step = *n;
-        s.this_step.imageprepared();
+        if(output_quadrics_image_)
+            s.this_step.imageprepared();
     }
 
     void SoSlam::reset() {
@@ -320,9 +366,9 @@ namespace gtsam_soslam {
         SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key,
                            huber_syc, state_.this_step.nearest_edge_point);
         state_.graph_.add(bbs);
-        state_.graph_.add(ssc);
-        state_.graph_.add(psc);
-        state_.graph_.add(syc);
+//        state_.graph_.add(ssc);
+//        state_.graph_.add(psc);
+//        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 

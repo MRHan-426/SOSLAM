@@ -45,7 +45,8 @@ add_library(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/src/MapDrawer.cc
         ${PROJECT_SOURCE_DIR}/src/FrameDrawer.cc
         ${PROJECT_SOURCE_DIR}/src/HandMadeData.cpp
-        ${PROJECT_SOURCE_DIR}/src/Evaluation.cpp)
+        ${PROJECT_SOURCE_DIR}/src/Evaluation.cpp
+        src/Map.cpp src/Geometry.cpp)
 
 target_link_libraries(${PROJECT_NAME}
         gtsam
@@ -56,7 +57,15 @@ target_link_libraries(${PROJECT_NAME}
         ${Boost_LIBRARIES}
         ${TBB_LIBRARIES} # Add this line
         ${OpenCV_LIBS}
+        dense_builder
         )
+FIND_PACKAGE( PCL REQUIRED )
+list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4") # use this in Ubuntu 16.04
+
+ADD_DEFINITIONS( ${PCL_DEFINITIONS} )
+INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS}  )
+LINK_LIBRARIES( ${PCL_LIBRARY_DIRS} )
+add_subdirectory(src/dense_builder)
 
 # Add executable
 add_executable(soslam_exe src/main.cpp)
@@ -71,6 +80,7 @@ target_link_libraries(soslam_exe
         ${OpenCV_LIBS}
         ${PROJECT_NAME}
         ${OpenCV_LIBS}
+        ${PCL_LIBRARIES}
         )
 
 

@@ -40,9 +40,9 @@ namespace gtsam_soslam {
             return static_cast<std::vector<gtsam::Pose3>::size_type>(i) == POSES.size();
         }
 
-        std::tuple<gtsam::Pose3, gtsam::Matrix3, cv::Mat> next(SoSlamState &state) override {
+        std::tuple<gtsam::Pose3, cv::Mat, cv::Mat> next(SoSlamState &state) override {
             ++i;
-            gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
+            cv::Mat mat;
             cv::Mat img;
             return std::make_tuple(gtsam::Pose3(POSES[i - 1]), mat, img);
         }

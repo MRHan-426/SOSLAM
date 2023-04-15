@@ -15,7 +15,7 @@
 
 //#include"Map.h"
 #include<opencv2/core/core.hpp>
-// #include"MapPoint.h"
+#include"Map.h"
 // #include"KeyFrame.h"
 #include<pangolin/pangolin.h>
 
@@ -23,13 +23,15 @@
 #include "SoSlam.h"
 
 using namespace std;
-namespace gtsam_soslam {
 
+namespace gtsam_soslam {
+    class Map;
     class MapDrawer {
     public:
-        MapDrawer(SoSlamState *sState, const string &strSettingPath);
+        MapDrawer(SoSlamState *sState, Map* mMap, const string &strSettingPath);
 
         SoSlamState *s;
+        Map* mpMap;
 
         void DrawSemiDense(const double sigma);
 
@@ -39,7 +41,10 @@ namespace gtsam_soslam {
 
         void DrawFrame();
 
-        void DrawMapPoints();
+        bool drawPoints();
+        void drawPointCloudLists(); // draw all the point cloud lists
+        void drawPointCloudWithOptions(const std::map<std::string,bool> &options); // draw the point cloud lists with options opened
+
 
         void Coordinate();
 

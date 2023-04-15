@@ -9,6 +9,8 @@
 #include "SemanticScaleFactor.h"
 #include "PlaneSupportingFactor.h"
 #include "SymmetryFactor.h"
+#include "../src/dense_builder/builder.h"
+#include "Map.h"
 
 #include <optional>
 #include <functional>
@@ -35,17 +37,27 @@ namespace gtsam_soslam {
         BaseAssociator &associator_;
         BaseDetector &detector_;
         // VisualOdometry visual_odometry_;
+        //Map
+        Map* mpMap;
+        SoSlamState state_;
+        Builder* mpBuilder;     // a dense pointcloud builder from visualization
+
         gtsam::Pose3 initial_pose_;
         bool optimizer_batch_;
-        SoSlamState state_;
+
+        bool output_quadrics_image_;
 
         SoSlam(
                 DataSource &data_source,
                 BaseAssociator &associator,
                 BaseDetector &detector,
+                Map* mMap,
                 // VisualOdometry visual_odometry = std::nullptr, //Optional
+                SoSlamState state,
+                const string &strSettingPath,
                 const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
-                const bool &optimizer_batch = true);
+                const bool &optimizer_batch = true,
+                const bool &output_quadrics_image = false);
 
         // private:
         void guess_initial_values();

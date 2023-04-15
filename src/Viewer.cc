@@ -79,7 +79,11 @@ namespace gtsam_soslam {
         pangolin::Var<bool> menuShowGraph("menu.Show Graph", true, true);
         pangolin::Var<bool> menuShowSemiDense("menu.Show SemiDense", true, true);
         pangolin::Var<double> menuSigmaTH("menu.Sigma", 0.02, 1e-10, 0.05, false);
+        pangolin::Var<bool> menuHandMove("menu.Move by Hand", false, true);
         pangolin::Var<bool> menuCameraView("menu.Camera View", true, true);
+        pangolin::Var<bool> menuViewX("menu.X Axis View", false, true);
+        pangolin::Var<bool> menuViewY("menu.Y Axis View", false, true);
+        pangolin::Var<bool> menuViewZ("menu.Z Axis View", false, true);
 //    pangolin::Var<bool> menuShowModel("menu.Show Model", false,true);
 //    pangolin::Var<bool> menuShowTexture("menu.Show Texture", false,true);
 
@@ -126,17 +130,47 @@ namespace gtsam_soslam {
         bool bLocalizationMode = false;
 
         // carv: camera close up view
-        bool bCameraView = true;
+        bool bCameraView = false;
         pangolin::OpenGlMatrix projectionAbove = pangolin::ProjectionMatrix(mImageWidth, mImageHeight, mViewpointF,
                                                                             mViewpointF,
                                                                             mImageWidth / 2, mImageHeight / 2, 0.1,
                                                                             1000);
         pangolin::OpenGlMatrix projectionCamera = pangolin::ProjectionMatrix(mImageWidth, mImageHeight, mfx, mfy, mcx,
                                                                              mcy, 0.1, 1000);
-        pangolin::OpenGlMatrix viewAbove = pangolin::ModelViewLookAt(mViewpointX, mViewpointY, mViewpointZ, 0, 0, 0,
+        pangolin::OpenGlMatrix viewAbove = pangolin::ModelViewLookAt(mViewpointX, mViewpointY, mViewpointZ,
+                                                                     0, 0, 0,
                                                                      0.0, -1.0, 0.0);
-        pangolin::OpenGlMatrix viewCamera = pangolin::ModelViewLookAt(0, 0, 0, 0, 0, 1, 0.0, -1.0, 0.0);
+        pangolin::OpenGlMatrix viewCamera = pangolin::ModelViewLookAt(0, 0, 0,
+                                                                      0, 0, 1,
+                                                                      0.0, -1.0, 0.0);
 
+        pangolin::OpenGlMatrix viewFromX = pangolin::ModelViewLookAt(-1, 0, 0,     // Camera position (1, 0, 0)
+                                                                     0, 0, 0,      // Camera looks at (0, 0, 0)
+                                                                     0, 0, -1);   // Up direction (0, 1, 0)
+
+        pangolin::OpenGlMatrix viewFromY = pangolin::ModelViewLookAt(0, -1, 0,     // Camera position (1, 0, 0)
+                                                                     0, 0, 0,      // Camera looks at (0, 0, 0)
+                                                                     0, 0, -1);   // Up direction (0, 1, 0)
+
+        pangolin::OpenGlMatrix viewFromZ = pangolin::ModelViewLookAt(0, 0, -1,     // Camera position (1, 0, 0)
+                                                                     0, 0, 0,      // Camera looks at (0, 0, 0)
+                                                                     0, -1, 0);   // Up direction (0, 1, 0)
+
+        // Define the position of the camera
+        gtsam::Point3 cameraPosition(0, 0, 0);
+
+        // Define the orientations for the X, Y, and Z axes
+        gtsam::Rot3 lookAtX = gtsam::Rot3::RzRyRx(-M_PI_2, 0, -M_PI_2); // Yaw, Pitch, Roll
+        gtsam::Rot3 lookAtY = gtsam::Rot3::RzRyRx(-M_PI_2, 0, 0); // Yaw, Pitch, Roll
+        gtsam::Rot3 lookAtZ = gtsam::Rot3::RzRyRx(M_PI, 0, 0); // Yaw, Pitch, Roll
+
+        // Create gtsam::Pose3 instances for X, Y, and Z axes
+        gtsam::Pose3 poseLookAtX(lookAtX, cameraPosition);
+        gtsam::Pose3 poseLookAtY(lookAtY, cameraPosition);
+        gtsam::Pose3 poseLookAtZ(lookAtZ, cameraPosition);
+        viewFromX = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtX);
+        viewFromY = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtY);
+        viewFromZ = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtZ);
 
         while (1) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -151,8 +185,17 @@ namespace gtsam_soslam {
                 bFollow = true;
             } else if (!menuFollowCamera && bFollow) {
                 bFollow = false;
-            }
 
+            }
+            if(!bFollow){
+                if(menuViewX && !menuViewY && !menuViewZ){
+                    s_cam.Follow(viewFromX);
+                } else if(!menuViewX && menuViewY && !menuViewZ){
+                    s_cam.Follow(viewFromY);
+                } else if(!menuViewX && !menuViewY && menuViewZ){
+                    s_cam.Follow(viewFromZ);
+                }
+            }
             // if(menuLocalizationMode && !bLocalizationMode)
             // {
             //     mpSystem->ActivateLocalizationMode();
@@ -165,24 +208,42 @@ namespace gtsam_soslam {
             // }
 
             // carv: setup viewpoint to see model
-            if (menuCameraView && !bCameraView) {
-                s_cam.SetProjectionMatrix(projectionCamera);
-                s_cam.SetModelViewMatrix(viewCamera);
-                bCameraView = true;
-            } else if (!menuCameraView && bCameraView) {
-                s_cam.SetProjectionMatrix(projectionAbove);
-                s_cam.SetModelViewMatrix(viewAbove);
-                bCameraView = false;
-            }
+            if(!menuHandMove)
+                if (menuCameraView ) {
+                    s_cam.SetProjectionMatrix(projectionCamera);
+                    s_cam.SetModelViewMatrix(viewCamera);
+                    bCameraView = true;
+                } else  {
+//                    if(menuViewX && !menuViewY && !menuViewZ){
+//                        s_cam.SetProjectionMatrix(projectionAbove);
+//                        s_cam.SetModelViewMatrix(viewFromX);
+//                    }
+//                    else if(!menuViewX && menuViewY && !menuViewZ){
+//                        s_cam.SetProjectionMatrix(projectionAbove);
+//                        s_cam.SetModelViewMatrix(viewFromY);
+//                    }else if(!menuViewX && !menuViewY && menuViewZ){
+//                        s_cam.SetProjectionMatrix(projectionAbove);
+//                        s_cam.SetModelViewMatrix(viewFromZ);
+//                    }
+//                    else {
+//                        s_cam.SetProjectionMatrix(projectionAbove);
+//                        s_cam.SetModelViewMatrix(viewAbove);
+                        bCameraView = false;
+//                    }
+                }
 
             d_cam.Activate(s_cam);
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             if (menuShowCamera)
                 mpMapDrawer->DrawCurrentCamera(Twc);
-            // if(menuShowKeyFrames || menuShowGraph)
-            mpMapDrawer->DrawKeyFrames(menuShowKeyFrames, menuShowGraph);
-            // if(menuShowPoints)
-            //     mpMapDrawer->DrawMapPoints();
+             if(menuShowKeyFrames || menuShowGraph)
+                mpMapDrawer->DrawKeyFrames(menuShowKeyFrames, menuShowGraph);
+             if(menuShowPoints) {
+                 mpMapDrawer->drawPoints();  // draw point clouds
+                 // draw pointclouds with names
+//                 RefreshPointCloudOptions();
+//                 mpMapDrawer->drawPointCloudWithOptions(mmPointCloudOptionMap);
+             }
             // if(menuShowSemiDense)
             //     mpMapDrawer->DrawSemiDense(menuSigmaTH);
             mpMapDrawer->Coordinate();
@@ -262,6 +323,10 @@ namespace gtsam_soslam {
 
                 menuShowSemiDense = true;
                 menuCameraView = true;
+                menuViewX = false;
+                menuViewY = false;
+                menuViewZ = false;
+                menuHandMove = false;
 //            menuShowModel = true;
 //            menuShowTexture = true;
 
@@ -280,6 +345,57 @@ namespace gtsam_soslam {
         }
 
         SetFinish();
+    }
+//    void Viewer::RefreshPointCloudOptions()
+//    {
+//        // generate options from mmPointCloudOptionMenus, pointclouds with names will only be drawn when their options are activated.
+//        std::map<std::string,bool> options;
+//        for( auto pair : mmPointCloudOptionMenus)
+//            options.insert(make_pair(pair.first, pair.second->Get()));
+//
+//        mmPointCloudOptionMap.clear();
+//        mmPointCloudOptionMap = options;
+//    }
+    void Viewer::RefreshMenu(){
+        unique_lock<mutex> lock(mMutexFinish);
+
+        // Generate menu bar for every pointcloud in pointcloud list.
+        auto pointLists = s->mpMap->GetPointCloudList();
+
+        // Iterate over the menu and delete the menu if the corresponding clouds are no longer available
+        for( auto menuPair = mmPointCloudOptionMenus.begin(); menuPair!=mmPointCloudOptionMenus.end(); )
+        {
+            if(pointLists.find(menuPair->first) == pointLists.end())
+            {
+                delete menuPair->second;        // destroy the dynamic menu
+                menuPair = mmPointCloudOptionMenus.erase(menuPair);
+            }
+            else
+                menuPair++;
+        }
+
+        // Iterate over the cloud lists to add new menu.
+        for( auto cloudPair: pointLists )
+        {
+            if(mmPointCloudOptionMenus.find(cloudPair.first) == mmPointCloudOptionMenus.end())
+            {
+                pangolin::Var<bool>* pMenu = new pangolin::Var<bool>(string("menu.") + cloudPair.first, true, true);
+                mmPointCloudOptionMenus.insert(make_pair(cloudPair.first, pMenu));
+            }
+        }
+
+        // refresh double bars
+        int doubleBarNum = mvDoubleMenus.size();
+        int structNum = mvMenuStruct.size();
+        if( structNum > 0 && structNum > doubleBarNum )
+        {
+            for(int i = doubleBarNum; i < structNum; i++)
+            {
+                pangolin::Var<double>* pMenu = new pangolin::Var<double>(string("menu.")+mvMenuStruct[i].name, mvMenuStruct[i].def, mvMenuStruct[i].min, mvMenuStruct[i].max);
+                mvDoubleMenus.push_back(pMenu);
+            }
+        }
+
     }
 
     void Viewer::RequestFinish() {

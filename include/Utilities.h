@@ -24,12 +24,15 @@
 #include <utility>
 
 #include "ConstrainedDualQuadric.h"
-#include "SoSlam.h"
+//#include "SoSlam.h"
 #include "BoundingBoxFactor.h"
 #include "SemanticScaleFactor.h"
 #include "PlaneSupportingFactor.h"
 #include "SymmetryFactor.h"
 #include "Evaluation.h"
+#include "Geometry.h"
+// pcl
+#include <pcl/common/transforms.h>
 
 #include <gtsam/base/Matrix.h>
 #include <gtsam/geometry/Pose3.h>
@@ -38,6 +41,12 @@
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <boost/optional.hpp>
 #include <Eigen/Dense>
+
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+typedef pcl::PointXYZRGB PointT;
+typedef pcl::PointCloud<PointT> PointCloudPCL;
 
 namespace gtsam_soslam {
     namespace utils {
@@ -119,5 +128,7 @@ namespace gtsam_soslam {
         double area(const gtsam::Vector4 &);
 
         double iou(const AlignedBox2 &, const AlignedBox2 &);
+        Eigen::Matrix4d getTransformFromVector(Eigen::VectorXd& pose);
+        PointCloud* pclToQuadricPointCloudPtr(PointCloudPCL::Ptr &pCloud);
     } // namespace utils
 } // namespace gtsam_soslam

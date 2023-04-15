@@ -29,6 +29,7 @@ namespace gtsam_soslam {
     class HandMadeData : public DataSource {
     public:
         std::string img_path_;
+        std::string dep_path_;
         std::string xml_path_;
         std::string calib_file_;
         std::vector<std::string> odom_data_;
@@ -39,6 +40,7 @@ namespace gtsam_soslam {
         }
 
         explicit HandMadeData(const std::string &img_path = "../input/img/",
+                              const std::string &dep_path = "../input/depth/",
                               const std::string &xml_path = "../input/xml/",
                               const std::string &calib_file = "../input/calib_params.txt",
                               const std::string &odom_file = "../input/odom.txt");
@@ -51,7 +53,7 @@ namespace gtsam_soslam {
             return i == num_img_;
         }
 
-        std::tuple<gtsam::Pose3, gtsam::Matrix3, cv::Mat> next(SoSlamState &state) override;
+        std::tuple<gtsam::Pose3, cv::Mat, cv::Mat> next(SoSlamState &state) override;
 
     private:
         int i;

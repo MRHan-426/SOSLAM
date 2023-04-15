@@ -32,7 +32,13 @@
 #include "SoSlam.h"
 
 namespace gtsam_soslam {
-
+    struct MenuStruct
+    {
+        double min;
+        double max;
+        double def;
+        string name;
+    };
 // class Tracking;
     class FrameDrawer;
 
@@ -89,6 +95,15 @@ namespace gtsam_soslam {
         bool mbStopRequested;
         std::mutex mMutexStop;
 
+        // menu lists
+        vector<pangolin::Var<double>*> mvDoubleMenus;
+        vector<MenuStruct> mvMenuStruct;
+
+        // Manual control of the point cloud visualization
+        map<string,pangolin::Var<bool>*> mmPointCloudOptionMenus;
+        void RefreshPointCloudOptions();
+
+        void RefreshMenu();
         // demo.
 //    string mflag;
     };

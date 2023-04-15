@@ -5,9 +5,12 @@
 
 namespace gtsam_soslam {
 
-    HandMadeData::HandMadeData(const std::string &img_path, const std::string &xml_path, const std::string &calib_file,
+    HandMadeData::HandMadeData(const std::string &img_path,
+                               const std::string &dep_path,
+                               const std::string &xml_path,
+                               const std::string &calib_file,
                                const std::string &odom_file)
-            : img_path_(img_path), xml_path_(xml_path), calib_file_(calib_file) {
+            : img_path_(img_path), dep_path_(dep_path), xml_path_(xml_path), calib_file_(calib_file) {
         i = 0;
         if (file_num(img_path) == 0 || file_num(xml_path) == 0) {
             std::cerr << "WARN: there be no imgs or xmls in the folder path, please check." << std::endl;
@@ -79,7 +82,7 @@ namespace gtsam_soslam {
         }
     }
 
-    std::tuple<gtsam::Pose3, gtsam::Matrix3, cv::Mat> HandMadeData::next(SoSlamState &state) {
+    std::tuple<gtsam::Pose3, cv::Mat, cv::Mat> HandMadeData::next(SoSlamState &state) {
         std::vector<std::string> parts;
         std::stringstream ss(odom_data_[i]); //start from 0
         std::string token;
@@ -98,7 +101,15 @@ namespace gtsam_soslam {
         ++i;
 
         std::string img_name = img_path_ + std::to_string(i) + ".png"; //start from 1.png
-        gtsam::Matrix3 mat = gtsam::Matrix3::Zero();
+        std::string dep_name = dep_path_ + std::to_string(i) + ".png"; //start from 1.png
+        cv::Mat mat = cv::imread(dep_name, cv::IMREAD_UNCHANGED); //depth
+//        for(int i = 0; i < mat.rows; i++) {
+//            for(int j = 0; j < mat.cols; j++) {
+//                uchar element = mat.at<uchar>(i, j);
+//                std::cout << element << " ";
+//            }
+//            std::cout << std::endl;
+//        }
         cv::Mat img = cv::imread(img_name, cv::IMREAD_COLOR); //BGR
         return std::make_tuple(pose, mat, img);
     }

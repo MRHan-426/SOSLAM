@@ -2,6 +2,7 @@
 #define SYSTEMSTATE_H
 
 #include "Constants.h"
+#include "Map.h"
 
 #include <vector>
 #include <map>
@@ -69,7 +70,7 @@ namespace gtsam_soslam {
         int i;
         gtsam::Key pose_key;
         cv::Mat rgb;
-        gtsam::Matrix3 depth;
+        cv::Mat depth;
         gtsam::Pose3 odom;
         std::vector<Detection> detections;
         std::vector<Detection> new_associated;
@@ -103,6 +104,7 @@ namespace gtsam_soslam {
 
     class SoSlamState {
     public:
+        Map* mpMap;
         gtsam::Pose3 initial_pose_;
         gtsam::Matrix noise_prior_;
         gtsam::Matrix noise_odom_;
@@ -122,9 +124,10 @@ namespace gtsam_soslam {
         StepState this_step;
 
 
-        explicit SoSlamState(const gtsam::Pose3 &initial_pose = Constants::POSES[0], const bool &optimizer_batch = true)
-                : initial_pose_(initial_pose),
-                  optimizer_batch_(optimizer_batch) {
+        explicit SoSlamState(Map *mMap, const gtsam::Pose3 &initial_pose = Constants::POSES[0], const bool &optimizer_batch = true)
+                :   mpMap(mMap),
+                    initial_pose_(initial_pose),
+                    optimizer_batch_(optimizer_batch) {
 
             isam_params_.relinearizeThreshold = 0.05;
             isam_params_.relinearizeSkip = 10;

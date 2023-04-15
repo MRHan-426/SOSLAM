@@ -11,6 +11,7 @@
 */
 
 #include "MapDrawer.h"
+
 // #include "MapPoint.h"
 // #include "KeyFrame.h"
 // #include "ProbabilityMapping.h"
@@ -22,76 +23,93 @@
 namespace gtsam_soslam {
 
 
-    MapDrawer::MapDrawer(SoSlamState *sState, const string &strSettingPath) : s(sState) {
+    MapDrawer::MapDrawer(SoSlamState *sState, Map* mMap, const string &strSettingPath) :
+    s(sState),
+    mpMap(mMap){
         cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
         mKeyFrameSize = fSettings["Viewer.KeyFrameSize"];
         mKeyFrameLineWidth = fSettings["Viewer.KeyFrameLineWidth"];
         mGraphLineWidth = fSettings["Viewer.GraphLineWidth"];
-        // mPointSize = fSettings["Viewer.PointSize"];
+        mPointSize = fSettings["Viewer.PointSize"];
         mCameraSize = fSettings["Viewer.CameraSize"];
         mCameraLineWidth = fSettings["Viewer.CameraLineWidth"];
     }
 
+    void MapDrawer::drawPointCloudLists()
+    {
+        auto pointLists = mpMap->GetPointCloudList();
 
-// void MapDrawer::DrawTriangles(pangolin::OpenGlMatrix &Twc)
-// {
-//     Model* pModel = mpMap->GetModel();
-//     if(pModel == NULL) return;
+        glPushMatrix();
 
-//     pModel->SetNotErase();
+        for(auto pair:pointLists){
+            auto pPoints = pair.second;
+            if( pPoints == NULL ) continue;
+            for(int i=0; i<pPoints->size(); i=i+1)
+            {
+                PointXYZRGB &p = (*pPoints)[i];
+                glPointSize( p.size );
+                glBegin(GL_POINTS);
+                glColor3d(p.r/255.0, p.g/255.0, p.b/255.0);
+                glVertex3d(p.x, p.y, p.z);
+                glEnd();
 
+            }
+        }
+        glPointSize( 1 );
 
-//     glPushMatrix();
+        glPopMatrix();
+    }
 
-// #ifdef HAVE_GLES
-//     glMultMatrixf(Twc.m);
-// #else
-//     glMultMatrixd(Twc.m);
-// #endif
+    bool MapDrawer::drawPoints() {
+        vector<PointXYZRGB*> pPoints = mpMap->GetAllPoints();
+        glPushMatrix();
 
-//     GLfloat light_position[] = { 0.0, 0.0, 1.0, 0.0 };
-//     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        for(int i=0; i<pPoints.size(); i=i+1)
+        {
+            PointXYZRGB &p = *(pPoints[i]);
+            glPointSize( p.size );
+            glBegin(GL_POINTS);
+            glColor3d(p.r/255.0, p.g/255.0, p.b/255.0);
+            glVertex3d(p.x, p.y, p.z);
+            glEnd();
+        }
 
-//     glPopMatrix();
+        glPointSize( 1 );
+        glPopMatrix();
 
-//     glEnable(GL_LIGHTING);
-//     glEnable(GL_LIGHT0);
+        return true;
+    }
 
-//     glShadeModel(GL_FLAT);
+    void MapDrawer::drawPointCloudWithOptions(const std::map<std::string,bool> &options)
+    {
+        auto pointLists = mpMap->GetPointCloudList();
+        glPushMatrix();
 
-//     GLfloat material_diffuse[] = {0.2, 0.5, 0.8, 1};
-//     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material_diffuse);
+        for(auto pair:pointLists){
+            auto pPoints = pair.second;
+            if( pPoints == NULL ) continue;
 
-//     glBegin(GL_TRIANGLES);
-//     glColor3f(1.0,1.0,1.0);
+            auto iter = options.find(pair.first);
+            if(iter == options.end()) {
+                continue;  // not exist
+            }
+            if(iter->second == false) continue; // menu is closed
 
-//     for (list<dlovi::Matrix>::const_iterator it = pModel->GetTris().begin(); it != pModel->GetTris().end(); it++) {
+            for(int i=0; i<pPoints->size(); i=i+1)
+            {
+                PointXYZRGB &p = (*pPoints)[i];
+                glPointSize( p.size );
+                glBegin(GL_POINTS);
+                glColor3d(p.r/255.0, p.g/255.0, p.b/255.0);
+                glVertex3d(p.x, p.y, p.z);
+                glEnd();
 
-//         dlovi::Matrix point0 = pModel->GetPoints()[(*it)(0)];
-//         dlovi::Matrix point1 = pModel->GetPoints()[(*it)(1)];
-//         dlovi::Matrix point2 = pModel->GetPoints()[(*it)(2)];
-
-//         dlovi::Matrix edge10 = point1 - point0;
-//         dlovi::Matrix edge20 = point2 - point0;
-
-//         dlovi::Matrix normal = edge20.cross(edge10);
-//         normal = normal / normal.norm();
-
-//         glNormal3d(normal(0), normal(1), normal(2));
-
-//         glVertex3d(point0(0), point0(1), point0(2));
-//         glVertex3d(point1(0), point1(1), point1(2));
-//         glVertex3d(point2(0), point2(1), point2(2));
-
-//     }
-//     glEnd();
-
-//     glDisable(GL_LIGHTING);
-
-//     pModel->SetErase();
-
-// }
+            }
+        }
+        glPointSize( 1 );
+        glPopMatrix();
+    }
 
 //void MapDrawer::DrawFrame()
 //{
@@ -532,8 +550,8 @@ namespace gtsam_soslam {
 //        twc = -Rwc*mCameraPose.rowRange(0,3).col(3);
 //        }
 //        cout<< poseMatrix<<endl;
-        M.m[0] = poseMatrix(0, 0);//Rwc.at<float>(0,0);
         M.m[1] = poseMatrix(1, 0);//Rwc.at<float>(1,0);
+        M.m[0] = poseMatrix(0, 0);//Rwc.at<float>(0,0);
         M.m[2] = poseMatrix(2, 0);//Rwc.at<float>(2,0);
         M.m[3] = 0.0;
 
@@ -559,8 +577,8 @@ namespace gtsam_soslam {
     pangolin::OpenGlMatrix MapDrawer::GetOpenGLCameraMatrixFromPose3(gtsam::Pose3 &ps) {
         pangolin::OpenGlMatrix M;
         M.SetIdentity();
-        cv::Mat Rwc(3, 3, CV_32F);
-        cv::Mat twc(3, 1, CV_32F);
+//        cv::Mat Rwc(3, 3, CV_32F);
+//        cv::Mat twc(3, 1, CV_32F);
 
 //        gtsam::Pose3 pose3=ps;
         gtsam::Matrix44 poseMatrix = ps.matrix();
