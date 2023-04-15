@@ -46,7 +46,7 @@ namespace gtsam_soslam
                 // draw new version
                 cv::Point center_edge(nearest_edge_point_.at(uniform_sample_point).second, nearest_edge_point_.at(uniform_sample_point).first);
                 cv::circle(nearest_image, center_edge, radius, cv::Scalar(0, 0, 255), 5);
-                cv::imshow("nearest_image", nearest_image);
+                // cv::imshow("nearest_image", nearest_image);
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 gtsam::Pose3 quadric_pose = quadric.pose();
@@ -183,15 +183,15 @@ namespace gtsam_soslam
                 symmetry_sample_3D[3] = 1;
 
                 // x, y, z points
-                double intersection_point_x = intersection_point[0] / intersection_point[2];
-                double intersection_point_y = intersection_point[1] / intersection_point[2];
-                double intersection_point_z = intersection_point[2] / intersection_point[2];
-                double center_point_x = quadric_translation[0] / quadric_translation[2];
-                double center_point_y = quadric_translation[1] / quadric_translation[2];
-                double center_point_z = quadric_translation[2] / quadric_translation[2];
-                double symmetry_point_x = symmetry_sample_3D[0] / symmetry_sample_3D[3];
-                double symmetry_point_y = symmetry_sample_3D[1] / symmetry_sample_3D[3];
-                double symmetry_point_z = symmetry_sample_3D[2] / symmetry_sample_3D[3];
+                double intersection_point_x = intersection_point[0];
+                double intersection_point_y = intersection_point[1];
+                double intersection_point_z = intersection_point[2];
+                double center_point_x = quadric_translation[0];
+                double center_point_y = quadric_translation[1];
+                double center_point_z = quadric_translation[2];
+                double symmetry_point_x = symmetry_sample_3D[0];
+                double symmetry_point_y = symmetry_sample_3D[1];
+                double symmetry_point_z = symmetry_sample_3D[2];
 
                 std::cout << "sample_3D:              " << intersection_point_x << ", " << intersection_point_y << ", " << intersection_point_z << std::endl;
                 std::cout << "----------------------  " << center_point_x << ", " << center_point_y << ", " << center_point_z << std::endl;
@@ -218,7 +218,7 @@ namespace gtsam_soslam
                 cv::circle(nearest_image, center_sample_3D, radius, cv::Scalar(0, 255, 255), 5);
                 // cv::Point center_symmetry_sample_3D(symmetry_sample_3D[1], symmetry_sample_3D[0]);
                 // cv::circle(nearest_image, center_symmetry_sample_3D, radius, cv::Scalar(255, 255, 0), 5);
-                cv::imshow("nearest_image", nearest_image);
+                // cv::imshow("nearest_image", nearest_image);
 
                 symmetry_sample_2D = world2image * symmetry_sample_3D;
                 std::cout << symmetry_sample_2D[0] / symmetry_sample_2D[2] << ", " << symmetry_sample_2D[1] / symmetry_sample_2D[2] << std::endl;
@@ -246,12 +246,12 @@ namespace gtsam_soslam
                 // std::pair<int, int> edge_2D_q = nearest_edge_point_.at(symmetry_2D);
                 // symmetry_edge_2D << edge_2D_q.first, edge_2D_q.second, 1;
 
-                // cv::Point center_sym_sample(edge_2D_q.second, edge_2D_q.first);
-                // cv::circle(nearest_image, center_sym_sample, radius, cv::Scalar(0, 255, 0), 5);
+                // cv::Point center_sym_sample(symmetry_2D.second, symmetry_2D.first);
+                // cv::circle(nearest_image, center_sym_sample, radius, cv::Scalar(0, 255, 255), 5);
                 // cv::imshow("nearest_image", nearest_image);
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                cv::waitKey(0);
+                // cv::waitKey(0);
             }
             gtsam::Vector1 error(1);
 
