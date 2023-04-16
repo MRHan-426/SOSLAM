@@ -298,40 +298,34 @@ namespace gtsam_soslam {
     }
 
 // BRIEF [EAO-SLAM] draw objects.
-    void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj) {
+    void MapDrawer::DrawObject(const bool QuadricObj) {
 //    const vector<Object_Map*> &vObjs = mpMap->GetObjects();
+    if(QuadricObj) {
         const gtsam::Values vEstimates = s->estimates_;
         auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
         std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
         vector<cv::Mat> object_cen;
 
         int i = -1;
-//        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+    //        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
         for (auto &key_value: cqs) {
             i++;
             gtsam::Key ObjKey = key_value.first;
             ConstrainedDualQuadric *Obj = &(key_value.second);
-//        for (auto& q : qs) {
-//            i++;
-////        gtsam::Key ObjKey = key_value.first;
-//            ConstrainedDualQuadric *Obj = &(q);
-
-
-
 
             // color.
             if (i % 10 == 0)
-                glColor3f(1.0, 0.0, 0.0);
+                glColor3f(0.0 / 255.0, 0.0 / 255.0, 135.0 / 255.0);
             else if (i % 10 == 1)
-                glColor3f(0.0, 1.0, 0.0);
+                glColor3f(135.0 / 255.0, 0.0 / 255.0, 135.0 / 255.0);
             else if (i % 10 == 2)
-                glColor3f(0.0, 0.0, 1.0);
+                glColor3f(119.0 / 255.0, 254.0 / 255.0, 4.0 / 255.0);
             else if (i % 10 == 3)
-                glColor3f(0.5, 0.0, 0.0);
+                glColor3f(1.0 / 255.0, 126.0 / 255.0, 255.0 / 255.0);
             else if (i % 10 == 4)
-                glColor3f(0.0, 0.5, 0.0);
+                glColor3f(255.0 / 255.0, 112.0 / 255.0, 0.0 / 255.0);
             else if (i % 10 == 5)
-                glColor3f(0.0, 0.0, 0.5);
+                glColor3f(250.0 / 255.0, 250.0 / 255.0, 0.0 / 255.0);
             else if (i % 10 == 6)
                 glColor3f(1.0, 1.0, 0);
             else if (i % 10 == 7)
@@ -346,9 +340,7 @@ namespace gtsam_soslam {
             // ****************************************
             //    STEP 2. [EAO-SLAM] Draw quadrics.   *
             // ****************************************
-//        if(QuadricObj && !((Obj->mnClass == 73) || (Obj->mnClass == 64) || (Obj->mnClass == 65)
-//                || (Obj->mnClass == 66) || (Obj->mnClass == 56) || (Obj->mnClass == 72)))
-//        {
+
             // half axial length.
             gtsam::Vector3 radii = Obj->radii();
             double lenth = radii[0];
@@ -364,21 +356,18 @@ namespace gtsam_soslam {
             gtsam::Point3 centroid = Obj->centroid();
             // quadrcis pose.
             ;
-//        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
-//        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
+    //        cv::Mat Twq = cv::Mat::zeros(4,4,CV_32F);
+    //        cv::Mat Twq(4, 4, CV_32FC1, Obj->pose().matrix().data());
             gtsam::Pose3 pose = Obj->pose();
             gtsam::Rot3 rot = pose.rotation();
             gtsam::Matrix33 rot_matrix = rot.matrix();
 
-//            gtsam::Matrix44 homogeneous_matrix = gtsam::Matrix44::Identity();
-//            homogeneous_matrix.block<3, 3>(0, 0) = rot_matrix;
             gtsam::Matrix44 homogeneous_matrix = pose.matrix();
             std::vector<GLfloat> gl_matrix(homogeneous_matrix.data(),
                                            homogeneous_matrix.data() + homogeneous_matrix.size());
 
             // create a quadric.
             GLUquadricObj *pObj = gluNewQuadric();
-//        cv::Mat Twq_t = Twq;
 
             // color
             cv::Scalar sc;
@@ -386,7 +375,7 @@ namespace gtsam_soslam {
 
             // add to display list
             glPushMatrix();
-//        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
+    //        glMultMatrixf(Twq_t.ptr<GLfloat >(0));
             glMultMatrixf(gl_matrix.data());
 
             glScalef(
@@ -403,11 +392,12 @@ namespace gtsam_soslam {
             glEnd();
             glPopMatrix();
             // draw quadrics END ---------------------------------------------------------------------
-//        }
+    //        }
         }
+    }
 
     } // draw objects END ----------------------------------------------------------------------------
-    void MapDrawer::DrawGroundTruthObject(const bool bCubeObj, const bool QuadricObj)
+    void MapDrawer::DrawGroundTruthObject()
     {
         std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
         vector<cv::Mat> object_cen;

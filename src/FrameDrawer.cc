@@ -166,7 +166,7 @@ namespace gtsam_soslam {
     }
 
 // BRIEF [EAO-SLAM] draw quadric image.
-    cv::Mat FrameDrawer::GetQuadricImage(bool menuShowGroundTruth) {
+    cv::Mat FrameDrawer::GetQuadricImage(const bool menuShowQuadricObj, const bool menuShowGroundTruth) {
 //    cv::Mat imRGB;
         mRGBIm.copyTo(mQuadricIm);
 //    mQuadricIm.copyTo(imRGB);
@@ -228,61 +228,63 @@ namespace gtsam_soslam {
                                                 cv_mat,
                                                 axe,
                                                 Twq,
-                                                5);
+                                                -1);
             }
         }
         int i = -1;
 //    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
-        for (auto &key_value: cqs) {
-            i++;
-            gtsam::Key ObjKey = key_value.first;
-            ConstrainedDualQuadric *Obj = &(key_value.second);
+        if(menuShowQuadricObj) {
+            for (auto &key_value: cqs) {
+                i++;
+                gtsam::Key ObjKey = key_value.first;
+                ConstrainedDualQuadric *Obj = &(key_value.second);
 //    for (auto& q : qs) {
 //        i++;
 //        gtsam::Key ObjKey = key_value.first;
 //        ConstrainedDualQuadric *Obj = &(q);
-            gtsam::Vector3 radii = Obj->radii();
-            double lenth = radii[0];
-            double width = radii[1];
-            double height = radii[2];
+                gtsam::Vector3 radii = Obj->radii();
+                double lenth = radii[0];
+                double width = radii[1];
+                double height = radii[2];
 
-            // step 10.7 project quadrics to the image (only for visualization).
+                // step 10.7 project quadrics to the image (only for visualization).
 
-            cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
-            axe.at<float>(0) = lenth;
-            axe.at<float>(1) = width;
-            axe.at<float>(2) = height;
+                cv::Mat axe = cv::Mat::zeros(3, 1, CV_32F);
+                axe.at<float>(0) = lenth;
+                axe.at<float>(1) = width;
+                axe.at<float>(2) = height;
 
-            gtsam::Point3 centroid = Obj->centroid();
-            // quadrcis pose.
-            // object pose (world).
-            gtsam::Pose3 pose = Obj->pose(); // assume pose is initialized
-            cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
-            cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
+                gtsam::Point3 centroid = Obj->centroid();
+                // quadrcis pose.
+                // object pose (world).
+                gtsam::Pose3 pose = Obj->pose(); // assume pose is initialized
+                cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
+                cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
 
 // set translation matrix
-            T.at<float>(0, 3) = pose.translation().x();
-            T.at<float>(1, 3) = pose.translation().y();
-            T.at<float>(2, 3) = pose.translation().z();
+                T.at<float>(0, 3) = pose.translation().x();
+                T.at<float>(1, 3) = pose.translation().y();
+                T.at<float>(2, 3) = pose.translation().z();
 
 // set rotation matrix
-            gtsam::Rot3 rot = pose.rotation();
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    R.at<float>(i, j) = rot.matrix()(i, j);
+                gtsam::Rot3 rot = pose.rotation();
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        R.at<float>(i, j) = rot.matrix()(i, j);
+                    }
                 }
-            }
 
 // concatenate rotation and translation matrices
-            cv::Mat Twq = T * R;
-            // create a quadric.
-            cv::Mat Twq_t = Twq.t();
+                cv::Mat Twq = T * R;
+                // create a quadric.
+                cv::Mat Twq_t = Twq.t();
 
-            mQuadricIm = DrawQuadricProject(mQuadricIm,
-                                            cv_mat,
-                                            axe,
-                                            Twq,
-                                            0);
+                mQuadricIm = DrawQuadricProject(mQuadricIm,
+                                                cv_mat,
+                                                axe,
+                                                Twq,
+                                                i);
+            }
         }
 
         return mQuadricIm;
@@ -384,8 +386,8 @@ namespace gtsam_soslam {
                                             int nLatitudeNum,
                                             int nLongitudeNum) {
         // color.
-        std::vector<cv::Scalar> colors = {cv::Scalar(135, 0, 248),
-                                          cv::Scalar(255, 0, 253),
+        std::vector<cv::Scalar> colors = {cv::Scalar(135, 0, 0),
+                                          cv::Scalar(135, 0, 135),
                                           cv::Scalar(4, 254, 119),
                                           cv::Scalar(255, 126, 1),
                                           cv::Scalar(0, 112, 255),
@@ -393,7 +395,11 @@ namespace gtsam_soslam {
         };
 
         // draw params
-        cv::Scalar sc = colors[nClassid % 6];
+        cv::Scalar sc;
+        if(nClassid==-1)
+            sc = cv::Scalar(0, 0, 255);
+        else
+            sc  = colors[nClassid % 6];
 
         int nLineWidth = 2;
 

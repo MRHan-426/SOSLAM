@@ -187,7 +187,7 @@ namespace gtsam_soslam {
             //      sub_graph.add(syc);
             std::cout << "###############################" << std::endl;
             std::cout << "BALL: " << bbs.objectKey() << std::endl;
-            gtsam::Point3 localPoint(0, 0, 5);
+            gtsam::Point3 localPoint(0, 0, 2);
             gtsam::Point3 globalPoint = camera_pose.transformFrom(localPoint);
             // set a prior quadric
             ConstrainedDualQuadric quadric(gtsam::Pose3(gtsam::Rot3(), globalPoint), gtsam::Vector3(1, 1, 1));

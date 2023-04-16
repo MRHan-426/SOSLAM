@@ -88,7 +88,7 @@ namespace gtsam_soslam {
 //    pangolin::Var<bool> menuShowTexture("menu.Show Texture", false,true);
         pangolin::Var<bool> menuShowAxis("menu.Show Axis", true, true);
         pangolin::Var<bool> menuShowGroundTruth("menu.Show Ground Truth", true, true);
-        pangolin::Var<bool> menuShowCubeObj("menu.Show CubeObj", true, true);
+//        pangolin::Var<bool> menuShowCubeObj("menu.Show CubeObj", true, true);
         pangolin::Var<bool> menuShowQuadricObj("menu.Show QuadricObj", true, true);
 
         pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode", false, true);
@@ -219,8 +219,8 @@ namespace gtsam_soslam {
             // step draw objects.
 
             if(menuShowGroundTruth)
-                mpMapDrawer->DrawGroundTruthObject(menuShowCubeObj, menuShowQuadricObj);
-            mpMapDrawer->DrawObject(menuShowCubeObj, menuShowQuadricObj);
+                mpMapDrawer->DrawGroundTruthObject();
+            mpMapDrawer->DrawObject(menuShowQuadricObj);
 
 
             // TODO check opengl error?.
@@ -257,7 +257,7 @@ namespace gtsam_soslam {
             }
 
 //         quadric image.
-            cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage(menuShowGroundTruth);
+            cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage(menuShowQuadricObj, menuShowGroundTruth);
             if (!QuadricImage.empty()) {
             static int i=0;
             if(s->this_step.needSave()){

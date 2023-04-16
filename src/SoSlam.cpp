@@ -147,21 +147,21 @@ namespace gtsam_soslam {
 
     void SoSlam::step() {
         // Define noise model
-        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
+//        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
         gtsam::Vector6 temp;
         temp << 1.01, 1.01, 1.01, 1.01, 1.01, 1.01;
-//        gtsam::noiseModel::Diagonal::shared_ptr noise_prior =
-//                gtsam::noiseModel::Diagonal::Sigmas(0.001 * temp);
+        gtsam::noiseModel::Diagonal::shared_ptr noise_prior =
+                gtsam::noiseModel::Diagonal::Sigmas(0.001 * temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
                 gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(1.0, 1.0, 1.0, 1.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(10.0, 10.0, 10.0, 10.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
                 gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(10.0, 10.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(5.0));
 
         // Huber kernel
         auto huber_boxes = gtsam::noiseModel::Robust::Create(
@@ -208,17 +208,10 @@ namespace gtsam_soslam {
            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
        }
-//        if (count % 40 != 0 || count>400) {
-//            s.prev_step = *n;
-//            return;
-//        }
-//        s.graph_.print();
-//        s.estimates_.print();
-        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
-        //---------------------------------------------------------------------------------------------
+
 
         // point cloud process
-        if(count % 5 == 0 && !n->rgb.empty()){    // RGB images are needed.
+        if(count % 20 == 0 && !n->rgb.empty()){    // RGB images are needed.
 //            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
             mpBuilder->processFrame(n->rgb, n->depth, n->odom, 2.5); //depth thresh grab from object slam
 
@@ -232,6 +225,15 @@ namespace gtsam_soslam {
             mpMap->AddPointCloudList("Builder.Local Points", pCloudLocal);
             mpMap->addPointCloud(pCloudLocal);
         }
+        if (count % 5 != 0 || count>400) {
+            s.prev_step = *n;
+            count++;
+            return;
+        }
+//        s.graph_.print();
+//        s.estimates_.print();
+        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
+        //---------------------------------------------------------------------------------------------
         count++;
 //        int blockSize = 2;
 //        int apertureSize = 3;

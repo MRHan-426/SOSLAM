@@ -1,7 +1,7 @@
 <annotation>
-	<folder>folder_1</folder>
-	<filename>1311868164.363181.png</filename>
-	<path>/home/flanker/Documents/TUM/ye/folder_1/1311868164.363181.png</path>
+	<folder>fr2_dishes_img</folder>
+	<filename>1.png</filename>
+	<path>/home/ziqihan/soslam/rgb_label/fr2_dishes_img/1.png</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -12,75 +12,63 @@
 	</size>
 	<segmented>0</segmented>
 	<object>
-		<name>monitor</name>
+		<name>chair</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>233</xmin>
-			<ymin>94</ymin>
-			<xmax>390</xmax>
-			<ymax>259</ymax>
-		</bndbox>
-	<objectkey>1</objectkey></object>
-	<object>
-		<name>keyboard</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>200</xmin>
-			<ymin>253</ymin>
-			<xmax>387</xmax>
-			<ymax>312</ymax>
+			<xmin>269</xmin>
+			<ymin>146</ymin>
+			<xmax>344</xmax>
+			<ymax>237</ymax>
 		</bndbox>
 	<objectkey>2</objectkey></object>
 	<object>
-		<name>mouse</name>
+		<name>bowl_smaller</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>376</xmin>
-			<ymin>319</ymin>
-			<xmax>410</xmax>
-			<ymax>361</ymax>
+			<xmin>93</xmin>
+			<ymin>235</ymin>
+			<xmax>195</xmax>
+			<ymax>288</ymax>
 		</bndbox>
 	<objectkey>3</objectkey></object>
 	<object>
-		<name>can</name>
+		<name>bowl_bigger</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>41</xmin>
-			<ymin>254</ymin>
-			<xmax>88</xmax>
-			<ymax>321</ymax>
+			<xmin>469</xmin>
+			<ymin>209</ymin>
+			<xmax>576</xmax>
+			<ymax>269</ymax>
 		</bndbox>
-	<objectkey>5</objectkey></object>
+	<objectkey>4</objectkey></object>
 	<object>
-		<name>tape</name>
+		<name>cup</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>534</xmin>
-			<ymin>291</ymin>
-			<xmax>611</xmax>
-			<ymax>350</ymax>
+			<xmin>353</xmin>
+			<ymin>242</ymin>
+			<xmax>426</xmax>
+			<ymax>317</ymax>
 		</bndbox>
 	<objectkey>6</objectkey></object>
 	<object>
-		<name>book</name>
+		<name>laptop</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>496</xmin>
-			<ymin>220</ymin>
-			<xmax>594</xmax>
-			<ymax>279</ymax>
+			<ymin>136</ymin>
+			<xmax>532</xmax>
+			<ymax>159</ymax>
 		</bndbox>
-	<objectkey>4</objectkey></object>
+	<objectkey>5</objectkey></object>
 </annotation>

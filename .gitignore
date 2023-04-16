@@ -1,10 +1,13 @@
 *.sw*
 build*/
 cmake-build-debug*/
-cmake-build-release
+cmake-build-release/
+
 input/
+input/img/
 input10/
 input_10/
+input_scene1/
 output/
 input_full/
 output/
