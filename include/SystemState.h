@@ -84,6 +84,14 @@ namespace gtsam_soslam
         std::vector<Detection> new_associated;
         std::map<std::pair<int, int>, std::pair<int, int>> nearest_edge_point;
         std::vector<std::pair<int, int>> uniform_sample_points;
+        struct sym_output
+        {
+            gtsam::Vector4 sample_3D;
+            gtsam::Vector4 symmetry_3D;
+            gtsam::Vector4 edge_3D;
+            gtsam::Vector4 symmetry_edge_3D;
+        };
+        std::unordered_map<gtsam::Key, sym_output> sym_points;
         gtsam::Vector3 ray_points;
 
         explicit StepState(int i = 0) : i(i), pose_key(gtsam::Symbol('x', i))

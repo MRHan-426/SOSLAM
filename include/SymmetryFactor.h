@@ -11,6 +11,7 @@
 
 #include "AlignedBox2.h"
 #include "ConstrainedDualQuadric.h"
+#include "SystemState.h"
 
 #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/Pose3.h>
@@ -35,6 +36,7 @@ namespace gtsam_soslam
             TRUNCATED
         };
         gtsam::Vector3 *ray_point_;
+        std::unordered_map<gtsam::Key, StepState::sym_output> *sym_points_;
 
     protected:
         cv::Mat image_;
@@ -45,6 +47,7 @@ namespace gtsam_soslam
         MeasurementModel measurementModel_;
         std::map<std::pair<int, int>, std::pair<int, int>> nearest_edge_point_;
         std::vector<std::pair<int, int>> uniform_sample_points_;
+        gtsam::Key quadricKey_;
 
         int sigma_scc_;
 
@@ -64,11 +67,13 @@ namespace gtsam_soslam
                        const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
                        const std::vector<std::pair<int, int>> uniform_sample_points,
                        gtsam::Vector3 *ray_point,
+                       std::unordered_map<gtsam::Key, StepState::sym_output> *sym_points,
                        const MeasurementModel &errorType = STANDARD,
 
                        const int &sigma_scc = 1)
             : Base(model, poseKey, quadricKey),
               image_(image),
+              quadricKey_(quadricKey),
               measured_(measured),
               label_(label),
               calibration_(calibration),
@@ -76,6 +81,7 @@ namespace gtsam_soslam
               nearest_edge_point_(nearest_edge_point),
               uniform_sample_points_(uniform_sample_points),
               ray_point_(ray_point),
+              sym_points_(sym_points),
               sigma_scc_(sigma_scc){};
 
         SymmetryFactor(const AlignedBox2 &measured,
@@ -88,15 +94,18 @@ namespace gtsam_soslam
                        const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
                        const std::vector<std::pair<int, int>> &uniform_sample_points,
                        gtsam::Vector3 *ray_point,
+                       std::unordered_map<gtsam::Key, StepState::sym_output> *sym_points,
                        const int &sigma_scc = 1)
             : Base(model, poseKey, quadricKey),
               image_(image),
+              quadricKey_(quadricKey),
               measured_(measured),
               label_(label),
               calibration_(calibration),
               nearest_edge_point_(nearest_edge_point),
               uniform_sample_points_(uniform_sample_points),
               ray_point_(ray_point),
+              sym_points_(sym_points),
               sigma_scc_(sigma_scc)
         {
             if (errorString == "STANDARD")

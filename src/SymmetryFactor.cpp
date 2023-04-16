@@ -35,6 +35,7 @@ namespace gtsam_soslam
             //--------------------------------------------------------------------------------------------------
             cv::Mat symmetry_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
             cv::Mat nearest_image(480, 640, CV_8UC3, cv::Scalar(153, 204, 255));
+            StepState::sym_output output_point;
 
             for (std::pair<int, int> uniform_sample_point : uniform_sample_points_)
             {
@@ -78,9 +79,10 @@ namespace gtsam_soslam
                 // calculate sample point in 3d space
                 gtsam::Vector4 sample_ray = image2world * sample_2D;
                 sample_ray.normalize();
-                gtsam::Vector3 sample_ray_3;
-                // std::cout << "inside: " << sample_ray_3[0] << ", " << sample_ray_3[1] << ", " << sample_ray_3[2] << std::endl;
+                gtsam::Vector3 sample_ray_3(sample_ray[0], sample_ray[1], sample_ray[2]);
+                // std::cout << "inside: " << sample_ray_3[0] << ", " << sample_ray_3[1] << ", " << sample_ray_3[2] ;
                 *ray_point_ = sample_ray_3;
+                // std::cout << "outside: " << (*ray_point_)[0] << ", " << (*ray_point_)[1] << ", " << (*ray_point_)[2] << std::endl;
                 // ray_point_[0] = sample_ray(0);
                 // ray_point_[1] = sample_ray(1);
                 // ray_point_[2] = sample_ray(2);sssting the line in 3D space.
@@ -271,6 +273,11 @@ namespace gtsam_soslam
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // cv::waitKey(0);
+                output_point.sample_3D = sample_3D;
+                output_point.symmetry_3D = symmetry_sample_3D;
+                output_point.edge_3D = edge_3D;
+                output_point.symmetry_edge_3D = symmetry_edge_3D;
+                (*sym_points_)[quadricKey_] = output_point;
             }
             gtsam::Vector1 error(1);
 
