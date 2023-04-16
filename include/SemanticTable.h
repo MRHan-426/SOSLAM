@@ -7,14 +7,14 @@
 class SemanticTable {
 public:
     SemanticTable() : table_{
-            // TODO: modify these scales
-            {"can",      {0.5,  0.5}},
-            {"mouse",    {2.0,  1.0}},
-            {"keyboard", {10.0, 20.0}},
-            {"book",     {7.5,  5.5}},
-            {"monitor",  {0.1,  0.5}},
-            {"tape",     {0.7,  0.7}},
-            {"chair",    {0.5,  0.5}},
+        // TODO: modify these scales
+        {"can", {0.5, 0.5}},
+        {"mouse", {2.0, 1.0}},
+        {"keyboard", {8.0, 16.0}},
+        {"book", {7.5, 5.5}},
+        {"monitor", {0.20, 0.5}},
+        {"tape", {0.7, 0.7}},
+        {"chair", {0.5, 0.5}},
 
             {"q0",       {5,    5}},
             {"q1",       {2,    2}}

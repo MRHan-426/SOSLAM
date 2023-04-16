@@ -1,7 +1,13 @@
 #include "SoSlam.h"
+#include "OptimizeFunctor.h"
+
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
+#include <tbb/parallel_for.h>
+#include <tbb/blocked_range.h>
+#include <tbb/global_control.h>
+
 
 using namespace std;
 
@@ -130,9 +136,6 @@ namespace gtsam_soslam {
         if (state_.optimizer_batch_) {
             guess_initial_values();
             auto &s = state_;
-
-            // s.estimates_.print(); // print estimate values
-            // s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
@@ -195,16 +198,16 @@ namespace gtsam_soslam {
             }
         }
 
-//        // Add new pose to the factor graph
-//        if (!p.isValid()) {
-//            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
-//            guess_initial_values();
-//        } else {
-//            s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
-//            s.estimates_.insert(n->pose_key, n->odom);
-//            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
-//            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
-//        }
+       // Add new pose to the factor graph
+       if (!p.isValid()) {
+           s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, s.initial_pose_, noise_prior));
+           guess_initial_values();
+       } else {
+           s.graph_.add(gtsam::PriorFactor<gtsam::Pose3>(n->pose_key, n->odom, noise_prior));
+           s.estimates_.insert(n->pose_key, n->odom);
+           gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
+           s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
+       }
         if (count % 40 != 0 || count>400) {
             s.prev_step = *n;
             return;
@@ -250,84 +253,33 @@ namespace gtsam_soslam {
                     feature_points.push_back(std::make_pair((int) i, (int) j)); // x, y coordinate in matrix form
                 }
             }
+
+
+//            // Set up the TBB parallel_for construct
+//            size_t num_threads = tbb::global_control::active_value(tbb::global_control::max_allowed_parallelism);
+//            tbb::blocked_range<size_t> range(0, num_threads);
+//
+//            // Create a tbb::combinable container to collect optimized estimates from each thread
+//            tbb::combinable<gtsam::Values> comb_estimates([&] { return s.estimates_; });
+//
+//            // Create the functor with the problem setup and the reference to the tbb::combinable container
+//            OptimizeFunctor optimize_functor(s.graph_, comb_estimates, s.optimizer_params_);
+//
+//            // Run the optimization in parallel
+//            tbb::parallel_for(range, optimize_functor);
+//
+//            // Merge the optimized estimates from each thread
+//            comb_estimates.combine_each([&](const gtsam::Values& optimized_estimates) {
+//                s.estimates_.update(optimized_estimates);
+//            });
+
+            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
+            s.estimates_ = optimizer.optimize();
+            std::cout << s.graph_.error(s.estimates_) << std::endl;
+//            limitFactorGraphSize(s.graph_, 100);
+//            updateInitialEstimates(s.graph_, s.estimates_);
+
         }
-        n->nearest_edge_point = findNearestEdge(feature_points, gray_image.size().height, gray_image.size().width);
-        //---------------------------------------------------------------------------------------------
-
-//        // batch optimization
-//        if (s.optimizer_batch_) {
-//            for (const auto &d: n->new_associated) {
-//                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
-//            }
-//        }
-//            // step optimization
-//        else {
-////            guess_initial_values();
-//            for (const auto &d: n->new_associated) {
-//                // add factors into graph
-//                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
-//
-//                // quadric initialization
-//                gtsam::KeyVector keys = s.estimates_.keys();
-//                auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
-//                bool found = (iter != keys.end());
-//                if (!found) {
-//                    gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
-//                    ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs_syc(
-//                            std::get<0>(bbs_scc_psc_syc), std::get<1>(bbs_scc_psc_syc), std::get<2>(bbs_scc_psc_syc),
-//                            std::get<3>(bbs_scc_psc_syc), camera_pose);
-//                    // those factors have the same quadric key, just add once
-//                    initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
-//                }
-//            }
-
-//            try{
-//                s.isam_optimizer_.update(
-//                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-//                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-//                s.estimates_ = s.isam_optimizer_.calculateEstimate();
-//
-//            }catch (gtsam::IndeterminantLinearSystemException &e){
-//                std::cout << "Collect Data" << std::endl;
-//            }
-//
-//            gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
-//            s.estimates_ = optimizer.optimize();
-//            //            s.graph_.print();
-//            //                        s.isam_optimizer_.update(
-//            //                                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-//            //                                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-//            //                        s.estimates_ = s.isam_optimizer_.calculateEstimate();
-//            std::cout << s.graph_.error(s.estimates_) << std::endl;
-////            limitFactorGraphSize(s.graph_, 100);
-////            updateInitialEstimates(s.graph_, s.estimates_);
-//            auto current_ps_qs = utils::ps_and_qs_from_values(s.estimates_);
-//            std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
-//            int i = -1;
-////        std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
-//            for (auto &key_value: cqs) {
-//                i++;
-//
-//                gtsam::Key ObjKey = key_value.first;
-//                cout<<gtsam::Symbol(ObjKey)<<endl;
-//                ConstrainedDualQuadric *Obj = &(key_value.second);
-//                gtsam::Vector3 radii = Obj->radii();
-//                double lenth = radii[0];
-//                double width = radii[1];
-//                double height = radii[2];
-//                cout<<"len: "<<lenth<<", "<<width<<", "<<height<<endl;
-//                gtsam::Point3 centroid = Obj->centroid();
-//                cout<<"center: "<<centroid[0]<<", "<<centroid[1]<<", "<<centroid[2]<<endl;
-//                gtsam::Pose3 pose = Obj->pose();
-//                gtsam::Rot3 rot = pose.rotation();
-//                gtsam::Vector3 ypr = rot.ypr();
-//                double yaw_deg = ypr(0) * 180.0 / M_PI;
-//                double pitch_deg = ypr(1) * 180.0 / M_PI;
-//                double roll_deg = ypr(2) * 180.0 / M_PI;
-////                cout<<"rot: "<<rot<<endl;
-//                cout<<"yaw: "<<yaw_deg<<" *M_PI/180.0, "<<pitch_deg<<" *M_PI/180.0, "<<roll_deg<<endl;
-//            }
-//        }
         s.prev_step = *n;
         if(output_quadrics_image_)
             s.this_step.imageprepared();
@@ -366,33 +318,33 @@ namespace gtsam_soslam {
         SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key,
                            huber_syc, state_.this_step.nearest_edge_point);
         state_.graph_.add(bbs);
-//        state_.graph_.add(ssc);
-//        state_.graph_.add(psc);
+       state_.graph_.add(ssc);
+       state_.graph_.add(psc);
 //        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 
-    std::vector<std::vector<std::pair<double, double>>>
-    SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y) {
-        std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(
-                int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
-        for (int i = 0; i < int(max_x); i++) {
-            for (int j = 0; j < int(max_y); j++) {
-                double min = DBL_MAX;
-                std::pair<double, double> nearest_edge;
-                for (int k = 0; k < feature_points.size(); k++) {
-                    double distance = pow(pow(feature_points[k].first - i, 2) + pow(feature_points[k].second - j, 2),
-                                          0.5);
-                    if (distance < min) {
-                        nearest_edge = feature_points[k];
-                        min = distance;
-                    }
-                }
-                nearest[i][j] = nearest_edge;
-            }
-        }
-        return nearest;
-    }
+    // std::vector<std::vector<std::pair<double, double>>>
+    // SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y) {
+    //     std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(
+    //             int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
+    //     for (int i = 0; i < int(max_x); i++) {
+    //         for (int j = 0; j < int(max_y); j++) {
+    //             double min = DBL_MAX;
+    //             std::pair<double, double> nearest_edge;
+    //             for (int k = 0; k < feature_points.size(); k++) {
+    //                 double distance = pow(pow(feature_points[k].first - i, 2) + pow(feature_points[k].second - j, 2),
+    //                                       0.5);
+    //                 if (distance < min) {
+    //                     nearest_edge = feature_points[k];
+    //                     min = distance;
+    //                 }
+    //             }
+    //             nearest[i][j] = nearest_edge;
+    //         }
+    //     }
+    //     return nearest;
+    // }
 
     void SoSlam::limitFactorGraphSize(gtsam::NonlinearFactorGraph &graph, size_t maxFactors) {
         size_t numFactors = graph.size();

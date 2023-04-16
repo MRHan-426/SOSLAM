@@ -60,9 +60,9 @@ namespace gtsam_soslam {
     void Viewer::Run() {
         mbFinished = false;
 
-        // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1024,768);
-        pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer", 1200, 900);   // 1920,1080.
-        // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",mImageWidth+175,mImageHeight);
+    // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1024,768);
+    pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1600, 1080);   // 1920,1080.
+    // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",mImageWidth+175,mImageHeight);
 
         // 3D Mouse handler requires depth testing to be enabled
         glEnable(GL_DEPTH_TEST);
