@@ -3,8 +3,10 @@ build*/
 cmake-build-debug*/
 cmake-build-release
 input/
+input10/
 input_10/
 input_full/
+output/
 
 dist/
 *.egg-info/
