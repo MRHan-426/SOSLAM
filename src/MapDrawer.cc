@@ -419,7 +419,7 @@ namespace gtsam_soslam {
         int i = -1;
         for (auto &Obj: groundTruthQuad) {
             i++;
-            glColor3f(0.5, 0.5, 0.5);
+            glColor3f(1, 0, 0);
 
             glLineWidth(mCameraLineWidth);
 

@@ -3,6 +3,7 @@ build*/
 cmake-build-debug*/
 cmake-build-release
 input/
+input10/
 input_10/
 output/
 input_full/

@@ -217,9 +217,9 @@ namespace gtsam_soslam {
         // point cloud process
         if(!n->rgb.empty()){    // RGB images are needed.
 //            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
-            mpBuilder->processFrame(n->rgb, n->depth, n->odom, 3.0); //depth thresh grab from object slam
+            mpBuilder->processFrame(n->rgb, n->depth, n->odom, 2.5); //depth thresh grab from object slam
 
-//            mpBuilder->voxelFilter(0.1);   // Down sample threshold; smaller the finer; depend on the hardware.
+//            mpBuilder->voxelFilter(0.01);   // Down sample threshold; smaller the finer; depend on the hardware.
             PointCloudPCL::Ptr pCloudPCL = mpBuilder->getMap();
             PointCloudPCL::Ptr pCurrentCloudPCL = mpBuilder->getCurrentMap();
 
