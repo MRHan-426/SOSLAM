@@ -34,6 +34,7 @@ namespace gtsam_soslam
             STANDARD,
             TRUNCATED
         };
+        gtsam::Vector3 *ray_point_;
 
     protected:
         cv::Mat image_;
@@ -62,6 +63,7 @@ namespace gtsam_soslam
                        const gtsam::SharedNoiseModel &model,
                        const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
                        const std::vector<std::pair<int, int>> uniform_sample_points,
+                       gtsam::Vector3 *ray_point,
                        const MeasurementModel &errorType = STANDARD,
 
                        const int &sigma_scc = 1)
@@ -73,6 +75,7 @@ namespace gtsam_soslam
               measurementModel_(errorType),
               nearest_edge_point_(nearest_edge_point),
               uniform_sample_points_(uniform_sample_points),
+              ray_point_(ray_point),
               sigma_scc_(sigma_scc){};
 
         SymmetryFactor(const AlignedBox2 &measured,
@@ -83,7 +86,8 @@ namespace gtsam_soslam
                        const gtsam::SharedNoiseModel &model,
                        const std::string &errorString,
                        const std::map<std::pair<int, int>, std::pair<int, int>> &nearest_edge_point,
-                       const std::vector<std::pair<int, int>> uniform_sample_points,
+                       const std::vector<std::pair<int, int>> &uniform_sample_points,
+                       gtsam::Vector3 *ray_point,
                        const int &sigma_scc = 1)
             : Base(model, poseKey, quadricKey),
               image_(image),
@@ -92,6 +96,7 @@ namespace gtsam_soslam
               calibration_(calibration),
               nearest_edge_point_(nearest_edge_point),
               uniform_sample_points_(uniform_sample_points),
+              ray_point_(ray_point),
               sigma_scc_(sigma_scc)
         {
             if (errorString == "STANDARD")

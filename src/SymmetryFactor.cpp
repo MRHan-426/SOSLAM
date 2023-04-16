@@ -73,12 +73,17 @@ namespace gtsam_soslam
 
                 world2image = QuadricCamera::transformToImage(pose, calibration_);
                 image2world = world2image.transpose();
+                // label_ = 'c';
 
                 // calculate sample point in 3d space
                 gtsam::Vector4 sample_ray = image2world * sample_2D;
                 sample_ray.normalize();
-
-                // Assume sample_ray is a gtsam::Vector4 representing the line in 3D space.
+                gtsam::Vector3 sample_ray_3;
+                // std::cout << "inside: " << sample_ray_3[0] << ", " << sample_ray_3[1] << ", " << sample_ray_3[2] << std::endl;
+                *ray_point_ = sample_ray_3;
+                // ray_point_[0] = sample_ray(0);
+                // ray_point_[1] = sample_ray(1);
+                // ray_point_[2] = sample_ray(2);sssting the line in 3D space.
                 // Assume box is an AlignedBox3 representing the box in 3D space.
 
                 gtsam::Vector3 ray_dir = sample_ray.head<3>();
@@ -183,24 +188,24 @@ namespace gtsam_soslam
                 symmetry_sample_3D[3] = 1;
 
                 // x, y, z points
-                double intersection_point_x = intersection_point[0];
-                double intersection_point_y = intersection_point[1];
-                double intersection_point_z = intersection_point[2];
-                double center_point_x = quadric_translation[0];
-                double center_point_y = quadric_translation[1];
-                double center_point_z = quadric_translation[2];
-                double symmetry_point_x = symmetry_sample_3D[0];
-                double symmetry_point_y = symmetry_sample_3D[1];
-                double symmetry_point_z = symmetry_sample_3D[2];
+                double intersection_point_3d_x = intersection_point[0];
+                double intersection_point_3d_y = intersection_point[1];
+                double intersection_point_3d_z = intersection_point[2];
+                double center_point_3d_x = quadric_translation[0];
+                double center_point_3d_y = quadric_translation[1];
+                double center_point_3d_z = quadric_translation[2];
+                double symmetry_point_3d_x = symmetry_sample_3D[0];
+                double symmetry_point_3d_y = symmetry_sample_3D[1];
+                double symmetry_point_3d_z = symmetry_sample_3D[2];
 
-                std::cout << "sample_3D:              " << intersection_point_x << ", " << intersection_point_y << ", " << intersection_point_z << std::endl;
-                std::cout << "----------------------  " << center_point_x << ", " << center_point_y << ", " << center_point_z << std::endl;
-                std::cout << "symmetry_sample_3D:     " << symmetry_point_x << ", " << symmetry_point_y << ", " << symmetry_point_z << std::endl;
+                // std::cout << "sample_3D:              " << intersection_point_3d_x << ", " << intersection_point_3d_y << ", " << intersection_point_3d_z << std::endl;
+                // std::cout << "----------------------  " << center_point_3d_x << ", " << center_point_3d_y << ", " << center_point_3d_z << std::endl;
+                // std::cout << "symmetry_sample_3D:     " << symmetry_point_3d_x << ", " << symmetry_point_3d_y << ", " << symmetry_point_3d_z << std::endl;
 
                 // Find the distance
 
-                double sample_distance = std::sqrt(std::pow(center_point_x - intersection_point_x, 2) + std::pow(center_point_y - intersection_point_y, 2) + std::pow(center_point_z - intersection_point_z, 2));
-                double symmetry_distance = std::sqrt(std::pow(center_point_x - symmetry_point_x, 2) + std::pow(center_point_y - symmetry_point_y, 2) + std::pow(center_point_z - symmetry_point_z, 2));
+                double sample_distance = std::sqrt(std::pow(center_point_3d_x - intersection_point_3d_x, 2) + std::pow(center_point_3d_y - intersection_point_3d_y, 2) + std::pow(center_point_3d_z - intersection_point_3d_z, 2));
+                double symmetry_distance = std::sqrt(std::pow(center_point_3d_x - symmetry_point_3d_x, 2) + std::pow(center_point_3d_y - symmetry_point_3d_y, 2) + std::pow(center_point_3d_z - symmetry_point_3d_z, 2));
                 // std::cout << "========================" << std::endl;
                 // std::cout << "sample distance:        " << sample_distance << std::endl;
                 // std::cout << "symmetry distance :     " << symmetry_distance << std::endl;
@@ -221,28 +226,42 @@ namespace gtsam_soslam
                 // cv::imshow("nearest_image", nearest_image);
 
                 symmetry_sample_2D = world2image * symmetry_sample_3D;
-                std::cout << symmetry_sample_2D[0] / symmetry_sample_2D[2] << ", " << symmetry_sample_2D[1] / symmetry_sample_2D[2] << std::endl;
+                double symmetry_sample_2D_x = symmetry_sample_2D[0];
+                double symmetry_sample_2D_y = symmetry_sample_2D[1];
+                double symmetry_sample_2D_1 = symmetry_sample_2D[2];
 
-                double symmtery_sample_2D_x =
-                    (symmetry_sample_2D[0] / symmetry_sample_2D[2]) > 0 ? symmetry_sample_2D[0] /
-                                                                              symmetry_sample_2D[2]
-                                                                        : 0;
-                double symmtery_sample_2D_y =
-                    symmetry_sample_2D[1] / symmetry_sample_2D[2] > 0 ? symmetry_sample_2D[1] /
-                                                                            symmetry_sample_2D[2]
-                                                                      : 0;
-
-                if ((symmtery_sample_2D_x) >= image_.rows)
+                // normalize x value
+                if (symmetry_sample_2D_x / symmetry_sample_2D_1 > 0)
                 {
-                    symmtery_sample_2D_x = image_.rows - 1;
+                    symmetry_sample_2D_x /= symmetry_sample_2D_1;
                 }
-                if ((symmtery_sample_2D_y) >= image_.cols)
+                else
                 {
-                    symmtery_sample_2D_y = image_.cols - 1;
+                    symmetry_sample_2D_x = 0;
                 }
 
-                std::pair<int, int> symmetry_2D = std::make_pair((int)symmtery_sample_2D_x, (int)symmtery_sample_2D_y);
-                std::cout << "symmetry_2D: " << symmetry_2D.first << ", " << symmetry_2D.second << std::endl;
+                // normalize y value
+                if (symmetry_sample_2D_y / symmetry_sample_2D_1 > 0)
+                {
+                    symmetry_sample_2D_y /= symmetry_sample_2D_1;
+                }
+                else
+                {
+                    symmetry_sample_2D_y = 0;
+                }
+
+                // set it as the border when it is out of frame
+                if ((symmetry_sample_2D_x) >= image_.rows)
+                {
+                    symmetry_sample_2D_x = image_.rows - 1;
+                }
+                if ((symmetry_sample_2D_y) >= image_.cols)
+                {
+                    symmetry_sample_2D_y = image_.cols - 1;
+                }
+
+                std::pair<int, int> symmetry_2D = std::make_pair((int)symmetry_sample_2D_x, (int)symmetry_sample_2D_y);
+                // std::cout << "symmetry_2D: " << symmetry_2D.first << ", " << symmetry_2D.second << std::endl;
                 // std::pair<int, int> edge_2D_q = nearest_edge_point_.at(symmetry_2D);
                 // symmetry_edge_2D << edge_2D_q.first, edge_2D_q.second, 1;
 

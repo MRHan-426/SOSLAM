@@ -286,7 +286,13 @@ namespace gtsam_soslam
             closest_map = findClosest(sample_points, feature_points);
             n->nearest_edge_point = closest_map;
             n->uniform_sample_points = sample_points;
+
+            // change the ray points
+            gtsam::Vector3 ray_point = n->ray_points;
+            std::cout << "===============================================" << ray_point[0] << ", " << ray_point[1] << ", " << ray_point[2] << std::endl;
             // cv::waitKey(0);
+
+            //---------------------------------------------------------------------------------------------
 
             // batch optimization
             if (s.optimizer_batch_)
@@ -379,8 +385,16 @@ namespace gtsam_soslam
         BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, huber_boxes, "STANDARD");
         SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_ssc);
         PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_psc);
-        SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key,
-                           huber_syc, state_.this_step.nearest_edge_point, state_.this_step.uniform_sample_points);
+        SymmetryFactor syc(AlignedBox2(d.bounds),
+                           state_.this_step.rgb,
+                           d.label,
+                           calibPtr,
+                           d.pose_key,
+                           d.quadric_key,
+                           huber_syc,
+                           state_.this_step.nearest_edge_point,
+                           state_.this_step.uniform_sample_points,
+                           &state_.this_step.ray_points);
         state_.graph_.add(bbs);
         state_.graph_.add(ssc);
         state_.graph_.add(psc);

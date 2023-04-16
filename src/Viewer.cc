@@ -1,36 +1,36 @@
 /**
-* This file is part of ORB-SLAM2.
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-* 
-* Modification: EAO-SLAM
-* Version: 1.0
-* Created: 05/21/2019
-* Author: Yanmin Wu
-* E-mail: wuyanminmax@gmail.com
-*/
-
+ * This file is part of ORB-SLAM2.
+ * Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
+ * For more information see <https://github.com/raulmur/ORB_SLAM2>
+ *
+ * Modification: EAO-SLAM
+ * Version: 1.0
+ * Created: 05/21/2019
+ * Author: Yanmin Wu
+ * E-mail: wuyanminmax@gmail.com
+ */
 
 #include <pangolin/pangolin.h>
-//#include <pangolin/var/var.h>
-//#include <pangolin/var/varextra.h>
-//#include <pangolin/gl/gl.h>
-//#include <pangolin/gl/gldraw.h>
-//#include <pangolin/display/display.h>
-//#include <pangolin/display/view.h>
-//#include <pangolin/display/widgets.h>
-//#include <pangolin/display/default_font.h>
-//#include <pangolin/handler/handler.h>
+// #include <pangolin/var/var.h>
+// #include <pangolin/var/varextra.h>
+// #include <pangolin/gl/gl.h>
+// #include <pangolin/gl/gldraw.h>
+// #include <pangolin/display/display.h>
+// #include <pangolin/display/view.h>
+// #include <pangolin/display/widgets.h>
+// #include <pangolin/display/default_font.h>
+// #include <pangolin/handler/handler.h>
 #include "Viewer.h"
 #include <mutex>
 
-namespace gtsam_soslam {
+namespace gtsam_soslam
+{
 
     Viewer::Viewer(SoSlamState *sState, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer,
-                   const string &strSettingPath) :
-            s(sState),
-            mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer),
-            mbFinishRequested(false), mbFinished(true), mbStopped(false), mbStopRequested(false) {
+                   const string &strSettingPath) : s(sState),
+                                                   mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer),
+                                                   mbFinishRequested(false), mbFinished(true), mbStopped(false), mbStopRequested(false)
+    {
         cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
         float fps = fSettings["Camera.fps"];
@@ -40,7 +40,8 @@ namespace gtsam_soslam {
 
         mImageWidth = fSettings["Camera.width"];
         mImageHeight = fSettings["Camera.height"];
-        if (mImageWidth < 1 || mImageHeight < 1) {
+        if (mImageWidth < 1 || mImageHeight < 1)
+        {
             mImageWidth = 640;
             mImageHeight = 480;
         }
@@ -54,14 +55,14 @@ namespace gtsam_soslam {
         mfy = fSettings["Camera.fy"];
         mcx = fSettings["Camera.cx"];
         mcy = fSettings["Camera.cy"];
-
     }
 
-    void Viewer::Run() {
+    void Viewer::Run()
+    {
         mbFinished = false;
 
         // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1024,768);
-        pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer", 1200, 900);   // 1920,1080.
+        pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer", 1200, 900); // 1920,1080.
         // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",mImageWidth+175,mImageHeight);
 
         // 3D Mouse handler requires depth testing to be enabled
@@ -80,8 +81,8 @@ namespace gtsam_soslam {
         pangolin::Var<bool> menuShowSemiDense("menu.Show SemiDense", true, true);
         pangolin::Var<double> menuSigmaTH("menu.Sigma", 0.02, 1e-10, 0.05, false);
         pangolin::Var<bool> menuCameraView("menu.Camera View", true, true);
-//    pangolin::Var<bool> menuShowModel("menu.Show Model", false,true);
-//    pangolin::Var<bool> menuShowTexture("menu.Show Texture", false,true);
+        //    pangolin::Var<bool> menuShowModel("menu.Show Model", false,true);
+        //    pangolin::Var<bool> menuShowTexture("menu.Show Texture", false,true);
 
         pangolin::Var<bool> menuShowCubeObj("menu.Show CubeObj", true, true);
         pangolin::Var<bool> menuShowQuadricObj("menu.Show QuadricObj", true, true);
@@ -99,18 +100,17 @@ namespace gtsam_soslam {
 
         // Define Camera Render Object (for view / scene browsing)
         pangolin::OpenGlRenderState s_cam(
-//                pangolin::ProjectionMatrix(1024,768,mViewpointF,mViewpointF,512,389,0.1,1000),
-//                pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
-                // carv: using calibrated camera center and focal length
-                pangolin::ProjectionMatrix(mImageWidth, mImageHeight, mfx, mfy, mcx, mcy, 0.1, 1000),
-                pangolin::ModelViewLookAt(0, 0, 0, 0, 0, 1, 0.0, -1.0, 0.0)
-        );
+            //                pangolin::ProjectionMatrix(1024,768,mViewpointF,mViewpointF,512,389,0.1,1000),
+            //                pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
+            // carv: using calibrated camera center and focal length
+            pangolin::ProjectionMatrix(mImageWidth, mImageHeight, mfx, mfy, mcx, mcy, 0.1, 1000),
+            pangolin::ModelViewLookAt(0, 0, 0, 0, 0, 1, 0.0, -1.0, 0.0));
 
         // Add named OpenGL viewport to window and provide 3D Handler
         pangolin::View &d_cam = pangolin::CreateDisplay()
-//            .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
-                .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -mImageWidth / mImageHeight)
-                .SetHandler(new pangolin::Handler3D(s_cam));
+                                    //            .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
+                                    .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -mImageWidth / mImageHeight)
+                                    .SetHandler(new pangolin::Handler3D(s_cam));
 
         pangolin::OpenGlMatrix Twc;
         Twc.SetIdentity();
@@ -137,19 +137,24 @@ namespace gtsam_soslam {
                                                                      0.0, -1.0, 0.0);
         pangolin::OpenGlMatrix viewCamera = pangolin::ModelViewLookAt(0, 0, 0, 0, 0, 1, 0.0, -1.0, 0.0);
 
-
-        while (1) {
+        while (1)
+        {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             mpMapDrawer->GetCurrentOpenGLCameraMatrix(Twc);
 
-            if (menuFollowCamera && bFollow) {
+            if (menuFollowCamera && bFollow)
+            {
                 s_cam.Follow(Twc);
-            } else if (menuFollowCamera && !bFollow) {
-//            s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0));
+            }
+            else if (menuFollowCamera && !bFollow)
+            {
+                //            s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0));
                 s_cam.Follow(Twc);
                 bFollow = true;
-            } else if (!menuFollowCamera && bFollow) {
+            }
+            else if (!menuFollowCamera && bFollow)
+            {
                 bFollow = false;
             }
 
@@ -165,11 +170,14 @@ namespace gtsam_soslam {
             // }
 
             // carv: setup viewpoint to see model
-            if (menuCameraView && !bCameraView) {
+            if (menuCameraView && !bCameraView)
+            {
                 s_cam.SetProjectionMatrix(projectionCamera);
                 s_cam.SetModelViewMatrix(viewCamera);
                 bCameraView = true;
-            } else if (!menuCameraView && bCameraView) {
+            }
+            else if (!menuCameraView && bCameraView)
+            {
                 s_cam.SetProjectionMatrix(projectionAbove);
                 s_cam.SetModelViewMatrix(viewAbove);
                 bCameraView = false;
@@ -187,16 +195,16 @@ namespace gtsam_soslam {
             //     mpMapDrawer->DrawSemiDense(menuSigmaTH);
             mpMapDrawer->Coordinate();
             // step draw objects.
-//        if(menuShowCubeObj || menuShowQuadricObj)
-//        {
+            //        if(menuShowCubeObj || menuShowQuadricObj)
+            //        {
             mpMapDrawer->DrawObject(menuShowCubeObj, menuShowQuadricObj,
-                    //    mflag,
+                                    //    mflag,
                                     menuShowBottle, menuShowChair, menuShowTvmonitors,
                                     menuShowKeyboard, menuShowMouse, menuShowBook, menuShowBear);
-//        }
+            //        }
 
             // TODO check opengl error?.
-            //CheckGlDieOnError()
+            // CheckGlDieOnError()
             // step carv: show model or triangle with light from camera
             // if(menuShowModel && menuShowTexture) {
             //     mpMapDrawer->DrawModel();
@@ -207,14 +215,14 @@ namespace gtsam_soslam {
             // else if (!menuShowModel && menuShowTexture) {
             //     mpMapDrawer->DrawFrame();
             // }
-            //CheckGlDieOnError()
-
+            // CheckGlDieOnError()
 
             pangolin::FinishFrame();
-// debug later
+            // debug later
             // gray image.
             cv::Mat im = mpFrameDrawer->DrawFrame();
-            if (!im.empty()) {
+            if (!im.empty())
+            {
                 cv::Mat resizeimg;
                 cv::resize(im, resizeimg, cv::Size(640 * 0.7, 480 * 0.7), 0, 0, cv::INTER_CUBIC);
                 cv::imshow("Point, Line and Object Detection", resizeimg);
@@ -222,25 +230,27 @@ namespace gtsam_soslam {
 
             // color image.
             cv::Mat RawImage = mpFrameDrawer->GetRawColorImage();
-            if (!RawImage.empty()) {
+            if (!RawImage.empty())
+            {
                 cv::Mat resizeimg;
                 cv::resize(RawImage, resizeimg, cv::Size(640 * 0.7, 480 * 0.7), 0, 0, cv::INTER_CUBIC);
                 cv::imshow("Raw Image", resizeimg);
             }
 
-//         quadric image.
+            //         quadric image.
             cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage();
-            if (!QuadricImage.empty()) {
-            static int i=0;
-            if(s->this_step.needSave()){
-               cout<<"now i:"<<s->this_step.i<<endl;
-                std::string filename = "../output/outputimage" + std::to_string(++i) + ".png";
-                bool success = cv::imwrite(filename, QuadricImage);
-                if (success) {
-                    std::cout << "successfully store image" << std::endl;
-                    s->this_step.imageSaved();
-                }
-            }
+            if (!QuadricImage.empty())
+            {
+                static int i = 0;
+                // if(s->this_step.needSave()){
+                //    cout<<"now i:"<<s->this_step.i<<endl;
+                //     std::string filename = "../output/outputimage" + std::to_string(++i) + ".png";
+                //     bool success = cv::imwrite(filename, QuadricImage);
+                //     if (success) {
+                //         std::cout << "successfully store image" << std::endl;
+                //         s->this_step.imageSaved();
+                //     }
+                // }
                 cv::Mat resizeimg;
                 cv::resize(QuadricImage, resizeimg, cv::Size(640 * 0.7, 480 * 0.7), 0, 0, cv::INTER_CUBIC);
                 cv::imshow("Quadric Projection", resizeimg);
@@ -248,7 +258,8 @@ namespace gtsam_soslam {
 
             cv::waitKey(mT);
 
-            if (menuReset) {
+            if (menuReset)
+            {
                 menuShowGraph = true;
                 menuShowKeyFrames = true;
                 menuShowPoints = true;
@@ -261,15 +272,17 @@ namespace gtsam_soslam {
 
                 menuShowSemiDense = true;
                 menuCameraView = true;
-//            menuShowModel = true;
-//            menuShowTexture = true;
+                //            menuShowModel = true;
+                //            menuShowTexture = true;
 
                 // mpSystem->Reset();
                 menuReset = false;
             }
 
-            if (Stop()) {
-                while (isStopped()) {
+            if (Stop())
+            {
+                while (isStopped())
+                {
                     usleep(3000);
                 }
             }
@@ -281,54 +294,62 @@ namespace gtsam_soslam {
         SetFinish();
     }
 
-    void Viewer::RequestFinish() {
+    void Viewer::RequestFinish()
+    {
         unique_lock<mutex> lock(mMutexFinish);
         mbFinishRequested = true;
     }
 
-    bool Viewer::CheckFinish() {
+    bool Viewer::CheckFinish()
+    {
         unique_lock<mutex> lock(mMutexFinish);
         return mbFinishRequested;
     }
 
-    void Viewer::SetFinish() {
+    void Viewer::SetFinish()
+    {
         unique_lock<mutex> lock(mMutexFinish);
         mbFinished = true;
     }
 
-    bool Viewer::isFinished() {
+    bool Viewer::isFinished()
+    {
         unique_lock<mutex> lock(mMutexFinish);
         return mbFinished;
     }
 
-    void Viewer::RequestStop() {
+    void Viewer::RequestStop()
+    {
         unique_lock<mutex> lock(mMutexStop);
         if (!mbStopped)
             mbStopRequested = true;
     }
 
-    bool Viewer::isStopped() {
+    bool Viewer::isStopped()
+    {
         unique_lock<mutex> lock(mMutexStop);
         return mbStopped;
     }
 
-    bool Viewer::Stop() {
+    bool Viewer::Stop()
+    {
         unique_lock<mutex> lock(mMutexStop);
         unique_lock<mutex> lock2(mMutexFinish);
 
         if (mbFinishRequested)
             return false;
-        else if (mbStopRequested) {
+        else if (mbStopRequested)
+        {
             mbStopped = true;
             mbStopRequested = false;
             return true;
         }
 
         return false;
-
     }
 
-    void Viewer::Release() {
+    void Viewer::Release()
+    {
         unique_lock<mutex> lock(mMutexStop);
         mbStopped = false;
     }
