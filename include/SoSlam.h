@@ -39,7 +39,7 @@ namespace gtsam_soslam {
         // VisualOdometry visual_odometry_;
         //Map
         Map* mpMap;
-        SoSlamState state_;
+        SoSlamState* state_;
         Builder* mpBuilder;     // a dense pointcloud builder from visualization
 
         gtsam::Pose3 initial_pose_;
@@ -53,7 +53,7 @@ namespace gtsam_soslam {
                 BaseDetector &detector,
                 Map* mMap,
                 // VisualOdometry visual_odometry = std::nullptr, //Optional
-                SoSlamState state,
+                SoSlamState* state,
                 const string &strSettingPath,
                 const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
                 const bool &optimizer_batch = true,

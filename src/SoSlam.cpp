@@ -1,12 +1,12 @@
 #include "SoSlam.h"
-#include "OptimizeFunctor.h"
+//#include "OptimizeFunctor.h"
 
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
-#include <tbb/parallel_for.h>
-#include <tbb/blocked_range.h>
-#include <tbb/global_control.h>
+//#include <tbb/parallel_for.h>
+//#include <tbb/blocked_range.h>
+//#include <tbb/global_control.h>
 
 
 using namespace std;
@@ -17,7 +17,7 @@ namespace gtsam_soslam {
             BaseAssociator &associator,
             BaseDetector &detector,
             Map* mMap,
-            SoSlamState state,
+            SoSlamState *state,
             const string &strSettingPath,
             const gtsam::Pose3 &initial_pose,
             const bool &optimizer_batch,
@@ -25,7 +25,7 @@ namespace gtsam_soslam {
                                            associator_(associator),
                                            detector_(detector),
                                            mpMap(mMap),
-                                           state_(std::move(state)),
+                                           state_(state),
                                            initial_pose_(initial_pose),
                                            optimizer_batch_(optimizer_batch),
                                            output_quadrics_image_(output_quadrics_image){
@@ -49,7 +49,7 @@ namespace gtsam_soslam {
     }
 
     void SoSlam::guess_initial_values() {
-        auto &s = state_;
+        auto &s = *state_;
         std::vector<boost::shared_ptr<gtsam::NonlinearFactor>> fs(s.graph_.nrFactors());
 
         std::transform(fs.begin(), fs.end(), fs.begin(),
@@ -121,7 +121,7 @@ namespace gtsam_soslam {
                     points.push_back(bb->measurement());
                 }
                 //                s.estimates_.print();
-                utils::initialize_quadric_ray_intersection(poses, points, state_).addToValues(s.estimates_,
+                utils::initialize_quadric_ray_intersection(poses, points, *state_).addToValues(s.estimates_,
                                                                                               kv.second.front()->objectKey());
             }
         }
@@ -130,38 +130,38 @@ namespace gtsam_soslam {
     void SoSlam::spin() {
         while (!data_source_.done()) {
             step();
-            usleep(30000);
+//            usleep(30000);
         }
 
-        if (state_.optimizer_batch_) {
+        if (state_->optimizer_batch_) {
             guess_initial_values();
-            auto &s = state_;
+            auto &s = *state_;
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
-            utils::visualize(s);
+//            utils::visualize(s);
         } else {
             // state_.graph_.print(); // print all factors in current graph
-            utils::visualize(state_);
+//            utils::visualize(state_);
         }
     }
 
     void SoSlam::step() {
         // Define noise model
-//        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
+        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
         gtsam::Vector6 temp;
-        temp << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
-        gtsam::noiseModel::Diagonal::shared_ptr noise_prior =
-                gtsam::noiseModel::Diagonal::Sigmas(0.001 * temp);
+        temp << 1.01, 1.01, 1.01, 1.01, 1.01, 1.01;
+//        gtsam::noiseModel::Diagonal::shared_ptr noise_prior =
+//                gtsam::noiseModel::Diagonal::Sigmas(0.001 * temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
                 gtsam::noiseModel::Diagonal::Sigmas(temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_boxes =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(10.0, 10.0, 10.0, 10.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4(1.0, 1.0, 1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_ssc =
                 gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(10.0, 10.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(1.0, 1.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(5.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(3.0));
 
         // Huber kernel
         auto huber_boxes = gtsam::noiseModel::Robust::Create(
@@ -174,12 +174,12 @@ namespace gtsam_soslam {
                 gtsam::noiseModel::mEstimator::Huber::Create(1.345), noise_syc);
 
         // Setup state for the current step
-        auto &s = state_;
-        auto p = state_.prev_step;
+        auto &s = *state_;
+        auto p = state_->prev_step;
         static int count = 0;
         // step index is initialized with zero
         int new_step_index = p.i + 1;
-        count++;
+
 //        cout<<"step_index"<<new_step_index<<endl;
         StepState *n;
         n = &(s.this_step);
@@ -208,17 +208,17 @@ namespace gtsam_soslam {
            gtsam::Pose3 between_pose((p.odom.inverse() * n->odom).matrix());
            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
        }
-        if (count % 40 != 0 || count>400) {
-            s.prev_step = *n;
-            return;
-        }
+//        if (count % 40 != 0 || count>400) {
+//            s.prev_step = *n;
+//            return;
+//        }
 //        s.graph_.print();
 //        s.estimates_.print();
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
         //---------------------------------------------------------------------------------------------
 
         // point cloud process
-        if(!n->rgb.empty()){    // RGB images are needed.
+        if(count % 5 == 0 && !n->rgb.empty()){    // RGB images are needed.
 //            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
             mpBuilder->processFrame(n->rgb, n->depth, n->odom, 2.5); //depth thresh grab from object slam
 
@@ -232,29 +232,57 @@ namespace gtsam_soslam {
             mpMap->AddPointCloudList("Builder.Local Points", pCloudLocal);
             mpMap->addPointCloud(pCloudLocal);
         }
+        count++;
+//        int blockSize = 2;
+//        int apertureSize = 3;
+//        // adjust this to get different # of keypoints
+//        int thresh = 180;
+//        double k = 0.04;
+//        std::vector<std::pair<double, double>> feature_points;
+//        cv::Mat gray_image;
+//        cv::cvtColor(n->rgb, gray_image, cv::COLOR_BGR2GRAY);
+//        cv::Mat detected_image = cv::Mat::zeros(gray_image.size(), CV_32FC1);
+//        cv::cornerHarris(gray_image, detected_image, blockSize, apertureSize, k);
+//        cv::Mat detected_norm, detected_norm_scaled;
+//        cv::normalize(detected_image, detected_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+//        cv::convertScaleAbs(detected_norm, detected_norm_scaled);
+//
+//        for (int i = 0; i < detected_norm.rows; i++) {
+//            for (int j = 0; j < detected_norm.cols; j++) {
+//                if ((int) detected_norm.at<float>(i, j) > thresh) {
+//                    feature_points.push_back(std::make_pair((int) i, (int) j)); // x, y coordinate in matrix form
+//                }
+//            }
 
-        int blockSize = 2;
-        int apertureSize = 3;
-        // adjust this to get different # of keypoints
-        int thresh = 180;
-        double k = 0.04;
-        std::vector<std::pair<double, double>> feature_points;
-        cv::Mat gray_image;
-        cv::cvtColor(n->rgb, gray_image, cv::COLOR_BGR2GRAY);
-        cv::Mat detected_image = cv::Mat::zeros(gray_image.size(), CV_32FC1);
-        cv::cornerHarris(gray_image, detected_image, blockSize, apertureSize, k);
-        cv::Mat detected_norm, detected_norm_scaled;
-        cv::normalize(detected_image, detected_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
-        cv::convertScaleAbs(detected_norm, detected_norm_scaled);
+// batch optimization
+        if (s.optimizer_batch_)
+        {
+            for (const auto &d : n->new_associated)
+            {
+                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
+            }
+        }
+            // step optimization
+        else
+        {
+//            guess_initial_values();
+            for (const auto &d : n->new_associated)
+            {
+                // add factors into graph
+                bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
 
-        for (int i = 0; i < detected_norm.rows; i++) {
-            for (int j = 0; j < detected_norm.cols; j++) {
-                if ((int) detected_norm.at<float>(i, j) > thresh) {
-                    feature_points.push_back(std::make_pair((int) i, (int) j)); // x, y coordinate in matrix form
+                // quadric initialization
+                gtsam::KeyVector keys = s.estimates_.keys();
+                auto iter = std::find(keys.begin(), keys.end(), d.quadric_key);
+                bool found = (iter != keys.end());
+                if (!found)
+                {
+                    gtsam::Pose3 camera_pose = s.estimates_.at<gtsam::Pose3>(d.pose_key);
+                    ConstrainedDualQuadric initial_quadric = utils::initialize_with_ssc_psc_bbs_syc(std::get<0>(bbs_scc_psc_syc), std::get<1>(bbs_scc_psc_syc), std::get<2>(bbs_scc_psc_syc), std::get<3>(bbs_scc_psc_syc), camera_pose);
+                    // those factors have the same quadric key, just add once
+                    initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
-
-
 //            // Set up the TBB parallel_for construct
 //            size_t num_threads = tbb::global_control::active_value(tbb::global_control::max_allowed_parallelism);
 //            tbb::blocked_range<size_t> range(0, num_threads);
@@ -287,7 +315,7 @@ namespace gtsam_soslam {
 
     void SoSlam::reset() {
         data_source_.restart();
-        auto &s = state_;
+        auto &s = *state_;
         s.associated_.clear();
         s.unassociated_.clear();
         s.labels_.clear();
@@ -297,8 +325,8 @@ namespace gtsam_soslam {
         // s.calib_depth_ = data_source_.calib_depth();
         s.calib_rgb_ = data_source_.calib_rgb();
         StepState new_step;
-        state_.prev_step = new_step;
-        state_.this_step = new_step;
+        state_->prev_step = new_step;
+        state_->this_step = new_step;
     }
 
     // Helper function
@@ -311,15 +339,15 @@ namespace gtsam_soslam {
         if (d.quadric_key == 66666) {
             std::cerr << "WARN: skipping associated detection with quadric_key = 66666, which means None" << std::endl;
         }
-        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_.calib_rgb_));
+        boost::shared_ptr<gtsam::Cal3_S2> calibPtr(new gtsam::Cal3_S2(state_->calib_rgb_));
         BoundingBoxFactor bbs(AlignedBox2(d.bounds), calibPtr, d.pose_key, d.quadric_key, huber_boxes, "STANDARD");
         SemanticScaleFactor ssc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_ssc);
         PlaneSupportingFactor psc(d.label, calibPtr, d.pose_key, d.quadric_key, huber_psc);
-        SymmetryFactor syc(AlignedBox2(d.bounds), state_.this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key,
-                           huber_syc, state_.this_step.nearest_edge_point);
-        state_.graph_.add(bbs);
-       state_.graph_.add(ssc);
-       state_.graph_.add(psc);
+        SymmetryFactor syc(AlignedBox2(d.bounds), state_->this_step.rgb, d.label, calibPtr, d.pose_key, d.quadric_key,
+                           huber_syc, state_->this_step.nearest_edge_point);
+        state_->graph_.add(bbs);
+       state_->graph_.add(ssc);
+       state_->graph_.add(psc);
 //        state_.graph_.add(syc);
         return std::make_tuple(bbs, ssc, psc, syc);
     }

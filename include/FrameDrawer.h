@@ -51,7 +51,7 @@ namespace gtsam_soslam {
 
         cv::Mat GetRawColorImage();
 
-        cv::Mat GetQuadricImage();
+        cv::Mat GetQuadricImage(bool menuShowGroundTruth);
 
     protected:
 

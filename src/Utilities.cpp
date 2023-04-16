@@ -181,8 +181,8 @@ namespace gtsam_soslam {
             auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
             sub_graph.add(gtsam::PriorFactor<gtsam::Pose3>(bbs.poseKey(), camera_pose, noise_prior));
             sub_graph.add(bbs);
-//            sub_graph.add(ssc);
-//            sub_graph.add(psc);
+            sub_graph.add(ssc);
+            sub_graph.add(psc);
 
             //      sub_graph.add(syc);
             std::cout << "###############################" << std::endl;

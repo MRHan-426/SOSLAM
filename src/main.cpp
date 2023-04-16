@@ -8,7 +8,7 @@ namespace gtsam_soslam {
         Map* mMap = new Map();
         string YamlFile = "../TUM2.yaml";
         bool optimizer_batch = false;
-        SoSlamState state = SoSlamState(mMap, initial_pose, optimizer_batch);
+        SoSlamState* state = new SoSlamState(mMap, initial_pose, optimizer_batch);
         SoSlam *q = new SoSlam(
                 data_source, //DataSource
                 associator,//BaseAssociator
@@ -20,7 +20,7 @@ namespace gtsam_soslam {
                 optimizer_batch, //bool optimizer_batch
                 output_quadrics_image
         );
-        SoSlamState *s = &(q->state_);
+        SoSlamState *s = state;
 
         if (use_3D_visualization) {
             FrameDrawer *mpFrameDrawer = new FrameDrawer(s);

@@ -51,10 +51,7 @@ namespace gtsam_soslam {
         void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph);
 
         // BRIEF [EAO-SLAM] draw objects.
-        void DrawObject(const bool bCubeObj, const bool QuadricObj,
-//                    const string &flag,
-                        const bool bShowBottle, const bool bShowChair, const bool bShowTvmonitors,
-                        const bool bShowKeyboard, const bool bShowMouse, const bool bShowBook, const bool bShowBear);
+        void DrawObject(const bool bCubeObj, const bool QuadricObj);
         void DrawGroundTruthObject(const bool bCubeObj, const bool QuadricObj);
 
         void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);

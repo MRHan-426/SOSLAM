@@ -298,11 +298,7 @@ namespace gtsam_soslam {
     }
 
 // BRIEF [EAO-SLAM] draw objects.
-    void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj,
-//                           const string &flag,
-                               const bool bShowBottle, const bool bShowChair, const bool bShowTvmonitors,
-                               const bool bShowKeyboard, const bool bShowMouse, const bool bShowBook,
-                               const bool bShowBear) {
+    void MapDrawer::DrawObject(const bool bCubeObj, const bool QuadricObj) {
 //    const vector<Object_Map*> &vObjs = mpMap->GetObjects();
         const gtsam::Values vEstimates = s->estimates_;
         auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);

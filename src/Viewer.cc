@@ -86,20 +86,15 @@ namespace gtsam_soslam {
         pangolin::Var<bool> menuViewZ("menu.Z Axis View", false, true);
 //    pangolin::Var<bool> menuShowModel("menu.Show Model", false,true);
 //    pangolin::Var<bool> menuShowTexture("menu.Show Texture", false,true);
-
+        pangolin::Var<bool> menuShowAxis("menu.Show Axis", true, true);
+        pangolin::Var<bool> menuShowGroundTruth("menu.Show Ground Truth", true, true);
         pangolin::Var<bool> menuShowCubeObj("menu.Show CubeObj", true, true);
         pangolin::Var<bool> menuShowQuadricObj("menu.Show QuadricObj", true, true);
 
         pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode", false, true);
         pangolin::Var<bool> menuReset("menu.Reset", false, false);
 
-        pangolin::Var<bool> menuShowBottle("menu.Show Bottles", true, true);
-        pangolin::Var<bool> menuShowChair("menu.Show Chairs", true, true);
-        pangolin::Var<bool> menuShowTvmonitors("menu.Show Tvmonitors", true, true);
-        pangolin::Var<bool> menuShowKeyboard("menu.Show Keyboard", true, true);
-        pangolin::Var<bool> menuShowMouse("menu.Show Mouse", true, true);
-        pangolin::Var<bool> menuShowBook("menu.Show Books", true, true);
-        pangolin::Var<bool> menuShowBear("menu.Show Bear", true, true);
+
 
         // Define Camera Render Object (for view / scene browsing)
         pangolin::OpenGlRenderState s_cam(
@@ -144,18 +139,6 @@ namespace gtsam_soslam {
                                                                       0, 0, 1,
                                                                       0.0, -1.0, 0.0);
 
-        pangolin::OpenGlMatrix viewFromX = pangolin::ModelViewLookAt(-1, 0, 0,     // Camera position (1, 0, 0)
-                                                                     0, 0, 0,      // Camera looks at (0, 0, 0)
-                                                                     0, 0, -1);   // Up direction (0, 1, 0)
-
-        pangolin::OpenGlMatrix viewFromY = pangolin::ModelViewLookAt(0, -1, 0,     // Camera position (1, 0, 0)
-                                                                     0, 0, 0,      // Camera looks at (0, 0, 0)
-                                                                     0, 0, -1);   // Up direction (0, 1, 0)
-
-        pangolin::OpenGlMatrix viewFromZ = pangolin::ModelViewLookAt(0, 0, -1,     // Camera position (1, 0, 0)
-                                                                     0, 0, 0,      // Camera looks at (0, 0, 0)
-                                                                     0, -1, 0);   // Up direction (0, 1, 0)
-
         // Define the position of the camera
         gtsam::Point3 cameraPosition(0, 0, 0);
 
@@ -168,9 +151,9 @@ namespace gtsam_soslam {
         gtsam::Pose3 poseLookAtX(lookAtX, cameraPosition);
         gtsam::Pose3 poseLookAtY(lookAtY, cameraPosition);
         gtsam::Pose3 poseLookAtZ(lookAtZ, cameraPosition);
-        viewFromX = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtX);
-        viewFromY = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtY);
-        viewFromZ = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtZ);
+        pangolin::OpenGlMatrix viewFromX = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtX);
+        pangolin::OpenGlMatrix viewFromY = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtY);
+        pangolin::OpenGlMatrix viewFromZ = mpMapDrawer->GetOpenGLCameraMatrixFromPose3(poseLookAtZ);
 
         while (1) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -214,20 +197,7 @@ namespace gtsam_soslam {
                     s_cam.SetModelViewMatrix(viewCamera);
                     bCameraView = true;
                 } else  {
-//                    if(menuViewX && !menuViewY && !menuViewZ){
-//                        s_cam.SetProjectionMatrix(projectionAbove);
-//                        s_cam.SetModelViewMatrix(viewFromX);
-//                    }
-//                    else if(!menuViewX && menuViewY && !menuViewZ){
-//                        s_cam.SetProjectionMatrix(projectionAbove);
-//                        s_cam.SetModelViewMatrix(viewFromY);
-//                    }else if(!menuViewX && !menuViewY && menuViewZ){
-//                        s_cam.SetProjectionMatrix(projectionAbove);
-//                        s_cam.SetModelViewMatrix(viewFromZ);
-//                    }
-//                    else {
-//                        s_cam.SetProjectionMatrix(projectionAbove);
-//                        s_cam.SetModelViewMatrix(viewAbove);
+
                         bCameraView = false;
 //                    }
                 }
@@ -244,18 +214,14 @@ namespace gtsam_soslam {
 //                 RefreshPointCloudOptions();
 //                 mpMapDrawer->drawPointCloudWithOptions(mmPointCloudOptionMap);
              }
-            // if(menuShowSemiDense)
-            //     mpMapDrawer->DrawSemiDense(menuSigmaTH);
-            mpMapDrawer->Coordinate();
+            if(menuShowAxis)
+                mpMapDrawer->Coordinate();
             // step draw objects.
-//        if(menuShowCubeObj || menuShowQuadricObj)
-//        {
-            mpMapDrawer->DrawGroundTruthObject(menuShowCubeObj, menuShowQuadricObj);
-            mpMapDrawer->DrawObject(menuShowCubeObj, menuShowQuadricObj,
-                    //    mflag,
-                                    menuShowBottle, menuShowChair, menuShowTvmonitors,
-                                    menuShowKeyboard, menuShowMouse, menuShowBook, menuShowBear);
-//        }
+
+            if(menuShowGroundTruth)
+                mpMapDrawer->DrawGroundTruthObject(menuShowCubeObj, menuShowQuadricObj);
+            mpMapDrawer->DrawObject(menuShowCubeObj, menuShowQuadricObj);
+
 
             // TODO check opengl error?.
             //CheckGlDieOnError()
@@ -291,7 +257,7 @@ namespace gtsam_soslam {
             }
 
 //         quadric image.
-            cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage();
+            cv::Mat QuadricImage = mpFrameDrawer->GetQuadricImage(menuShowGroundTruth);
             if (!QuadricImage.empty()) {
             static int i=0;
             if(s->this_step.needSave()){
@@ -332,6 +298,8 @@ namespace gtsam_soslam {
 
                 // mpSystem->Reset();
                 menuReset = false;
+                menuShowGroundTruth = true;
+                menuShowAxis = true;
             }
 
             if (Stop()) {
