@@ -1,7 +1,14 @@
 #include "SoSlam.h"
+#include "OptimizeFunctor.h"
+
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
+#include <tbb/parallel_for.h>
+#include <tbb/blocked_range.h>
+#include <tbb/global_control.h>
+
+
 using namespace std;
 
 namespace gtsam_soslam
@@ -129,9 +136,6 @@ namespace gtsam_soslam
         {
             guess_initial_values();
             auto &s = state_;
-
-            // s.estimates_.print(); // print estimate values
-            // s.graph_.print(); // print all factors in current graph
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();
             utils::visualize(s);
@@ -241,15 +245,25 @@ namespace gtsam_soslam
                     initial_quadric.addToValues(s.estimates_, std::get<0>(bbs_scc_psc_syc).objectKey());
                 }
             }
-//            try{
-//                s.isam_optimizer_.update(
-//                        utils::new_factors(s.graph_, s.isam_optimizer_.getFactorsUnsafe()),
-//                        utils::new_values(s.estimates_,s.isam_optimizer_.getLinearizationPoint()));
-//                s.estimates_ = s.isam_optimizer_.calculateEstimate();
+
+
+//            // Set up the TBB parallel_for construct
+//            size_t num_threads = tbb::global_control::active_value(tbb::global_control::max_allowed_parallelism);
+//            tbb::blocked_range<size_t> range(0, num_threads);
 //
-//            }catch (gtsam::IndeterminantLinearSystemException &e){
-//                std::cout << "Collect Data" << std::endl;
-//            }
+//            // Create a tbb::combinable container to collect optimized estimates from each thread
+//            tbb::combinable<gtsam::Values> comb_estimates([&] { return s.estimates_; });
+//
+//            // Create the functor with the problem setup and the reference to the tbb::combinable container
+//            OptimizeFunctor optimize_functor(s.graph_, comb_estimates, s.optimizer_params_);
+//
+//            // Run the optimization in parallel
+//            tbb::parallel_for(range, optimize_functor);
+//
+//            // Merge the optimized estimates from each thread
+//            comb_estimates.combine_each([&](const gtsam::Values& optimized_estimates) {
+//                s.estimates_.update(optimized_estimates);
+//            });
 
             gtsam::LevenbergMarquardtOptimizer optimizer(s.graph_, s.estimates_, s.optimizer_params_);
             s.estimates_ = optimizer.optimize();

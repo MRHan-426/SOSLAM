@@ -126,7 +126,7 @@ public:
         optimizer_params_.lambdaInitial = 1e-5;
         optimizer_params_.lambdaFactor = 10.0;
 
-//        optimizer_params_.verbosity = gtsam::NonlinearOptimizerParams::ERROR;
+        optimizer_params_.verbosity = gtsam::NonlinearOptimizerParams::ERROR;
 //        optimizer_params_.verbosityLM = gtsam::LevenbergMarquardtParams::LAMBDA;
 //        optimizer_params_.linearSolverType = gtsam::NonlinearOptimizerParams::Iterative;
 //        auto subgraph_params = boost::shared_ptr<gtsam::IterativeOptimizationParameters>();
