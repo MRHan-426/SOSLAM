@@ -31,8 +31,10 @@
         - [x] quadricimage is in Tracking, move to here. 
         - [x] It also use a Update to update images, find a way to place Update.
         - [x] verify drawing correctness.
+    - [x] point cloud
     - [x] multithread part
     - [x] world axis
+    - [x] usability: control visualization
  
 ===========================================================================
 
