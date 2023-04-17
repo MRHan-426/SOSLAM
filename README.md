@@ -167,9 +167,9 @@ It costs us a lot of time to label and associate these datasets, so please star 
   - Odom txt
   - Depth image (if you do not need point cloud visualization, just ignore)
 
-          Be aware that you should rename your images and xmls as number 1,2,3,...
+  Be aware that you should rename your images and xmls as number 1,2,3,...
 
-          Be aware that RGB, Depth, Label, Odom must match.
+  Be aware that RGB, Depth, Label, Odom must match.
 
 + This is an incomplete version of our project. We have a lot of experiments to be done.
 
