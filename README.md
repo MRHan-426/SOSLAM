@@ -122,7 +122,7 @@ make
 ```
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/2.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/3.png" alt="image" width="640" height="400" />
 </p>
 
 
@@ -135,7 +135,7 @@ make
 
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/3.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/2.png" alt="image" width="640" height="400" />
 </p>
 
 There are detailed configurations in **config.yaml**, please change if you need.
