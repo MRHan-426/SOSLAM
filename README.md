@@ -44,7 +44,7 @@ sudo apt-get install libusb-1.0-0-dev
 **Note that higher version may bring unexpected errors, we do not test other version so far.**
 
 ```shell
-git clone --branch New_release https://github.com/borglab/gtsam.git
+git clone --branch 4.1.1 https://github.com/borglab/gtsam.git
 ```
 
 Modify Eigen cmake config file: cmake/HandleEigen.cmake
@@ -70,13 +70,13 @@ sudo make install
 Branch Master contains point cloud visualization, so you have some more prerequisites.
 
 ```shell
-git clone --branch Master https://github.com/MRHan-426/SOSLAM_plus.git
+git clone --branch master https://github.com/MRHan-426/SOSLAM_plus.git
 ```
 
-Branch 4.1.1 doesnot contain point cloud visualization, so you don't have to compile PCL, VTK.
+Branch 0.0.1 doesnot contain point cloud visualization, so you don't have to compile PCL, VTK.
 
 ```shell
-git clone --branch 4.1.1 https://github.com/MRHan-426/SOSLAM_plus.git
+git clone --branch 0.0.1 https://github.com/MRHan-426/SOSLAM_plus.git
 ```
 
 Then:
