@@ -160,6 +160,13 @@ namespace gtsam_soslam {
         static ConstrainedDualQuadric getFromValues(const gtsam::Values &v,
                                                     const gtsam::Key &k);
 
+        double calculateIntersectionError(const ConstrainedDualQuadric& e1, const ConstrainedDualQuadric& e2);
+
+        double calculateArea(const ConstrainedDualQuadric & e);
+
+        double calculateIntersectionOnXY(const ConstrainedDualQuadric& e1, const ConstrainedDualQuadric& e2);
+
+        double calculateIntersectionOnZ(const ConstrainedDualQuadric& e1, const ConstrainedDualQuadric& e2);
         /// @}
         /// @name Testable group traits
         /// @{

@@ -10,7 +10,7 @@ find_package(GTSAM 4.1.1 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(TBB REQUIRED) # Add this line
 find_package(OpenCV REQUIRED)
-find_package(glfw3 REQUIRED)
+#find_package(glfw3 REQUIRED)
 find_package(Pangolin 0.8 REQUIRED)
 find_package(pugixml REQUIRED)
 
@@ -51,7 +51,6 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         gtsam
-        glfw
         pango_display
         pango_python
         pugixml
@@ -60,6 +59,7 @@ target_link_libraries(${PROJECT_NAME}
         ${TBB_LIBRARIES} # Add this line
         ${OpenCV_LIBS}
         dense_builder
+        Polygon
         )
 FIND_PACKAGE( PCL REQUIRED )
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4") # use this in Ubuntu 16.04
@@ -68,12 +68,12 @@ ADD_DEFINITIONS( ${PCL_DEFINITIONS} )
 INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS}  )
 LINK_LIBRARIES( ${PCL_LIBRARY_DIRS} )
 add_subdirectory(src/dense_builder)
+add_subdirectory(src/Polygon)
 
 # Add executable
 add_executable(soslam_exe src/main.cpp)
 target_link_libraries(soslam_exe
         gtsam
-        glfw
         pango_display
         pango_python
         pugixml

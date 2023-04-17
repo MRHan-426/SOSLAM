@@ -308,6 +308,35 @@ namespace gtsam_soslam {
             std::cout << s.graph_.error(s.estimates_) << std::endl;
 //            limitFactorGraphSize(s.graph_, 100);
 //            updateInitialEstimates(s.graph_, s.estimates_);
+
+            //IOU
+
+            //Rot
+            std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
+            static vector<vector<double>> error(groundTruthQuad.size(), vector<double>(3,0));
+            const gtsam::Values vEstimates = s.estimates_;
+            auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
+            std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
+            for (auto &Obj: cqs) {
+                gtsam::Key key = Obj.first;
+                int idx = gtsam::Symbol(key).index();
+                auto ypr = Obj.second.pose().rotation().ypr();
+                auto groundTruthYpr = groundTruthQuad[idx-1].pose().rotation().ypr();
+                cout<<"quad "<<idx<<endl;
+                for(int i =0; i<3; i++){
+                    double angleError=fabs(ypr[i]-groundTruthYpr[i])*180.0/M_PI;
+                    double smallestAngleError = angleError <= 90.0 ? angleError : 180.0 - angleError;
+                    if(count==1){ //init error
+                        error[idx-1][i] = smallestAngleError;
+                    }
+                    else{
+                        int cur_count=count/5;
+                        error[idx-1][i] = error[idx-1][i]*(cur_count-1)/cur_count+smallestAngleError/cur_count;
+                    }
+                    cout << smallestAngleError << " " << error[idx-1][i] << endl;
+                }
+                Obj.second.calculateIntersectionError(groundTruthQuad[idx-1],Obj.second);
+            }
         }
         s.prev_step = *n;
         if(output_quadrics_image_)
