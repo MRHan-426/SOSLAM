@@ -288,8 +288,8 @@ namespace gtsam_soslam
             n->uniform_sample_points = sample_points;
 
             // change the ray points
-            gtsam::Vector3 ray_point = n->ray_points;
-            std::cout << "===============================================" << ray_point[0] << ", " << ray_point[1] << ", " << ray_point[2] << std::endl;
+            // gtsam::Vector3 ray_point = n->ray_points;
+            // std::cout << "===============================================" << ray_point[0] << ", " << ray_point[1] << ", " << ray_point[2] << std::endl;
             // cv::waitKey(0);
 
             //---------------------------------------------------------------------------------------------
@@ -394,7 +394,8 @@ namespace gtsam_soslam
                            huber_syc,
                            state_.this_step.nearest_edge_point,
                            state_.this_step.uniform_sample_points,
-                           &state_.this_step.ray_points);
+                           &state_.this_step.ray_points,
+                           &state_.this_step.sym_points);
         state_.graph_.add(bbs);
         state_.graph_.add(ssc);
         state_.graph_.add(psc);
