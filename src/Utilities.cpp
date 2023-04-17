@@ -216,7 +216,6 @@ namespace gtsam_soslam {
             for (const auto &key_value_pair: values) {
                 gtsam::Key key = key_value_pair.key;
                 unsigned char symbol_char = gtsam::Symbol(key).chr();
-
                 if (symbol_char == 'x') {
                     ps[key] = values.at<gtsam::Pose3>(key);
                 } else if (symbol_char == 'q') {

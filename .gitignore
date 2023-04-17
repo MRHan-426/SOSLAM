@@ -7,8 +7,7 @@ input/
 input/img/
 input10/
 input_10/
-input_scene1/
-input_scene2/
+input_scene*
 output/
 input_full/
 output/
@@ -28,6 +27,7 @@ doc/latex/
 *.m~
 
 *.pyc
+*.zip
 
 ros/install/
 ros/log/

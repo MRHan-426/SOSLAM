@@ -20,7 +20,7 @@ namespace gtsam_soslam {
 
             return poses;
         }
-        std::vector<ConstrainedDualQuadric> groundTruthQuadrics() {
+        std::vector<ConstrainedDualQuadric> groundTruthQuadrics() { //sequence based on quadrics
             std::vector<ConstrainedDualQuadric> quadrics{
                     ConstrainedDualQuadric(gtsam::Pose3(
                         gtsam::Rot3::RzRyRx(2 *M_PI/180.0, 20 *M_PI/180.0, 0* M_PI / 180.0),

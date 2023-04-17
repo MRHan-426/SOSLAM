@@ -308,7 +308,6 @@ namespace gtsam_soslam {
             std::cout << s.graph_.error(s.estimates_) << std::endl;
 //            limitFactorGraphSize(s.graph_, 100);
 //            updateInitialEstimates(s.graph_, s.estimates_);
-
         }
         s.prev_step = *n;
         if(output_quadrics_image_)

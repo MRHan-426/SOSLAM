@@ -238,6 +238,14 @@ namespace gtsam_soslam {
                 i++;
                 gtsam::Key ObjKey = key_value.first;
                 ConstrainedDualQuadric *Obj = &(key_value.second);
+                bool pass=true;
+                auto dets = s->this_step.detections;
+                for(auto &det : dets){
+                    if(ObjKey == det.quadric_key)
+                        pass=false;
+                }
+                if(pass)
+                    continue;
 //    for (auto& q : qs) {
 //        i++;
 //        gtsam::Key ObjKey = key_value.first;

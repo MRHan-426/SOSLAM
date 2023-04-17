@@ -172,128 +172,131 @@ namespace gtsam_soslam {
         const float &w = mKeyFrameSize;
         const float h = w * 0.75;
         const float z = w * 0.6;
-        const gtsam::Values vEstimates = s->estimates_;
-        auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
-        std::map<gtsam::Key, gtsam::Pose3> cps = current_ps_qs.first;
+        if(bDrawKF) {
+            const gtsam::Values vEstimates = s->estimates_;
+            auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
+            std::map<gtsam::Key, gtsam::Pose3> cps = current_ps_qs.first;
 //     const vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
 
 //     if(bDrawKF)
 //     {
 //    cout<<"previous poses"<<endl;
 //    int i=-1;
-        for (auto &ps: cps) {
+            for (auto &ps: cps) {
 //         for(size_t i=0; i<vpKFs.size(); i++)
 //         {
 //            i++;
-            gtsam::Pose3 p = ps.second;
+                gtsam::Pose3 p = ps.second;
 //             KeyFrame* pKF = vpKFs[i];
-            pangolin::OpenGlMatrix Tw = GetOpenGLCameraMatrixFromPose3(p);
+                pangolin::OpenGlMatrix Tw = GetOpenGLCameraMatrixFromPose3(p);
 //             cv::Mat Twc = pKF->GetPoseInverse().t();
 //            cout<< p.matrix()<<endl;
-            glPushMatrix();
+                glPushMatrix();
 
 //             glMultMatrixf(Twc.m);
-            glMultMatrixd(Tw.m);
+                glMultMatrixd(Tw.m);
 
-            glLineWidth(mKeyFrameLineWidth);
+                glLineWidth(mKeyFrameLineWidth);
 
-            // [EAO] created by objects.
+                // [EAO] created by objects.
 //             if(pKF->mbCreatedByObjs)
 //                 glColor3f(1.0f,0.0f,0.0f);
 //             else
-            glColor3f(0.0f, 0.0f, 1.0f);
+                glColor3f(0.0f, 0.0f, 1.0f);
 
-            glBegin(GL_LINES);
-            glVertex3f(0, 0, 0);
-            glVertex3f(w, h, z);
-            glVertex3f(0, 0, 0);
-            glVertex3f(w, -h, z);
-            glVertex3f(0, 0, 0);
-            glVertex3f(-w, -h, z);
-            glVertex3f(0, 0, 0);
-            glVertex3f(-w, h, z);
+                glBegin(GL_LINES);
+                glVertex3f(0, 0, 0);
+                glVertex3f(w, h, z);
+                glVertex3f(0, 0, 0);
+                glVertex3f(w, -h, z);
+                glVertex3f(0, 0, 0);
+                glVertex3f(-w, -h, z);
+                glVertex3f(0, 0, 0);
+                glVertex3f(-w, h, z);
 
-            glVertex3f(w, h, z);
-            glVertex3f(w, -h, z);
+                glVertex3f(w, h, z);
+                glVertex3f(w, -h, z);
 
-            glVertex3f(-w, h, z);
-            glVertex3f(-w, -h, z);
+                glVertex3f(-w, h, z);
+                glVertex3f(-w, -h, z);
 
-            glVertex3f(-w, h, z);
-            glVertex3f(w, h, z);
+                glVertex3f(-w, h, z);
+                glVertex3f(w, h, z);
 
-            glVertex3f(-w, -h, z);
-            glVertex3f(w, -h, z);
-            glEnd();
+                glVertex3f(-w, -h, z);
+                glVertex3f(w, -h, z);
+                glEnd();
 
-            glPopMatrix();
-        }
-//         cout<<"number of pose "<<i<<endl;
-//     }
-
-//     if(bDrawGraph)
-//     {
-        glLineWidth(mGraphLineWidth);
-        glColor4f(0.0f, 1.0f, 0.0f, 0.6f);
-        glBegin(GL_LINES);
-        pair<gtsam::Key, gtsam::Pose3> previous = {0, gtsam::Pose3::identity()};
-        pangolin::OpenGlMatrix PrevM;
-        PrevM.SetIdentity();
-        pair<gtsam::Key, gtsam::Pose3> current = {0, gtsam::Pose3::identity()};
-        pangolin::OpenGlMatrix CurM;
-        CurM.SetIdentity();
-        for (auto &ps: cps) {
-            previous = current;
-            PrevM = CurM;
-            current = ps;
-            CurM = GetOpenGLCameraMatrixFromPose3(ps.second);
-            if (previous.first) {
-//                 M.m[12] = poseMatrix(0,3);//twc.at<float>(0);
-//                 M.m[13] = poseMatrix(1,3);//twc.at<float>(1);
-//                 M.m[14] = poseMatrix(2,3);//twc.at<float>(2);
-//                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
-                glVertex3f(PrevM.m[12], PrevM.m[13], PrevM.m[14]);
-                glVertex3f(CurM.m[12], CurM.m[13], CurM.m[14]);
+                glPopMatrix();
             }
-//         for(size_t i=0; i<vpKFs.size(); i++)
-//         {
-            // Covisibility Graph
-//             const vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
-//             cv::Mat Ow = vpKFs[i]->GetCameraCenter();
-//             if(!vCovKFs.empty())
-//             {
-//                 for(vector<KeyFrame*>::const_iterator vit=vCovKFs.begin(), vend=vCovKFs.end(); vit!=vend; vit++)
-//                 {
-//                     if((*vit)->mnId<vpKFs[i]->mnId)
-//                         continue;
-//                     cv::Mat Ow2 = (*vit)->GetCameraCenter();
-//                     glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-//                     glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
-//                 }
-//             }
-//
-//             // Spanning tree
-//             KeyFrame* pParent = vpKFs[i]->GetParent();
-//             if(pParent)
-//             {
-//                 cv::Mat Owp = pParent->GetCameraCenter();
-//                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-//                 glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
-//             }
-//
-//             // Loops
-//             set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
-//             for(set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
-//             {
-//                 if((*sit)->mnId<vpKFs[i]->mnId)
-//                     continue;
-//                 cv::Mat Owl = (*sit)->GetCameraCenter();
-//                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-//                 glVertex3f(Owl.at<float>(0),Owl.at<float>(1),Owl.at<float>(2));
-//             }
-        }
 
-        glEnd();
+    //         cout<<"number of pose "<<i<<endl;
+    //     }
+
+    //     if(bDrawGraph)
+    //     {
+            glLineWidth(mGraphLineWidth);
+            glColor4f(0.0f, 1.0f, 0.0f, 0.6f);
+            glBegin(GL_LINES);
+            pair<gtsam::Key, gtsam::Pose3> previous = {0, gtsam::Pose3::identity()};
+            pangolin::OpenGlMatrix PrevM;
+            PrevM.SetIdentity();
+            pair<gtsam::Key, gtsam::Pose3> current = {0, gtsam::Pose3::identity()};
+            pangolin::OpenGlMatrix CurM;
+            CurM.SetIdentity();
+            for (auto &ps: cps) {
+                previous = current;
+                PrevM = CurM;
+                current = ps;
+                CurM = GetOpenGLCameraMatrixFromPose3(ps.second);
+                if (previous.first) {
+    //                 M.m[12] = poseMatrix(0,3);//twc.at<float>(0);
+    //                 M.m[13] = poseMatrix(1,3);//twc.at<float>(1);
+    //                 M.m[14] = poseMatrix(2,3);//twc.at<float>(2);
+    //                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
+                    glVertex3f(PrevM.m[12], PrevM.m[13], PrevM.m[14]);
+                    glVertex3f(CurM.m[12], CurM.m[13], CurM.m[14]);
+                }
+    //         for(size_t i=0; i<vpKFs.size(); i++)
+    //         {
+                // Covisibility Graph
+    //             const vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
+    //             cv::Mat Ow = vpKFs[i]->GetCameraCenter();
+    //             if(!vCovKFs.empty())
+    //             {
+    //                 for(vector<KeyFrame*>::const_iterator vit=vCovKFs.begin(), vend=vCovKFs.end(); vit!=vend; vit++)
+    //                 {
+    //                     if((*vit)->mnId<vpKFs[i]->mnId)
+    //                         continue;
+    //                     cv::Mat Ow2 = (*vit)->GetCameraCenter();
+    //                     glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //                     glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
+    //                 }
+    //             }
+    //
+    //             // Spanning tree
+    //             KeyFrame* pParent = vpKFs[i]->GetParent();
+    //             if(pParent)
+    //             {
+    //                 cv::Mat Owp = pParent->GetCameraCenter();
+    //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //                 glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
+    //             }
+    //
+    //             // Loops
+    //             set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
+    //             for(set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
+    //             {
+    //                 if((*sit)->mnId<vpKFs[i]->mnId)
+    //                     continue;
+    //                 cv::Mat Owl = (*sit)->GetCameraCenter();
+    //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //                 glVertex3f(Owl.at<float>(0),Owl.at<float>(1),Owl.at<float>(2));
+    //             }
+            }
+
+            glEnd();
+        }
 //     }
     }
 
