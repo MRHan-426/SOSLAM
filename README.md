@@ -2,7 +2,7 @@
 
 
 
-![](https://github.com/MRHan-426/SOSLAM_plus/tree/master/gtsam_quardic/3 00_00_00-00_00_30.gif)
+![](SO-SLAM.assets/3 00_00_00-00_00_30.gif)
 
 
 
