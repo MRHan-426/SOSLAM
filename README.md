@@ -2,7 +2,7 @@
 
 
 
-![](SO-SLAM.assets/3 00_00_00-00_00_30.gif)
+![](gtsam_quadrics.assets/3 00_00_00-00_00_30.gif)
 
 
 
