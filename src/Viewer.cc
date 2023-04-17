@@ -61,7 +61,7 @@ namespace gtsam_soslam {
         mbFinished = false;
 
     // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1024,768);
-    pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1600, 1080);   // 1920,1080.
+    pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",1600, 1120);   // 1920,1080.
     // pangolin::CreateWindowAndBind("ORB-SLAM2: Map Viewer",mImageWidth+175,mImageHeight);
 
         // 3D Mouse handler requires depth testing to be enabled
@@ -86,8 +86,8 @@ namespace gtsam_soslam {
         pangolin::Var<bool> menuViewZ("menu.Z Axis View", false, true);
 //    pangolin::Var<bool> menuShowModel("menu.Show Model", false,true);
 //    pangolin::Var<bool> menuShowTexture("menu.Show Texture", false,true);
-        pangolin::Var<bool> menuShowAxis("menu.Show Axis", true, true);
-        pangolin::Var<bool> menuShowGroundTruth("menu.Show Ground Truth", true, true);
+        pangolin::Var<bool> menuShowAxis("menu.Show Axis", false, true);
+        pangolin::Var<bool> menuShowGroundTruth("menu.Show Ground Truth", false, true);
 //        pangolin::Var<bool> menuShowCubeObj("menu.Show CubeObj", true, true);
         pangolin::Var<bool> menuShowQuadricObj("menu.Show QuadricObj", true, true);
 
@@ -115,11 +115,11 @@ namespace gtsam_soslam {
         Twc.SetIdentity();
 
         cv::namedWindow("Raw Image");
-        cv::moveWindow("Raw Image", 40, 20);
+        cv::moveWindow("Raw Image", 1722, 77);
         cv::namedWindow("Point, Line and Object Detection");
-        cv::moveWindow("Point, Line and Object Detection", 40, 360);
+        cv::moveWindow("Point, Line and Object Detection", 1722, 452);
         cv::namedWindow("Quadric Projection");
-        cv::moveWindow("Quadric Projection", 40, 710);
+        cv::moveWindow("Quadric Projection", 1722, 826);
 
         bool bFollow = true;
         bool bLocalizationMode = false;
@@ -298,8 +298,8 @@ namespace gtsam_soslam {
 
                 // mpSystem->Reset();
                 menuReset = false;
-                menuShowGroundTruth = true;
-                menuShowAxis = true;
+                menuShowGroundTruth = false;
+                menuShowAxis = false;
             }
 
             if (Stop()) {

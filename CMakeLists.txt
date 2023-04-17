@@ -10,6 +10,7 @@ find_package(GTSAM 4.1.1 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(TBB REQUIRED) # Add this line
 find_package(OpenCV REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(Pangolin 0.8 REQUIRED)
 find_package(pugixml REQUIRED)
 
@@ -50,6 +51,7 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         gtsam
+        glfw
         pango_display
         pango_python
         pugixml
@@ -71,6 +73,7 @@ add_subdirectory(src/dense_builder)
 add_executable(soslam_exe src/main.cpp)
 target_link_libraries(soslam_exe
         gtsam
+        glfw
         pango_display
         pango_python
         pugixml

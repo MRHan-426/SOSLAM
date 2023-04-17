@@ -64,10 +64,10 @@ int main(int argc, char *argv[]) {
         const std::string &xml_path = "../input/xml/";
         const std::string &calib_file = "../input/calib_params.txt";
         const std::string &odom_file = "../input/odom.txt";
-        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(-0.4832, 0.5869, 0.4973, -0.4181),
-                          gtsam::Point3(0.2475, -0.2891, 0.9502));
-//        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(-0.4095, 0.6529, -0.5483, 0.3248),
-//                          gtsam::Point3(-0.1546, -1.4445, 1.4773));
+//        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(-0.4832, 0.5869, 0.4973, -0.4181),
+//                          gtsam::Point3(0.2475, -0.2891, 0.9502));
+        gtsam::Pose3 pose(gtsam::Rot3::Quaternion(-0.4095, 0.6529, -0.5483, 0.3248),
+                          gtsam::Point3(-0.1546, -1.4445, 1.4773));
         const gtsam::Pose3 &initial_pose = pose;
 
         gtsam_soslam::HandMadeData data_source(img_path, dep_path, xml_path, calib_file, odom_file);

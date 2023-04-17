@@ -225,7 +225,7 @@ namespace gtsam_soslam {
             mpMap->AddPointCloudList("Builder.Local Points", pCloudLocal);
             mpMap->addPointCloud(pCloudLocal);
         }
-        if (count % 5 != 0 || count>400) {
+        if (count % 5 != 0 ) {
             s.prev_step = *n;
             count++;
             return;

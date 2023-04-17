@@ -60,7 +60,7 @@ PointCloudPCL::Ptr Builder::image2PointCloud( cv::Mat& rgb, cv::Mat& depth, doub
             PointT p;
             p.z = double(d) / mdScale;
 
-            if( p.z < 0.5 || p.z > depth_thresh )
+            if( p.z < 0.3 || p.z > depth_thresh )
                 continue;   
 
             p.x = (n - camera.cx) * p.z / camera.fx;
