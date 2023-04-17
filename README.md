@@ -105,7 +105,7 @@ First, prepare dataset and rename as 'input' directory.
 
 
 
-+ **Fr2 Desk:** We provide a demo running dataset TUM RGBD. [Download hand labeled dataset]
++ **Fr2 Desk:** We provide a demo running dataset TUM RGBD. [**Download hand labeled dataset**](https://drive.google.com/file/d/1V3Ow0UOeU0FA58rtzbE325CzNy2-PVOL/view?usp=sharing)
 
 ```shell
 ./soslam_exe --Fr2_Desk --3d
@@ -117,7 +117,7 @@ First, prepare dataset and rename as 'input' directory.
 
 
 
-+ **Fr1 Desk2:** We provide a demo running dataset TUM RGBD. [Download hand labeled dataset]
++ **Fr1 Desk2:** We provide a demo running dataset TUM RGBD. [**Download hand labeled dataset**](https://drive.google.com/file/d/19szLlFB4Yxnx0SC5PewdLyk07I1OXINP/view?usp=sharing)
 
 ```shell
 ./soslam_exe --Fr1_Desk2 --3d
@@ -129,7 +129,7 @@ First, prepare dataset and rename as 'input' directory.
 
 
 
-+ **Fr2 Dishes:** We provide a demo running dataset TUM RGBD. [Download hand labeled dataset]
++ **Fr2 Dishes:** We provide a demo running dataset TUM RGBD. [**Download hand labeled dataset**](https://drive.google.com/file/d/1ASIADGoLiYin7QoxdcVXOR1_HpVC9U2t/view?usp=sharing)
 
 ```shell
 ./soslam_exe --Fr2_Dishes --3d
@@ -273,3 +273,4 @@ Liao Z, Hu Y, Zhang J, et al. So-slam: Semantic object slam with scale proportio
 
 - [x] 8. Doing experiments, Record Video. 
 - [ ] 9. Write final report.
+- [ ] 10. Modify code, make it clear.
