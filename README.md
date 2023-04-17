@@ -109,7 +109,7 @@ make
 ./soslam_exe --Fr2_Desk --3d
 ```
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/4.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/3.png" alt="image" width="640" height="400" />
 </p>
 
 
@@ -122,7 +122,7 @@ make
 ```
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/3.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/4.png" alt="image" width="640" height="400" />
 </p>
 
 
