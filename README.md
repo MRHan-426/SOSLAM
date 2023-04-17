@@ -114,7 +114,7 @@ make
 ./soslam_exe --Fr1_Desk2 --3d
 ```
 
-<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/4.png" alt="4" style="zoom:25%;" />
+<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/2.png" alt="4" style="zoom:25%;" />
 
 
 
@@ -124,7 +124,7 @@ make
 ./soslam_exe --Fr2_Dishes --3d
 ```
 
-<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/1.png" alt="2" style="zoom:25%;" />
+<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3.png" alt="2" style="zoom:25%;" />
 
 
 
