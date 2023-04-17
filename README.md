@@ -92,6 +92,8 @@ make
 
 ## 4. Examples
 
+First, prepare dataset and rename as 'input' directory.
+
 + **Dummy Example**: We provide a demo to visualize for debugging. It will shows two hand designed ellipsoid.
 
 ```shell
