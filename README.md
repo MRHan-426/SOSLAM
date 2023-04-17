@@ -2,7 +2,7 @@
 
 
 
-![](SO-SLAM.assets/3 00_00_00-00_00_30.gif)
+![](https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3%2000_00_00-00_00_30.gif)
 
 
 
@@ -104,7 +104,7 @@ make
 ./soslam_exe --Fr2_Desk --3d
 ```
 
-<img src="SO-SLAM.assets/3.png" alt="3" style="zoom:25%;" />
+<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/4.png" alt="3" style="zoom:25%;" />
 
 
 
@@ -114,7 +114,7 @@ make
 ./soslam_exe --Fr1_Desk2 --3d
 ```
 
-<img src="SO-SLAM.assets/4.png" alt="4" style="zoom:25%;" />
+<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/4.png" alt="4" style="zoom:25%;" />
 
 
 
