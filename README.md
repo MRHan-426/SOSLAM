@@ -1,7 +1,7 @@
 #  SO-SLAM
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/3%2000_00_00-00_00_30.gif" alt="gif">
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/3%2000_00_00-00_00_30.gif" alt="gif">
 </p>
      
      
@@ -70,13 +70,13 @@ sudo make install
 Branch Master contains point cloud visualization, so you have some more prerequisites.
 
 ```shell
-git clone --branch master https://github.com/MRHan-426/SOSLAM_plus.git
+git clone --branch master https://github.com/MRHan-426/SOSLAM.git
 ```
 
 Branch 0.0.1 doesnot contain point cloud visualization, so you don't have to compile PCL, VTK.
 
 ```shell
-git clone --branch 0.0.1 https://github.com/MRHan-426/SOSLAM_plus.git
+git clone --branch 0.0.1 https://github.com/MRHan-426/SOSLAM.git
 ```
 
 Then:
@@ -100,7 +100,7 @@ First, prepare dataset and rename as 'input' directory.
 ./soslam_exe --dummy --3d
 ```
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/image-20230417154558047.png" alt="image" width="640" height="400">
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/image-20230417154558047.png" alt="image" width="640" height="400">
 </p>
 
 
@@ -111,7 +111,7 @@ First, prepare dataset and rename as 'input' directory.
 ./soslam_exe --Fr2_Desk --3d
 ```
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/3.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/3.png" alt="image" width="640" height="400" />
 </p>
 
 
@@ -124,7 +124,7 @@ First, prepare dataset and rename as 'input' directory.
 ```
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/4.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/4.png" alt="image" width="640" height="400" />
 </p>
 
 
@@ -137,7 +137,7 @@ First, prepare dataset and rename as 'input' directory.
 
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/.assets/2.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/2.png" alt="image" width="640" height="400" />
 </p>
 
 There are detailed configurations in **config.yaml**, please change if you need.
