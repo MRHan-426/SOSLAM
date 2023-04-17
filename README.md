@@ -1,7 +1,9 @@
 # SO-SLAM
 
+<p align="center">
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3%2000_00_00-00_00_30.gif" alt="gif">
+</p>
 
-![](https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3%2000_00_00-00_00_30.gif)
 
 
 This is Team 6's final project git repository for ROB530: Mobile Robotics. 
@@ -91,9 +93,10 @@ make
 ```shell
 ./soslam_exe --dummy --3d
 ```
-<div align=center>
-![image-20230417154558047](https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/image-20230417154558047.png)
-</div>
+<p align="center">
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/image-20230417154558047.png" alt="image" width="640" height="400">
+</p>
+
 
 
 + **Fr2 Desk:** We provide a demo running dataset TUM RGBD. [Download hand labeled dataset]
@@ -101,9 +104,11 @@ make
 ```shell
 ./soslam_exe --Fr2_Desk --3d
 ```
-<div align=center>
-<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/4.png" alt="3" style="zoom:25%;" />
-</div>
+<p align="center">
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/4.png" alt="image" width="640" height="400" />
+</p>
+
+
 
 
 + **Fr1 Desk2:** We provide a demo running dataset TUM RGBD. [Download hand labeled dataset]
@@ -111,9 +116,11 @@ make
 ```shell
 ./soslam_exe --Fr1_Desk2 --3d
 ```
-<div align=center>
-<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/2.png" alt="4" style="zoom:25%;" />
-</div>
+
+<p align="center">
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/2.png" alt="image" width="640" height="400" />
+</p>
+
 
 
 + **Fr2 Dishes:** We provide a demo running dataset TUM RGBD. [Download hand labeled dataset]
@@ -122,9 +129,10 @@ make
 ./soslam_exe --Fr2_Dishes --3d
 ```
 
-<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3.png" alt="2" style="zoom:25%;" />
 
-
+<p align="center">
+  <img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3.png" alt="image" width="640" height="400" />
+</p>
 
 There are detailed configurations in **config.yaml**, please change if you need.
 
@@ -193,7 +201,7 @@ Liao, Z., Hu, Y., Zhang, J., Qi, X., Zhang, X. & Wang, W. (2021). SO-SLAM: Seman
     - [x] 2.1 Finish compiling.
     - [x] 2.2 Get correct answer.
 
-- [ ] 3.New Constraints and quadric Initialization.
+- [x] 3.New Constraints and quadric Initialization.
 
   - [x] 3.1 Finish writing constraints.
     - [x] 3.1.1 Semantic Scale constraint.
