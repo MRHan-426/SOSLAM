@@ -124,7 +124,7 @@ make
 ./soslam_exe --Fr2_Dishes --3d
 ```
 
-<img src="https://github.com/MRHan-426/SOSLAM_plus/tree/master/gtsam_quardic/2.png" alt="2" style="zoom:25%;" />
+<img src="https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/1.png" alt="2" style="zoom:25%;" />
 
 
 
