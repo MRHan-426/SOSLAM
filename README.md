@@ -94,7 +94,7 @@ make
 ./soslam_exe --dummy --3d
 ```
 
-![image-20230417154558047](SO-SLAM.assets/image-20230417154558047.png)
+![image-20230417154558047](https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/image-20230417154558047.png)
 
 
 
@@ -200,7 +200,7 @@ Liao, Z., Hu, Y., Zhang, J., Qi, X., Zhang, X. & Wang, W. (2021). SO-SLAM: Seman
   - [x] 3.1 Finish writing constraints.
     - [x] 3.1.1 Semantic Scale constraint.
     - [x] 3.1.2 Plane Support constraint.
-    - [ ] 3.1.3 Symmetry Texture constraint.
+    - [x] 3.1.3 Symmetry Texture constraint.
     - [x] 3.1.4 Bounding Box constraint.    
   - [x] 3.2 Finish writing Quadric Initialization.
   - [x] 3.3 Add Constraints into "c++ core".
