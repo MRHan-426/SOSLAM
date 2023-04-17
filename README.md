@@ -1,9 +1,7 @@
 # SO-SLAM
 
 
-<div align=center>
 ![](https://github.com/MRHan-426/SOSLAM_plus/blob/master/gtsam_quardic/3%2000_00_00-00_00_30.gif)
-</div>
 
 
 This is Team 6's final project git repository for ROB530: Mobile Robotics. 
