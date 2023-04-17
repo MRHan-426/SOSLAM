@@ -62,7 +62,7 @@ sudo make install
 
 
 
-## 3. Compile SO-SLAM
+## 3. Compile our repo
 
 Branch Master contains point cloud visualization, so you have some more prerequisites.
 
