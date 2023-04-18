@@ -13,7 +13,7 @@ The title of our project is **Implementation and Evaluation of Semantic-Object S
 
 The team members include: Ziqi Han, Zhewei Ye, Tien-Li Lin, Yi-Cheng Liu, Shubh Agrawal.
 
-**Related Paper:**  [RAL 2022]
+**Related Paper:**  [RA-L&ICRA 2022]
 
 + Liao Z, Hu Y, Zhang J, et al. So-slam: Semantic object slam with scale proportional and symmetrical texture constraints[J]. IEEE Robotics and Automation Letters, 2022, 7(2): 4008-4015. [**[PDF]**](https://arxiv.org/abs/2109.04884)
 
