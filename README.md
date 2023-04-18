@@ -224,7 +224,7 @@ Thanks for the great work:
 
 
 
-## 📈 9. Project Log & Todo List
+## 📌 9. Project Log & Todo List
     
 - [x] 1. Get dataset ready. Label and associate data by hand.
 
