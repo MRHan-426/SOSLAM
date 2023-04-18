@@ -23,17 +23,15 @@ The team members include: Ziqi Han, Zhewei Ye, Tien-Li Lin, Yi-Cheng Liu, Shubh 
 
 ```shell
 cmake 3.26.0
-eigen 3.3.7
 libboost 1.71.0  # make sure to compile C++ version from source code.
 ```
 
 ```shell
-sudo apt install libeigen3-dev
-sudo apt install libtbb-dev
-sudo apt-get install libpugixml-dev # a light library to deal with xml file
-sudo apt install libflann-dev  # dependency of PCL
+sudo apt-get install libeigen3-dev
+sudo apt-get install libtbb-dev
+sudo apt-get install libmetis-dev
+sudo apt-get install libpugixml-dev
 sudo apt-get install libpcl-dev
-sudo apt-get install libusb-1.0-0-dev
 ```
 
 
@@ -247,7 +245,7 @@ Liao Z, Hu Y, Zhang J, et al. So-slam: Semantic object slam with scale proportio
     - [x] world axis
     - [x] usability: control visualization
 
-===========================================================================
+==========================================================================
 
 4.10 ~ 4.13 TODO list
 
@@ -267,7 +265,7 @@ Liao Z, Hu Y, Zhang J, et al. So-slam: Semantic object slam with scale proportio
 
 - [x] 7. Add visual odometry to take place of odom ground truth. [Orb Slam] [Optional]
 
-===========================================================================
+==========================================================================
 
 4.14 ~ 4.16 TODO list
 
