@@ -21,12 +21,9 @@ The team members include: Ziqi Han, Zhewei Ye, Tien-Li Lin, Yi-Cheng Liu, Shubh 
 
 ## 1. Prerequisites
 
-```shell
-cmake 3.26.0
-libboost 1.71.0  # make sure to compile C++ version from source code.
-```
 
 ```shell
+sudo apt-get install libglew-dev
 sudo apt-get install libeigen3-dev
 sudo apt-get install libtbb-dev
 sudo apt-get install libmetis-dev
@@ -34,6 +31,12 @@ sudo apt-get install libpugixml-dev
 sudo apt-get install libpcl-dev
 ```
 
+
+```shell
+cmake 3.26.0
+libboost 1.71.0  # make sure to compile C++ version from source code.
+Pangolin 0.8.0
+```
 
 
 
