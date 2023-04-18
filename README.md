@@ -116,7 +116,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 ./soslam_exe --Fr2_Desk --3d
 ```
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/3.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/3.png" alt="image" width="66%" height="auto" />
 </p>
 
 
@@ -129,8 +129,9 @@ There are detailed configurations in **config.yaml**, please change if you need.
 ```
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/4.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/4.png" alt="image" width="66%" height="auto" />
 </p>
+
 
 
 
@@ -142,7 +143,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 <p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/2.png" alt="image" width="640" height="400" />
+  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/2.png" alt="image" width="66%" height="auto" />
 </p>
 
 
@@ -165,16 +166,18 @@ There are detailed configurations in **config.yaml**, please change if you need.
 + If you want to use it in your work or with other datasets, you should prepare the dataset containing:
 
   - RGB image
-
   - Label xml (contain "objectKey" key to store the data association information)
   - Odom txt
   - Depth image (if you do not need point cloud visualization, just ignore)
+  - Camera intrinsic txt
 
   Be aware that you should rename your images and xmls as number 1,2,3,...
 
   Be aware that RGB, Depth, Label, Odom must match.
 
-+ This is an incomplete version of our project. We have a lot of experiments to be done.
++ This is an incomplete version of our project. 
+    - We have a lot of experiments to be done.
+    - We have not achieved real-time.
 
 
 
