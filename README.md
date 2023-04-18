@@ -161,7 +161,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 📄 6. Note
+## 📝 6. Note
 
 + If you want to use it in your work or with other datasets, you should prepare the dataset containing:
 
