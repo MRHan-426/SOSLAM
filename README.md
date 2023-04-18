@@ -13,7 +13,7 @@ The title of our project is **Implementation and Evaluation of Semantic-Object S
 
 The team members include: Ziqi Han, Zhewei Ye, Tien-Li Lin, Yi-Cheng Liu, Shubh Agrawal.
 
-**Related Paper:**  
+**Related Paper:**  [RAL 2022]
 
 + Liao Z, Hu Y, Zhang J, et al. So-slam: Semantic object slam with scale proportional and symmetrical texture constraints[J]. IEEE Robotics and Automation Letters, 2022, 7(2): 4008-4015. [**[PDF]**](https://arxiv.org/abs/2109.04884)
 
@@ -184,8 +184,14 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 ## 6. Acknowledgement
 
-Thanks for the great work: **SO-SLAM**, **Quadric-SLAM**, **EAO-SLAM**, **ORB-SLAM2**, **YOLO-v8**.
+Thanks for the great work: 
 
++ [**SO-SLAM**](https://github.com/XunshanMan/SoSLAM)
++ [**GTSAM**](https://github.com/borglab/gtsam)
++ [**Quadric-SLAM**](https://github.com/qcr/quadricslam)
++ [**EAO-SLAM**](https://github.com/yanmin-wu/EAO-SLAM) 
++ [**ORB-SLAM2**](https://github.com/raulmur/ORB_SLAM2)
++ [**YOLO-v8**](https://github.com/ultralytics/ultralytics)
 
 
 
