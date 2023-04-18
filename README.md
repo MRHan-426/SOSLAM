@@ -200,13 +200,22 @@ Thanks for the great work: **SO-SLAM**, **Quadric-SLAM**, **EAO-SLAM**, **ORB-SL
 **Please cite the author's paper if you use the code in your work.**
 
 ```
-Liao Z, Hu Y, Zhang J, et al. So-slam: Semantic object slam with scale proportional and symmetrical texture constraints[J]. IEEE Robotics and Automation Letters, 2022, 7(2): 4008-4015.
+@article{liao2022so,
+  title={So-slam: Semantic object slam with scale proportional and symmetrical texture constraints},
+  author={Liao, Ziwei and Hu, Yutong and Zhang, Jiadong and Qi, Xianyu and Zhang, Xiaoyu and Wang, Wei},
+  journal={IEEE Robotics and Automation Letters},
+  volume={7},
+  number={2},
+  pages={4008--4015},
+  year={2022},
+  publisher={IEEE}
+}
 ```
 
 
 
 
-## TODO
+## Project Log & Todo List
     
 - [x] 1. Get dataset ready. Label and associate data by hand.
 
