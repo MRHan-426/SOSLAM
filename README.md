@@ -149,7 +149,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 4. Videos and Documentation
+## 5. Videos and Documentation
 
 + Our project presentation video is on [**[YouTube]**](https://youtu.be/_yUy5nOtfMM).
 
@@ -161,7 +161,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 5. Note
+## 6. Note
 
 + If you want to use it in your work or with other datasets, you should prepare the dataset containing:
 
@@ -182,7 +182,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 6. Acknowledgement
+## 7. Acknowledgement
 
 Thanks for the great work: 
 
@@ -195,7 +195,7 @@ Thanks for the great work:
 
 
 
-## 7. Contact
+## 8. Contact
 
 + Ziqi Han, Email: ziqihan@umich.edu
 + Zhewei Ye, Email: yezhewei@umich.edu
@@ -224,7 +224,7 @@ Thanks for the great work:
 
 
 
-## Project Log & Todo List
+## 9. Project Log & Todo List
     
 - [x] 1. Get dataset ready. Label and associate data by hand.
 
