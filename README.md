@@ -36,6 +36,7 @@ sudo apt-get install libpcl-dev
 cmake 3.26.0
 libboost 1.71.0  # make sure to compile C++ version from source code.
 Pangolin 0.8.0
+OpenCV 4.7.0
 ```
 
 
