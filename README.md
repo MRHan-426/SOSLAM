@@ -19,7 +19,7 @@ The team members include: Ziqi Han, Zhewei Ye, Tien-Li Lin, Yi-Cheng Liu, Shubh 
 
 ---
 
-## 1. Prerequisites
+## 📚 1. Prerequisites
 
 
 ```shell
@@ -41,7 +41,7 @@ OpenCV 4.7.0
 
 
 
-## 2. Compile GTSAM
+## ⚙️ 2. Compile GTSAM
 
 **Note that higher version may bring unexpected errors, we do not test other version so far.**
 
@@ -67,7 +67,7 @@ sudo make install
 
 
 
-## 3. Compile our repo
+## 🛠️ 3. Compile our repo
 
 Branch Master contains point cloud visualization, so you have some more prerequisites.
 
@@ -92,7 +92,7 @@ make
 
 
 
-## 4. Examples
+## 🌟 4. Examples
 
 First, prepare dataset and rename as **input** directory. We provide three hand-labeled dataset below.
 
@@ -149,7 +149,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 5. Videos and Documentation
+## 🎬 5. Videos and Documentation
 
 + Our project presentation video is on [**[YouTube]**](https://youtu.be/_yUy5nOtfMM).
 
@@ -161,7 +161,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 6. Note
+## 📄 6. Note
 
 + If you want to use it in your work or with other datasets, you should prepare the dataset containing:
 
@@ -182,7 +182,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-## 7. Acknowledgement
+## 🏅 7. Acknowledgement
 
 Thanks for the great work: 
 
@@ -195,7 +195,7 @@ Thanks for the great work:
 
 
 
-## 8. Contact
+## 📫 8. Contact
 
 + Ziqi Han, Email: ziqihan@umich.edu
 + Zhewei Ye, Email: yezhewei@umich.edu
@@ -224,7 +224,7 @@ Thanks for the great work:
 
 
 
-## 9. Project Log & Todo List
+## 📈 9. Project Log & Todo List
     
 - [x] 1. Get dataset ready. Label and associate data by hand.
 
