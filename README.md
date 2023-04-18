@@ -97,9 +97,7 @@ First, prepare dataset and rename as 'input' directory.
 ```shell
 ./soslam_exe --dummy --3d
 ```
-<p align="center">
-  <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/image-20230417154558047.png" alt="image" width="640" height="400">
-</p>
+
 
 
 
