@@ -94,7 +94,12 @@ make
 
 ## 4. Examples
 
-First, prepare dataset and rename as 'input' directory.
+First, prepare dataset and rename as **input** directory. We provide three hand-labeled dataset below.
+
+It cost us a lot of time to label and associate these datasets, so please star if we do help you.
+
+There are detailed configurations in **config.yaml**, please change if you need.
+
 
 + **Dummy Example**: We provide a demo to visualize for debugging. It will shows two hand designed ellipsoid.
 
@@ -140,16 +145,12 @@ First, prepare dataset and rename as 'input' directory.
   <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/2.png" alt="image" width="640" height="400" />
 </p>
 
-There are detailed configurations in **config.yaml**, please change if you need.
-
-It costs us a lot of time to label and associate these datasets, so please star if they do help you.
-
 
 
 
 ## 4. Videos and Documentation
 
-+ Our project presentation video is on [**YouTube**](https://youtu.be/_yUy5nOtfMM).
++ Our project presentation video is on [**[YouTube]**](https://youtu.be/_yUy5nOtfMM).
 
 
 
