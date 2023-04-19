@@ -12,7 +12,7 @@ find_package(OpenCV REQUIRED)
 find_package(Pangolin 0.8 REQUIRED)
 find_package(pugixml REQUIRED)
 find_package(PCL REQUIRED)
-list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4") # use this in Ubuntu 16.04
+list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
 # Set include directories
 include_directories(

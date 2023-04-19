@@ -20,7 +20,8 @@ void run(gtsam_soslam::DataSource &data_source, \
             gtsam_soslam::BaseAssociator &associator, \
             gtsam_soslam::BaseDetector &detector, \
             const gtsam::Pose3 &initial_pose, \
-            const bool &use_3D_visualization = true
+            const bool &use_3D_visualization = true, \
+            const bool &optimizer_batch = false
 );
 
 #endif // MAIN_H

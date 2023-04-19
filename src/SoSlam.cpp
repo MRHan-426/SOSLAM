@@ -195,27 +195,7 @@ namespace gtsam_soslam {
            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
        }
 
-        // point cloud process
-        if(count % 20 == 0 && !n->rgb.empty()){    // RGB images are needed.
-//            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
-            mpBuilder->processFrame(n->rgb, n->depth, n->odom, 2.5); //depth thresh grab from object slam
 
-//            mpBuilder->voxelFilter(0.01);   // Down sample threshold; smaller the finer; depend on the hardware.
-            PointCloudPCL::Ptr pCloudPCL = mpBuilder->getMap();
-            PointCloudPCL::Ptr pCurrentCloudPCL = mpBuilder->getCurrentMap();
-
-            auto pCloud = utils::pclToQuadricPointCloudPtr(pCloudPCL);
-            auto pCloudLocal = utils::pclToQuadricPointCloudPtr(pCurrentCloudPCL);
-            mpMap->AddPointCloudList("Builder.Global Points", pCloud);
-            mpMap->AddPointCloudList("Builder.Local Points", pCloudLocal);
-            mpMap->addPointCloud(pCloudLocal);
-        }
-        if (count % 5 != 0 ) {
-            s.prev_step = *n;
-            count++;
-            return;
-        }
-        count++;
         std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
 
         // batch optimization
@@ -229,6 +209,28 @@ namespace gtsam_soslam {
         // step optimization
         else
         {
+            // point cloud process
+            if(count % 20 == 0 && !n->rgb.empty()){    // RGB images are needed.
+//            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
+                mpBuilder->processFrame(n->rgb, n->depth, n->odom, 2.5); //depth thresh grab from object slam
+
+//            mpBuilder->voxelFilter(0.01);   // Down sample threshold; smaller the finer; depend on the hardware.
+                PointCloudPCL::Ptr pCloudPCL = mpBuilder->getMap();
+                PointCloudPCL::Ptr pCurrentCloudPCL = mpBuilder->getCurrentMap();
+
+                auto pCloud = utils::pclToQuadricPointCloudPtr(pCloudPCL);
+                auto pCloudLocal = utils::pclToQuadricPointCloudPtr(pCurrentCloudPCL);
+                mpMap->AddPointCloudList("Builder.Global Points", pCloud);
+                mpMap->AddPointCloudList("Builder.Local Points", pCloudLocal);
+                mpMap->addPointCloud(pCloudLocal);
+            }
+            if (count % 5 != 0 ) {
+                s.prev_step = *n;
+                count++;
+                return;
+            }
+            count++;
+
             if(0) {
                 //---------------------------------------------------------------------------------------------
                 int blockSize = 2;
