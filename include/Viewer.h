@@ -1,35 +1,19 @@
 /**
-* This file is part of ORB-SLAM2.
-*
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-*
-* ORB-SLAM2 is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM2 is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ * @file MapDrawer.cc
+ * @author Raúl Mur-Artal, thanks for your great work
+ * @modified by Zhewei Ye
+ * @Lastest modified on 19/04/2023
+ */
 
 #ifndef VIEWER_H
 #define VIEWER_H
 
+#include "SoSlam.h"
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
 #include <unistd.h>
-// #include "Tracking.h"
-// #include "System.h"
-
 #include <mutex>
-#include "SoSlam.h"
+using namespace std;
 
 namespace gtsam_soslam {
     struct MenuStruct
@@ -43,9 +27,7 @@ namespace gtsam_soslam {
     class FrameDrawer;
 
     class MapDrawer;
-//class
 // class System;
-    using namespace std;
 
     class Viewer {
     public:
@@ -109,7 +91,6 @@ namespace gtsam_soslam {
     };
 
 }
-
 
 #endif // VIEWER_H
 	

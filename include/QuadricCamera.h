@@ -1,29 +1,19 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
  * @file QuadricCamera.h
- * @date Apr 16, 2020
- * @author Lachlan Nicholson
- * @brief a class responsible for projecting quadrics
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
 
 #pragma once
 
+#include "ConstrainedDualQuadric.h"
+#include "DualConic.h"
 #include <gtsam/base/ThreadsafeException.h>
 #include <gtsam/base/types.h>
 #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/PinholePose.h>
-#include <ConstrainedDualQuadric.h>
-#include <DualConic.h>
+#include <gtsam/base/numericalDerivative.h>
 
 namespace gtsam_soslam {
 

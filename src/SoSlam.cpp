@@ -1,5 +1,4 @@
 #include "SoSlam.h"
-//#include "OptimizeFunctor.h"
 
 #include <iostream>
 #include <gtsam/slam/BetweenFactor.h>
@@ -7,7 +6,6 @@
 //#include <tbb/parallel_for.h>
 //#include <tbb/blocked_range.h>
 //#include <tbb/global_control.h>
-
 
 using namespace std;
 
@@ -20,30 +18,19 @@ namespace gtsam_soslam {
             SoSlamState *state,
             const string &strSettingPath,
             const gtsam::Pose3 &initial_pose,
-            const bool &optimizer_batch,
-            const bool &output_quadrics_image) : data_source_(data_source),
+            const bool &optimizer_batch) : data_source_(data_source),
                                            associator_(associator),
                                            detector_(detector),
                                            mpMap(mMap),
                                            state_(state),
                                            initial_pose_(initial_pose),
-                                           optimizer_batch_(optimizer_batch),
-                                           output_quadrics_image_(output_quadrics_image){
-//        state_ = SoSlamState(mMap, initial_pose, optimizer_batch);
+                                           optimizer_batch_(optimizer_batch)
+   {
         reset();
         cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
-        float fx = fSettings["Camera.fx"];
-        float fy = fSettings["Camera.fy"];
-        float cx = fSettings["Camera.cx"];
-        float cy = fSettings["Camera.cy"];
-
-
-        Eigen::Matrix3d mCalib;
-        mCalib << fx,  0,  cx,
-                  0,  fy,  cy,
-                  0,   0,   1;
-
+        output_quadrics_image_ = int(fSettings["output_quadrics_image"]);
         double scale = fSettings["Camera.scale"];
+        auto mCalib = state_ -> calib_rgb_.K();
         mpBuilder = new Builder();
         mpBuilder->setCameraIntrinsic(mCalib, scale);
     }
@@ -149,7 +136,7 @@ namespace gtsam_soslam {
         // Define noise model
 //        auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
         gtsam::Vector6 temp;
-        temp << 1.01, 1.01, 1.01, 1.01, 1.01, 1.01;
+        temp << 1.00, 1.00, 1.00, 1.00, 1.00, 1.00;
         gtsam::noiseModel::Diagonal::shared_ptr noise_prior =
                 gtsam::noiseModel::Diagonal::Sigmas(0.001 * temp);
         gtsam::noiseModel::Diagonal::shared_ptr noise_odom =
@@ -161,7 +148,7 @@ namespace gtsam_soslam {
         gtsam::noiseModel::Diagonal::shared_ptr noise_psc =
                 gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(10.0, 10.0));
         gtsam::noiseModel::Diagonal::shared_ptr noise_syc =
-                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(5.0));
+                gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector1(20.0));
 
         // Huber kernel
         auto huber_boxes = gtsam::noiseModel::Robust::Create(
@@ -180,7 +167,6 @@ namespace gtsam_soslam {
         // step index is initialized with zero
         int new_step_index = p.i + 1;
 
-//        cout<<"step_index"<<new_step_index<<endl;
         StepState *n;
         n = &(s.this_step);
         n->i = new_step_index;
@@ -209,7 +195,6 @@ namespace gtsam_soslam {
            s.graph_.add(gtsam::BetweenFactor<gtsam::Pose3>(p.pose_key, n->pose_key, between_pose, noise_odom));
        }
 
-
         // point cloud process
         if(count % 20 == 0 && !n->rgb.empty()){    // RGB images are needed.
 //            Eigen::VectorXd pose = mCurrFrame->cam_pose_Twc.toVector();
@@ -230,33 +215,10 @@ namespace gtsam_soslam {
             count++;
             return;
         }
-//        s.graph_.print();
-//        s.estimates_.print();
-        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
-        //---------------------------------------------------------------------------------------------
         count++;
-//        int blockSize = 2;
-//        int apertureSize = 3;
-//        // adjust this to get different # of keypoints
-//        int thresh = 180;
-//        double k = 0.04;
-//        std::vector<std::pair<double, double>> feature_points;
-//        cv::Mat gray_image;
-//        cv::cvtColor(n->rgb, gray_image, cv::COLOR_BGR2GRAY);
-//        cv::Mat detected_image = cv::Mat::zeros(gray_image.size(), CV_32FC1);
-//        cv::cornerHarris(gray_image, detected_image, blockSize, apertureSize, k);
-//        cv::Mat detected_norm, detected_norm_scaled;
-//        cv::normalize(detected_image, detected_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
-//        cv::convertScaleAbs(detected_norm, detected_norm_scaled);
-//
-//        for (int i = 0; i < detected_norm.rows; i++) {
-//            for (int j = 0; j < detected_norm.cols; j++) {
-//                if ((int) detected_norm.at<float>(i, j) > thresh) {
-//                    feature_points.push_back(std::make_pair((int) i, (int) j)); // x, y coordinate in matrix form
-//                }
-//            }
+        std::tuple<BoundingBoxFactor, SemanticScaleFactor, PlaneSupportingFactor, SymmetryFactor> bbs_scc_psc_syc;
 
-// batch optimization
+        // batch optimization
         if (s.optimizer_batch_)
         {
             for (const auto &d : n->new_associated)
@@ -264,10 +226,35 @@ namespace gtsam_soslam {
                 bbs_scc_psc_syc = add_detection_factors(d, huber_boxes, huber_ssc, huber_psc, huber_syc);
             }
         }
-            // step optimization
+        // step optimization
         else
         {
-//            guess_initial_values();
+            if(0) {
+                //---------------------------------------------------------------------------------------------
+                int blockSize = 2;
+                int apertureSize = 3;
+                // adjust this to get different # of keypoints
+                int thresh = 180;
+                double k = 0.04;
+                std::vector<std::pair<double, double>> feature_points;
+                cv::Mat gray_image;
+                cv::cvtColor(n->rgb, gray_image, cv::COLOR_BGR2GRAY);
+                cv::Mat detected_image = cv::Mat::zeros(gray_image.size(), CV_32FC1);
+                cv::cornerHarris(gray_image, detected_image, blockSize, apertureSize, k);
+                cv::Mat detected_norm, detected_norm_scaled;
+                cv::normalize(detected_image, detected_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+                cv::convertScaleAbs(detected_norm, detected_norm_scaled);
+
+                for (int i = 0; i < detected_norm.rows; i++) {
+                    for (int j = 0; j < detected_norm.cols; j++) {
+                        if ((int) detected_norm.at<float>(i, j) > thresh) {
+                            feature_points.push_back(
+                                    std::make_pair((int) i, (int) j)); // x, y coordinate in matrix form
+                        }
+                    }
+                }
+            }
+
             for (const auto &d : n->new_associated)
             {
                 // add factors into graph
@@ -382,27 +369,27 @@ namespace gtsam_soslam {
         return std::make_tuple(bbs, ssc, psc, syc);
     }
 
-    // std::vector<std::vector<std::pair<double, double>>>
-    // SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y) {
-    //     std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(
-    //             int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
-    //     for (int i = 0; i < int(max_x); i++) {
-    //         for (int j = 0; j < int(max_y); j++) {
-    //             double min = DBL_MAX;
-    //             std::pair<double, double> nearest_edge;
-    //             for (int k = 0; k < feature_points.size(); k++) {
-    //                 double distance = pow(pow(feature_points[k].first - i, 2) + pow(feature_points[k].second - j, 2),
-    //                                       0.5);
-    //                 if (distance < min) {
-    //                     nearest_edge = feature_points[k];
-    //                     min = distance;
-    //                 }
-    //             }
-    //             nearest[i][j] = nearest_edge;
-    //         }
-    //     }
-    //     return nearest;
-    // }
+     std::vector<std::vector<std::pair<double, double>>>
+     SoSlam::findNearestEdge(std::vector<std::pair<double, double>> &feature_points, double max_x, double max_y) {
+         std::vector<std::vector<std::pair<double, double>>> nearest = std::vector<std::vector<std::pair<double, double>>>(
+                 int(max_x), std::vector<std::pair<double, double>>(max_y, {0, 0}));
+         for (int i = 0; i < int(max_x); i++) {
+             for (int j = 0; j < int(max_y); j++) {
+                 double min = DBL_MAX;
+                 std::pair<double, double> nearest_edge;
+                 for (int k = 0; k < feature_points.size(); k++) {
+                     double distance = pow(pow(feature_points[k].first - i, 2) + pow(feature_points[k].second - j, 2),
+                                           0.5);
+                     if (distance < min) {
+                         nearest_edge = feature_points[k];
+                         min = distance;
+                     }
+                 }
+                 nearest[i][j] = nearest_edge;
+             }
+         }
+         return nearest;
+     }
 
     void SoSlam::limitFactorGraphSize(gtsam::NonlinearFactorGraph &graph, size_t maxFactors) {
         size_t numFactors = graph.size();

@@ -1,0 +1,25 @@
+%YAML:1.0
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters.
+#--------------------------------------------------------------------------------------------
+# Camera frames per second
+Camera.fps: 30.0
+# Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+Camera.RGB: 1
+Camera.scale: 5000.0
+output_quadrics_image: 0
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize:2
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+

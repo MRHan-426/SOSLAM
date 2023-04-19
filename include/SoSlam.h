@@ -9,7 +9,7 @@
 #include "SemanticScaleFactor.h"
 #include "PlaneSupportingFactor.h"
 #include "SymmetryFactor.h"
-#include "../src/dense_builder/builder.h"
+#include "builder.h"
 #include "Map.h"
 
 #include <optional>
@@ -32,7 +32,6 @@
 namespace gtsam_soslam {
     class SoSlam {
     public:
-        // TODO：Class Associator, DataSource, DummyDetector
         DataSource &data_source_;
         BaseAssociator &associator_;
         BaseDetector &detector_;
@@ -56,8 +55,7 @@ namespace gtsam_soslam {
                 SoSlamState* state,
                 const string &strSettingPath,
                 const gtsam::Pose3 &initial_pose = gtsam::Pose3(Constants::POSES[0].matrix()),
-                const bool &optimizer_batch = true,
-                const bool &output_quadrics_image = false);
+                const bool &optimizer_batch = true);
 
         // private:
         void guess_initial_values();

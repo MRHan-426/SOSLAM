@@ -1,16 +1,12 @@
 /**
  * @file BoundingBoxFactor.cpp
- * @date Apr 14, 2020
- * @author Lachlan Nicholson
- * @brief factor between Pose3 and ConstrainedDualQuadric
- **/
-
-#include <gtsam/base/numericalDerivative.h>
-#include <QuadricProjectionException.h>
-#include <BoundingBoxFactor.h>
-#include <QuadricCamera.h>
-
-#include <boost/bind/bind.hpp>
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
+ */
+#include "BoundingBoxFactor.h"
+#include "QuadricProjectionException.h"
+#include "QuadricCamera.h"
 
 #define NUMERICAL_DERIVATIVE true
 

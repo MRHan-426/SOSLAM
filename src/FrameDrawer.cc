@@ -1,22 +1,13 @@
 /**
-* This file is part of ORB-SLAM2.
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-* 
-* Modification: EAO-SLAM
-* Version: 1.0
-* Created: 05/16/2019
-* Author: Yanmin Wu
-* E-mail: wuyanminmax@gmail.com
-*/
+ * @file FrameDrawer.cc
+ * @author Raúl Mur-Artal, Yanmin Wu, thanks for your great work
+ * @modified by Zhewei Ye
+ * @Lastest modified on 19/04/2023
+ */
 
 #include "FrameDrawer.h"
-// #include "Tracking.h"
-
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-
-#include<mutex>
+#include <mutex>
 
 namespace gtsam_soslam {
 
@@ -31,126 +22,19 @@ namespace gtsam_soslam {
         vector<int> vMatches; // Initialization: correspondeces with reference keypoints
         vector<cv::KeyPoint> vCurrentKeys; // KeyPoints in current frame
         vector<bool> vbVO, vbMap; // Tracked MapPoints in current frame
-        int state; // Tracking state
         if (!s->this_step.rgb.empty())
             s->this_step.rgb.copyTo(mRGBIm);         // [EAO] copy color image.
         else
             mIm.copyTo(mRGBIm);
         Dboxes = s->this_step.detections;
-        //Copy variables within scoped mutex
-        {
-//        unique_lock<mutex> lock(mMutex);
-//        state=mState;
-            // if(mState==Tracking::SYSTEM_NOT_READY)
-            //     mState=Tracking::NO_IMAGES_YET;
-
-//        mIm.copyTo(im);
-
-            // if(mState==Tracking::NOT_INITIALIZED)
-            // {
-            //     vCurrentKeys = mvCurrentKeys;
-            //     vIniKeys = mvIniKeys;
-            //     vMatches = mvIniMatches;
-            // }
-            // else if(mState==Tracking::OK)
-            // {
-            //     vCurrentKeys = mvCurrentKeys;
-            //     vbVO = mvbVO;
-            //     vbMap = mvbMap;
-            // }
-            // else if(mState==Tracking::LOST)
-            // {
-            //     vCurrentKeys = mvCurrentKeys;
-            // }
-        } // destroy scoped mutex -> release mutex
-
-//    if(im.channels()<3) //this should be always true
-//        cvtColor(im,im,cv::COLOR_GRAY2BGR);
-
-//    if(state == NOT_INITIALIZED) //INITIALIZING
-//    {
-//        for(unsigned int i=0; i<vCurrentKeys.size(); i++)
-//        {
-//            cv::circle(im,vCurrentKeys[i].pt,1,cv::Scalar(0,0,255),-1);
-//        }
-//
-//        for(unsigned int i=0; i<vMatches.size(); i++)
-//        {
-//            if(vMatches[i]>=0)
-//            {
-//                cv::line(im,vIniKeys[i].pt,vCurrentKeys[vMatches[i]].pt,
-//                        cv::Scalar(0,255,0));
-//            }
-//        }
-//    }
-//    else if(state==OK) //TRACKING
-//    {
-//        mnTracked=0;
-//        mnTrackedVO=0;
-//        const float r = 5;
-//        for(int i=0;i<N;i++)
-//        {
-//            if(vbVO[i] || vbMap[i])
-//            {
-//                cv::Point2f pt1,pt2;
-//                pt1.x=vCurrentKeys[i].pt.x-r;
-//                pt1.y=vCurrentKeys[i].pt.y-r;
-//                pt2.x=vCurrentKeys[i].pt.x+r;
-//                pt2.y=vCurrentKeys[i].pt.y+r;
-//
-//                // This is a match to a MapPoint in the map
-//                if(vbMap[i])
-//                {
-//                    bool bInBox = false;
-//
-//                    if(have_detected)
-//                    {
-//                        // NOTE [EAO-SLAM] points in the bounding box.
-//                        for (auto&box : Dboxes)
-//                        {
-//                            int left = box.x;
-//                            int right = box.x+box.width;
-//                            int top = box.y;
-//                            int bottom = box.y+box.height;
-//
-//                            if((vCurrentKeys[i].pt.x > left)&&(vCurrentKeys[i].pt.x < right)
-//                                &&(vCurrentKeys[i].pt.y > top)&&(vCurrentKeys[i].pt.y < bottom))
-//                            {
-//                                cv::circle(im, vCurrentKeys[i].pt, 2, colors[box.m_class%4], -1);
-//
-//                                bInBox = true;
-//                                break;
-//                            }
-//                        }
-//                    }
-//
-//                    if(bInBox == false)
-//                    {
-//                        // cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
-//                        cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(255,0,255),-1);
-//                    }
-//
-//                    mnTracked++;
-//                }
-//                else // This is match to a "visual odometry" MapPoint created in the last frame
-//                {
-//                    cv::rectangle(im,pt1,pt2,cv::Scalar(255,0,0));
-//                    cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(255,0,0),-1);
-//                    mnTrackedVO++;
-//                }
-//            }
-////        }
-//    }
-
         // yolo detection.
         mRGBIm.copyTo(mDetIm);
         DrawYoloInfo(mDetIm, true);
-
         //return imWithInfo;
         return mDetIm;
     }
 
-// BRIEF [EAO-SLAM] draw yolo image.
+    // BRIEF [EAO-SLAM] draw yolo image.
     cv::Mat FrameDrawer::DrawYoloFrame() {
         cv::Mat imRGB;
         mRGBIm.copyTo(imRGB);
@@ -158,23 +42,22 @@ namespace gtsam_soslam {
         return imRGB;
     }
 
-// BRIEF [EAO-SLAM] get color image.
+    // BRIEF [EAO-SLAM] get color image.
     cv::Mat FrameDrawer::GetRawColorImage() {
         cv::Mat imRGB;
         mRGBIm.copyTo(imRGB);
         return imRGB;
     }
 
-// BRIEF [EAO-SLAM] draw quadric image.
+    // BRIEF [EAO-SLAM] draw quadric image.
     cv::Mat FrameDrawer::GetQuadricImage(const bool menuShowQuadricObj, const bool menuShowGroundTruth) {
-//    cv::Mat imRGB;
+        //    cv::Mat imRGB;
         mRGBIm.copyTo(mQuadricIm);
-//    mQuadricIm.copyTo(imRGB);
+        //    mQuadricIm.copyTo(imRGB);
         const gtsam::Values vEstimates = s->estimates_;
         auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
         std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
         vector<cv::Mat> object_cen;
-//    s->this_step.odom;
 
         gtsam::Matrix3 K = s->calib_rgb_.K();
         gtsam::Matrix4 Xi = s->this_step.odom.inverse().matrix();
@@ -206,12 +89,12 @@ namespace gtsam_soslam {
                 cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
                 cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
 
-// set translation matrix
+                // set translation matrix
                 T.at<float>(0, 3) = pose.translation().x();
                 T.at<float>(1, 3) = pose.translation().y();
                 T.at<float>(2, 3) = pose.translation().z();
 
-// set rotation matrix
+                // set rotation matrix
                 gtsam::Rot3 rot = pose.rotation();
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
@@ -219,7 +102,7 @@ namespace gtsam_soslam {
                     }
                 }
 
-// concatenate rotation and translation matrices
+                // concatenate rotation and translation matrices
                 cv::Mat Twq = T * R;
                 // create a quadric.
                 cv::Mat Twq_t = Twq.t();
@@ -232,7 +115,7 @@ namespace gtsam_soslam {
             }
         }
         int i = -1;
-//    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
+        //    std::vector<ConstrainedDualQuadric> qs = Constants::QUADRICS;
         if(menuShowQuadricObj) {
             for (auto &key_value: cqs) {
                 i++;
@@ -246,10 +129,10 @@ namespace gtsam_soslam {
                 }
                 if(pass)
                     continue;
-//    for (auto& q : qs) {
-//        i++;
-//        gtsam::Key ObjKey = key_value.first;
-//        ConstrainedDualQuadric *Obj = &(q);
+                //    for (auto& q : qs) {
+                //        i++;
+                //        gtsam::Key ObjKey = key_value.first;
+                //        ConstrainedDualQuadric *Obj = &(q);
                 gtsam::Vector3 radii = Obj->radii();
                 double lenth = radii[0];
                 double width = radii[1];
@@ -269,12 +152,12 @@ namespace gtsam_soslam {
                 cv::Mat T = cv::Mat::eye(4, 4, CV_32FC1);
                 cv::Mat R = cv::Mat::eye(4, 4, CV_32FC1);
 
-// set translation matrix
+                // set translation matrix
                 T.at<float>(0, 3) = pose.translation().x();
                 T.at<float>(1, 3) = pose.translation().y();
                 T.at<float>(2, 3) = pose.translation().z();
 
-// set rotation matrix
+                // set rotation matrix
                 gtsam::Rot3 rot = pose.rotation();
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
@@ -282,7 +165,7 @@ namespace gtsam_soslam {
                     }
                 }
 
-// concatenate rotation and translation matrices
+                // concatenate rotation and translation matrices
                 cv::Mat Twq = T * R;
                 // create a quadric.
                 cv::Mat Twq_t = Twq.t();
@@ -298,8 +181,7 @@ namespace gtsam_soslam {
         return mQuadricIm;
     }
 
-
-// BRIEF draw yolo text.
+    // BRIEF draw yolo text.
     cv::Mat FrameDrawer::DrawYoloInfo(cv::Mat &im, bool bText) {
         for (auto &box: Dboxes) {
             double x1 = box.bounds[0];
@@ -316,7 +198,7 @@ namespace gtsam_soslam {
                             cv::FONT_HERSHEY_DUPLEX,
                             1.0,
                             colors[0],
-                        // cv::Scalar(0,255,0), 
+                        // cv::Scalar(0,255,0),
                             2);
             }
 
@@ -334,57 +216,9 @@ namespace gtsam_soslam {
     void FrameDrawer::Update() {
         unique_lock<mutex> lock(mMutex);
         s->this_step.rgb.copyTo(mRGBIm);         // [EAO] copy color image.
-        Dboxes = s->this_step.detections;
-//    pTracker->mImGray.copyTo(mIm);
-//    pTracker->mCurrentFrame.mColorImage.copyTo(mRGBIm);         // [EAO] copy color image.
-//    pTracker->mCurrentFrame.mQuadricImage.copyTo(mQuadricIm);   // [EAO] copy quadric image.
+        Dboxes = s->this_step.detections;}
 
-//    mvCurrentKeys=pTracker->mCurrentFrame.mvKeys;
-//    N = mvCurrentKeys.size();
-//    mvbVO = vector<bool>(N,false);
-//    mvbMap = vector<bool>(N,false);
-
-        // NOTE [EAO]
-        // key line
-//    Dkeylines_raw = pTracker->mCurrentFrame.keylines_raw;
-//    Dkeylines_out = pTracker->mCurrentFrame.keylines_out;
-//    DTimeStamp = pTracker->mCurrentFrame.mTimeStamp;
-        // object detection results.
-//    Dboxes = s->this_step.detections;
-//    Dboxes = pTracker->mCurrentFrame.boxes;
-//    have_detected = pTracker->mCurrentFrame.have_detected;
-        // object line.
-//    DObjsLines = pTracker->mCurrentFrame.vObjsLines;
-
-//    mbOnlyTracking = pTracker->mbOnlyTracking;
-
-
-//    if(pTracker->mLastProcessedState==Tracking::NOT_INITIALIZED)
-//    {
-//        mvIniKeys=pTracker->mInitialFrame.mvKeys;
-//        mvIniMatches=pTracker->mvIniMatches;
-//    }
-//    else if(pTracker->mLastProcessedState==Tracking::OK)
-//    {
-//        for(int i=0;i<N;i++)
-//        {
-//            MapPoint* pMP = pTracker->mCurrentFrame.mvpMapPoints[i];
-//            if(pMP)
-//            {
-//                if(!pTracker->mCurrentFrame.mvbOutlier[i])
-//                {
-//                    if(pMP->Observations()>0)
-//                        mvbMap[i]=true;
-//                    else
-//                        mvbVO[i]=true;
-//                }
-//            }
-//        }
-//    }
-//    mState=static_cast<int>(pTracker->mLastProcessedState);
-    }
-
-// BRIEF [EAO] project quadrics from world to image.
+    // BRIEF [EAO] project quadrics from world to image.
     cv::Mat FrameDrawer::DrawQuadricProject(cv::Mat &im,
                                             const cv::Mat &P,   // projection matrix.
                                             const cv::Mat &axe, // axis length.
@@ -489,4 +323,4 @@ namespace gtsam_soslam {
 
         return im;
     }
-} //namespace ORB_SLAM
+} //namespace gtsam_soslam

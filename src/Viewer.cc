@@ -50,10 +50,10 @@ namespace gtsam_soslam {
         mViewpointZ = fSettings["Viewer.ViewpointZ"];
         mViewpointF = fSettings["Viewer.ViewpointF"];
 
-        mfx = fSettings["Camera.fx"];
-        mfy = fSettings["Camera.fy"];
-        mcx = fSettings["Camera.cx"];
-        mcy = fSettings["Camera.cy"];
+        mfx = s -> calib_rgb_.fx();
+        mfy = s -> calib_rgb_.fy();
+        mcx = s -> calib_rgb_.px();
+        mcy = s -> calib_rgb_.py();
 
     }
 

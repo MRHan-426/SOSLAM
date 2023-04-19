@@ -1,27 +1,12 @@
 /**
-* This file is part of ORB-SLAM2.
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-* 
-* Modification: EAO-SLAM
-* Version: 1.0
-* Created: 11/23/2019
-* Author: Yanmin Wu
-* E-mail: wuyanminmax@gmail.com
-*/
-
+ * @file MapDrawer.cc
+ * @author Raúl Mur-Artal, Yanmin Wu, thanks for your great work
+ * @modified by Zhewei Ye
+ * @Lastest modified on 19/04/2023
+ */
 #include "MapDrawer.h"
 
-// #include "MapPoint.h"
-// #include "KeyFrame.h"
-// #include "ProbabilityMapping.h"
-#include <pangolin/pangolin.h>
-#include <mutex>
-
-// #include "Object.h"
-
 namespace gtsam_soslam {
-
 
     MapDrawer::MapDrawer(SoSlamState *sState, Map* mMap, const string &strSettingPath) :
     s(sState),
@@ -152,7 +137,7 @@ namespace gtsam_soslam {
 //}
 
     void MapDrawer::Coordinate() {
-        // 绘制坐标系
+        // draw xyz frame
         glLineWidth(3);
         glBegin(GL_LINES);
         glColor3f(0.8f, 0.f, 0.f);
@@ -165,7 +150,6 @@ namespace gtsam_soslam {
         glVertex3f(0, 0, 0);
         glVertex3f(0, 0, 0.5);
         glEnd();
-
     }
 
     void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph) {

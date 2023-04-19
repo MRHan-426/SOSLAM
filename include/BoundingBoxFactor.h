@@ -1,20 +1,22 @@
-
 /**
  * @file BoundingBoxFactor.h
- * @date Apr 14, 2020
- * @author Lachlan Nicholson
- * @brief factor between Pose3 and ConstrainedDualQuadric
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
 
 #pragma once
 
+#include "ConstrainedDualQuadric.h"
+#include "AlignedBox2.h"
+
+#include <boost/bind/bind.hpp>
+#include <gtsam/base/numericalDerivative.h>
 #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/nonlinear/Expression.h>
 #include <gtsam/nonlinear/NonlinearFactor.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
-#include <AlignedBox2.h>
-#include <ConstrainedDualQuadric.h>
 
 namespace gtsam_soslam {
 

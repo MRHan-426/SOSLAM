@@ -5,8 +5,6 @@
 #include <opencv2/opencv.hpp>
 #include <Eigen/Core>
 
-//#include "Thirdparty/g2o/g2o/types/types_six_dof_expmap.h"
-
 using namespace std;
 using namespace Eigen;
 

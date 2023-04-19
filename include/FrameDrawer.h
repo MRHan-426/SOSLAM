@@ -1,34 +1,24 @@
 /**
-* This file is part of ORB-SLAM2.
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-* 
-* Modification: EAO-SLAM
-* Version: 1.0
-* Created: 05/16/2019
-* Author: Yanmin Wu
-* E-mail: wuyanminmax@gmail.com
-*/
+ * @file FrameDrawer.h
+ * @author Raúl Mur-Artal, Yanmin Wu, thanks for your great work
+ * @modified by Zhewei Ye
+ * @Lastest modified on 19/04/2023
+ */
 
 #ifndef FRAMEDRAWER_H
 #define FRAMEDRAWER_H
 
-// #include "Tracking.h"
-// #include "MapPoint.h"
+#include "SoSlam.h"
+#include "line_descriptor.hpp"
+#include "line_lbd_allclass.h"
+
 #include <vector>
-//#include "Map.h"
+#include <mutex>
 
-#include<opencv2/core/core.hpp>
-#include<opencv2/features2d/features2d.hpp>
-
-#include<mutex>
-
-// line.
-#include <line_lbd/line_descriptor.hpp>
-#include <line_lbd/line_lbd_allclass.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-#include "SoSlam.h"
 
 using namespace std;
 namespace gtsam_soslam {
@@ -38,7 +28,7 @@ namespace gtsam_soslam {
 
     class FrameDrawer {
     public:
-        FrameDrawer(SoSlamState *sState);
+        explicit FrameDrawer(SoSlamState *sState);
 
         // Update info from the last processed frame.
         void Update();
@@ -46,7 +36,6 @@ namespace gtsam_soslam {
         // Draw last processed frame.
         cv::Mat DrawFrame();
 
-        // [EAO-SLAM]
         cv::Mat DrawYoloFrame();
 
         cv::Mat GetRawColorImage();
@@ -54,8 +43,6 @@ namespace gtsam_soslam {
         cv::Mat GetQuadricImage(const bool menuShowQuadricObj, const bool menuShowGroundTruth);
 
     protected:
-
-        void DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText);
 
         cv::Mat DrawYoloInfo(cv::Mat &im, bool bText);
 
@@ -186,6 +173,6 @@ namespace gtsam_soslam {
         std::mutex mMutex;
     };
 
-} //namespace ORB_SLAM
+} //namespace gtsam_soslam
 
 #endif // FRAMEDRAWER_H

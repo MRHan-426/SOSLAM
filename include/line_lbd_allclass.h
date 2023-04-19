@@ -6,7 +6,7 @@
 
 # pragma once
 
-#include <line_lbd/line_descriptor.hpp>
+#include "line_descriptor.hpp"
 
 // #include "opencv2/core/utility.hpp"
 // #include <opencv4/opencv2/opencv.hpp>

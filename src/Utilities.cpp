@@ -1,23 +1,4 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
-/**
- * @file Utilities.cpp
- * @date Apr 14, 2020
- * @author Lachlan Nicholson
- * @brief a namespace providing a number of useful functions
- */
-
-#include <Utilities.h>
-#include <iostream>
+#include "Utilities.h"
 
 using namespace std;
 using namespace Eigen;
@@ -34,14 +15,12 @@ namespace gtsam_soslam {
             if (disc < 1e-10) {
                 disc = 0.0;
             }
-
             // throw exception if imaginary results
             if (disc < 0.0) {
                 stringstream ss;
                 ss << "poly solving failed, disc: " << disc << endl;
                 throw std::runtime_error(ss.str());
             }
-
             // calculate and return roots
             double root1 = (-b + std::sqrt(disc)) / (2.0 * a);
             double root2 = (-b - std::sqrt(disc)) / (2.0 * a);
@@ -64,11 +43,6 @@ namespace gtsam_soslam {
                                    C(1, 1) * y * y + 2 * C(1, 2) * y + C(2, 2));
         }
 
-        /* ************************************************************************* */
-        gtsam::Pose3 interpolate(const gtsam::Pose3 &p1, const gtsam::Pose3 &p2,
-                                 const double &percent) {
-            return gtsam::interpolate<gtsam::Pose3>(p1, p2, percent);
-        }
 
         /* ************************************************************************* */
         gtsam::Matrix44 matrix(const gtsam::Pose3 &pose,
@@ -152,10 +126,9 @@ namespace gtsam_soslam {
             gtsam::Matrix vs(3, n);
             // Get each observation point
             for (int i = 0; i < n; ++i) {
-                gtsam::Pose3 op = obs_poses[i];
+                const gtsam::Pose3& op = obs_poses[i];
                 gtsam::Vector3 p = op.translation();
                 gtsam::Vector3 v = op.rotation().matrix().col(0);
-
                 ps.col(i) = p;
                 vs.col(i) = v;
             }
@@ -175,7 +148,6 @@ namespace gtsam_soslam {
                 const gtsam::Pose3 &camera_pose
 
         ) {
-
             gtsam::NonlinearFactorGraph sub_graph;
             gtsam::Values initial_estimate;
             auto noise_prior = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector6::Zero());
@@ -184,15 +156,12 @@ namespace gtsam_soslam {
             sub_graph.add(ssc);
             sub_graph.add(psc);
 
-            //      sub_graph.add(syc);
-            std::cout << "###############################" << std::endl;
-            std::cout << "BALL: " << bbs.objectKey() << std::endl;
             gtsam::Point3 localPoint(0, 0, 2);
             gtsam::Point3 globalPoint = camera_pose.transformFrom(localPoint);
             // set a prior quadric
             ConstrainedDualQuadric quadric(gtsam::Pose3(gtsam::Rot3(), globalPoint), gtsam::Vector3(1, 1, 1));
 
-            //        ConstrainedDualQuadric quadric;
+            // ConstrainedDualQuadric quadric;
             initial_estimate.insert(bbs.objectKey(), quadric);
             initial_estimate.insert(bbs.poseKey(), camera_pose);
 
@@ -202,9 +171,6 @@ namespace gtsam_soslam {
 
             ConstrainedDualQuadric initial_quadric = result.at<ConstrainedDualQuadric>(bbs.objectKey());
             gtsam::Pose3 initial_pose = result.at<gtsam::Pose3>(bbs.poseKey());
-            //        cout<<"camera pose"<<endl<<camera_pose<<endl;
-            //        cout<<"inited pose"<<endl<<initial_pose<<endl;
-            //        std::cout << initial_quadric.pose() << std::endl << initial_quadric.radii() << std::endl;
             return initial_quadric;
         }
 
@@ -306,6 +272,7 @@ namespace gtsam_soslam {
             //            i++;
             //        }
         }
+
         Matrix4d getTransformFromVector(VectorXd& pose)
         {
             if( pose.rows() == 7)
@@ -320,9 +287,10 @@ namespace gtsam_soslam {
                 return homogeneous_matrix;
             }
         }
+
         PointCloud* pclToQuadricPointCloudPtr(PointCloudPCL::Ptr &pCloud)
         {
-            PointCloud* cloudPtr = new PointCloud;
+            auto* cloudPtr = new PointCloud;
             PointCloud& cloud = *cloudPtr;
             int num = pCloud->points.size();
             for(int i=0;i<num;i++){

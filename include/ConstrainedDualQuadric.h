@@ -1,31 +1,16 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
- * @file ConstrainedDualQuadric.h
- * @date Apr 14, 2020
- * @author Lachlan Nicholson
- * @brief a constrained dual quadric
+ * @file ConstrainedDualQuadric.cpp
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
 
 #pragma once
+#include <random>
+#include <iostream>
 
-// #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/nonlinear/Values.h>
-#include <AlignedBox2.h>
-#include <AlignedBox3.h>
-
-
-#include <random>
 
 namespace gtsam_soslam {
 
@@ -109,13 +94,7 @@ namespace gtsam_soslam {
 
         /** Returns the normalized dual quadric in matrix form */
         gtsam::Matrix44 normalizedMatrix() const;
-
-        /**
-         * Calculates the AlignedBox3 bounds of the ellipsoid
-         * @return 3D axis aligned bounding box
-         */
-        AlignedBox3 bounds() const;
-
+        
         /** Returns true if quadric centroid has negative depth */
         bool isBehind(const gtsam::Pose3 &cameraPose) const;
 
@@ -167,6 +146,7 @@ namespace gtsam_soslam {
         double calculateIntersectionOnXY(const ConstrainedDualQuadric& e1, const ConstrainedDualQuadric& e2);
 
         double calculateIntersectionOnZ(const ConstrainedDualQuadric& e1, const ConstrainedDualQuadric& e2);
+
         /// @}
         /// @name Testable group traits
         /// @{

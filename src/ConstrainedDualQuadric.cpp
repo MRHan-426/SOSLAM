@@ -1,28 +1,13 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
  * @file ConstrainedDualQuadric.cpp
- * @date Apr 14, 2020
- * @author Lachlan Nicholson
- * @brief a constrained dual quadric
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
-#include "../src/Polygon/Polygon.hpp"
-
-#include <Utilities.h>
-#include <AlignedBox2.h>
-#include <ConstrainedDualQuadric.h>
-#include <QuadricCamera.h>
-#include <eigen3/Eigen/Eigenvalues>
-#include <iostream>
+#include "ConstrainedDualQuadric.h"
+#include "AlignedBox2.h"
+#include "Polygon.hpp"
+#include "Utilities.h"
 
 using namespace std;
 
@@ -116,34 +101,6 @@ namespace gtsam_soslam {
         return Q / Q(3, 3);
     }
 
-/* ************************************************************************* */
-// TODO: vectorize
-    AlignedBox3 ConstrainedDualQuadric::bounds() const {
-        gtsam::Matrix44 dE = this->matrix();
-        double x_min =
-                (dE(0, 3) + std::sqrt(dE(0, 3) * dE(0, 3) - (dE(0, 0) * dE(3, 3)))) /
-                dE(3, 3);
-        double y_min =
-                (dE(1, 3) + std::sqrt(dE(1, 3) * dE(1, 3) - (dE(1, 1) * dE(3, 3)))) /
-                dE(3, 3);
-        double z_min =
-                (dE(2, 3) + std::sqrt(dE(2, 3) * dE(2, 3) - (dE(2, 2) * dE(3, 3)))) /
-                dE(3, 3);
-        double x_max =
-                (dE(0, 3) - std::sqrt(dE(0, 3) * dE(0, 3) - (dE(0, 0) * dE(3, 3)))) /
-                dE(3, 3);
-        double y_max =
-                (dE(1, 3) - std::sqrt(dE(1, 3) * dE(1, 3) - (dE(1, 1) * dE(3, 3)))) /
-                dE(3, 3);
-        double z_max =
-                (dE(2, 3) - std::sqrt(dE(2, 3) * dE(2, 3) - (dE(2, 2) * dE(3, 3)))) /
-                dE(3, 3);
-        return AlignedBox3((gtsam::Vector6() << std::min(x_min, x_max),
-                std::max(x_min, x_max), std::min(y_min, y_max),
-                std::max(y_min, y_max), std::min(z_min, z_max),
-                std::max(z_min, z_max))
-                                   .finished());
-    }
 
 /* ************************************************************************* */
     bool ConstrainedDualQuadric::isBehind(const gtsam::Pose3 &cameraPose) const {

@@ -1,29 +1,13 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
  * @file DualConic.cpp
- * @date Apr 14, 2020
- * @author Lachlan Nicholson
- * @brief a dual conic
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
 
-#include <gtsam/base/numericalDerivative.h>
-#include <QuadricProjectionException.h>
-#include <Utilities.h>
 #include "DualConic.h"
-#include <QuadricCamera.h>
-#include <cmath>
-#include <iomanip>
-#include <iostream>
+#include "Utilities.h"
+#include "QuadricProjectionException.h"
 
 using namespace std;
 
@@ -98,14 +82,11 @@ namespace gtsam_soslam {
     AlignedBox2 DualConic::smartBounds(
             const boost::shared_ptr<gtsam::Cal3_S2> &calibration,
             gtsam::OptionalJacobian<4, 9> H) const {
-        // calculate image dimensions from calibration
-        // double imageWidth = calibration->px() * 2.0;
-        // double imageHeight = calibration->py() * 2.0;
+
         double imageWidth = 640.0;
         double imageHeight = 480.0;
         AlignedBox2 imageBounds(0.0, 0.0, imageWidth, imageHeight);
 
-        // if quadric is fully visible, use the faster simple bounds
         Eigen::Matrix<double, 4, 9> simpleJacobian;
         AlignedBox2 simpleBounds = this->bounds(H ? &simpleJacobian : 0);
         if (imageBounds.contains(simpleBounds)) {
@@ -115,16 +96,6 @@ namespace gtsam_soslam {
             return simpleBounds;
         }
 
-        // ensure quadric is at least partially visible
-        // NOTE: this will not work because bounds can be inside whilst conic is
-        // completely outside imagebounds if (!imageBounds.contains(simpleBounds) &&
-        // !imageBounds.intersects(simpleBounds)) {
-        //   throw QuadricProjectionException("SimpleBounds outside ImageBounds,
-        //   implies quadric not visible");
-        // }
-
-        // cast dual conic to long double before inverting
-        /// NOTE: this helps keep polynomials from having -ve desc
         Eigen::Matrix<long double, 3, 3> dualConic = dC_.cast<long double>();
         dualConic = dualConic / dualConic(2, 2);
 
@@ -146,22 +117,6 @@ namespace gtsam_soslam {
                              ys[0]);
             gtsam::Point2 p3((-C(1, 0) * 2 * ys[1] - C(2, 0) * 2) / (2 * C(0, 0)),
                              ys[1]);
-
-            // solve intersection of dC/dx and conic C (solving x values first)
-            // Vector2 xs = gtsam::utils::solvePolynomial(
-            //   4*pow(C(0,0),2)*C(1,1)/pow(C(1,0)*2,2) - C(0,0),
-            //   4*C(0,0)*C(1,1)*C(2,0)*2/pow(C(1,0)*2,2) - 2*C(0,0)*C(2,1)*2/C(1,0)*2,
-            //   C(1,1)*pow(C(2,0)*2,2)/pow(C(1,0)*2,2) - C(2,0)*2*C(2,1)*2/C(1,0)*2 +
-            //   C(2,2)
-            // );
-
-            // solve intersection of dC/dy and conic C (solving y values first)
-            // Vector2 ys = gtsam::utils::solvePolynomial(
-            //   4*C(0,0)*pow(C(1,1),2)/pow(C(1,0)*2,2) - C(1,1),
-            //   4*C(0,0)*C(1,1)*C(2,1)*2/pow(C(1,0)*2,2) -
-            //   (2*C(1,1)*C(2,0)*2/C(1,0)*2), C(0,0)*pow(C(2,1)*2,2)/pow(C(1,0)*2,2) -
-            //   (C(2,0)*2*C(2,1)*2/C(1,0)*2) + C(2,2)
-            // );
 
             // solve intersection of dC/dy and conic C (solving x values first)
             gtsam::Vector2 xs = utils::solvePolynomial(
@@ -246,9 +201,6 @@ namespace gtsam_soslam {
             throw std::runtime_error(
                     "no valid conic points inside image dimensions, implies quadric not "
                     "visible");
-            // simpleBounds.print("Failed SimpleBounds:");
-            // throw QuadricProjectionException("No valid conic points inside image
-            // dimensions, implies quadric not visible");
         }
         auto minMaxX = std::minmax_element(
                 validPoints.begin(), validPoints.end(),

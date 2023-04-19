@@ -1,26 +1,18 @@
 /**
-* This file is part of ORB-SLAM2.
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-* 
-* Modification: EAO-SLAM
-* Version: 1.0
-* Created: 11/23/2019
-* Author: Yanmin Wu
-* E-mail: wuyanminmax@gmail.com
-*/
+ * @file MapDrawer.h
+ * @author Raúl Mur-Artal, Yanmin Wu, thanks for your great work
+ * @modified by Zhewei Ye
+ * @Lastest modified on 19/04/2023
+ */
 
 #ifndef MAPDRAWER_H
 #define MAPDRAWER_H
 
-//#include"Map.h"
-#include<opencv2/core/core.hpp>
-#include"Map.h"
-// #include"KeyFrame.h"
-#include<pangolin/pangolin.h>
-
-#include<mutex>
 #include "SoSlam.h"
+#include "Map.h"
+#include <mutex>
+#include <pangolin/pangolin.h>
+#include <opencv2/core/core.hpp>
 
 using namespace std;
 
@@ -31,6 +23,7 @@ namespace gtsam_soslam {
         MapDrawer(SoSlamState *sState, Map* mMap, const string &strSettingPath);
 
         SoSlamState *s;
+
         Map* mpMap;
 
         void DrawSemiDense(const double sigma);
@@ -42,9 +35,10 @@ namespace gtsam_soslam {
         void DrawFrame();
 
         bool drawPoints();
-        void drawPointCloudLists(); // draw all the point cloud lists
-        void drawPointCloudWithOptions(const std::map<std::string,bool> &options); // draw the point cloud lists with options opened
 
+        void drawPointCloudLists(); // draw all the point cloud lists
+
+        void drawPointCloudWithOptions(const std::map<std::string,bool> &options); // draw the point cloud lists with options opened
 
         void Coordinate();
 
@@ -52,6 +46,7 @@ namespace gtsam_soslam {
 
         // BRIEF [EAO-SLAM] draw objects.
         void DrawObject( const bool QuadricObj);
+
         void DrawGroundTruthObject();
 
         void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
@@ -70,12 +65,10 @@ namespace gtsam_soslam {
         float mPointSize;
         float mCameraSize;
         float mCameraLineWidth;
-
         cv::Mat mCameraPose;
-
         std::mutex mMutexCamera;
     };
 
-} //namespace ORB_SLAM
+} //namespace gtsam_soslam
 
 #endif // MAPDRAWER_H

@@ -52,6 +52,8 @@ namespace gtsam_soslam {
         // Function to initialize QUADRICS
         std::vector<gtsam::Vector3> rot_evaluation(SoSlamState &state) {
             //TODO
+            std::vector<gtsam::Vector3> temp;
+            return temp;
         }
     } //namespace evaluate
 } //namespace gtsam_soslam

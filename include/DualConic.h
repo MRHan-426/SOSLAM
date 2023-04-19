@@ -1,27 +1,18 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
  * @file DualConic.h
- * @date Apr 14, 2020
- * @author Lachlan Nich*olson
- * @brief a dual conic
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
 
 #pragma once
-
+#include "AlignedBox2.h"
+#include <cmath>
+#include <iostream>
 #include <gtsam/base/Testable.h>
 #include <gtsam/geometry/Cal3_S2.h>
 #include <gtsam/geometry/Pose2.h>
-#include <AlignedBox2.h>
+#include <gtsam/base/numericalDerivative.h>
 
 namespace gtsam_soslam {
 

@@ -8,12 +8,19 @@
 #include "Viewer.h"
 #include "MapDrawer.h"
 
+bool check_file_exists(const std::string& path);
+
+void check_input_files_exist(const std::string& img_path, const std::string& dep_path,\
+                                const std::string& xml_path, const std::string& calib_file,\
+                                const std::string& odom_file);
+
+gtsam::Pose3 get_initial_pose(const std::string& path);
+
 void run(gtsam_soslam::DataSource &data_source, \
             gtsam_soslam::BaseAssociator &associator, \
             gtsam_soslam::BaseDetector &detector, \
             const gtsam::Pose3 &initial_pose, \
-            const bool &use_3D_visualization = false, \
-            const bool &output_quadrics_image = false
+            const bool &use_3D_visualization = true
 );
 
 #endif // MAIN_H

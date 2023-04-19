@@ -1,15 +1,10 @@
 #ifndef ELLIPSOIDSLAM_MAP_H
 #define ELLIPSOIDSLAM_MAP_H
 
-//#include "Ellipsoid.h"
 #include "Geometry.h"
-//#include "Plane.h"
 #include <mutex>
 #include <set>
-
 #include <opencv2/opencv.hpp>
-
-//using namespace g2o;
 
 namespace gtsam_soslam
 {

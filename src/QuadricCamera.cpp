@@ -1,22 +1,10 @@
-/* ----------------------------------------------------------------------------
-
- * QuadricSLAM Copyright 2020, ARC Centre of Excellence for Robotic Vision,
- Queensland University of Technology (QUT)
- * Brisbane, QLD 4000
- * All Rights Reserved
- * Authors: Lachlan Nicholson, et al. (see THANKS for the full author list)
- * See LICENSE for the license information
-
- * -------------------------------------------------------------------------- */
-
 /**
  * @file QuadricCamera.cpp
- * @date Apr 16, 2020
- * @author Lachlan Nicholson
- * @brief a class responsible for projecting quadrics
+ * @author Lachlan Nicholson, thanks for your great work
+ * @modified by ROB530 group6
+ * @Lastest modified on 19/04/2023
  */
 
-#include <gtsam/base/numericalDerivative.h>
 #include "Utilities.h"
 #include "QuadricCamera.h"
 
@@ -74,6 +62,7 @@ namespace gtsam_soslam {
     }
 
 /* ************************************************************************* */
+// We think there is error here.
     std::vector<gtsam::Vector4> QuadricCamera::project(
             const AlignedBox2 &box, const gtsam::Pose3 &pose,
             const boost::shared_ptr<gtsam::Cal3_S2> &calibration) {
