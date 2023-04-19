@@ -1,10 +1,14 @@
 #  SO-SLAM
 
+
 <p align="center">
   <img src="https://github.com/MRHan-426/SOSLAM/blob/master/.assets/3%2000_00_00-00_00_30.gif" alt="gif">
 </p>
      
-     
+![build passing](https://img.shields.io/badge/build-passing-brightgreen)
+[![License](https://img.shields.io/github/license/MRHan-426/SOSLAM)](./LICENSE.txt)
+![Primary language](https://img.shields.io/github/languages/top/MRHan-426/SOSLAM)
+![ROB530](https://img.shields.io/badge/ROB530-group6-orange)
 
 
 This is Team 6's final project git repository for ROB530: Mobile Robotics. 
