@@ -9,6 +9,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Primary language](https://img.shields.io/github/languages/top/MRHan-426/SOSLAM)
 ![ROB530](https://img.shields.io/badge/ROB530-group6-orange)
+![visitors](https://visitor-badge.glitch.me/badge?page_id=littleTreeme)
 
 
 This is Team 6's final project git repository for ROB530: Mobile Robotics. 
@@ -62,7 +63,8 @@ set(GTSAM_USE_SYSTEM_EIGEN ON)
 Then:
 
 ```shell
-mkdir build && cd build
+mkdir build
+cd build
 cmake ..
 make check
 sudo make install
@@ -89,6 +91,7 @@ Then:
 
 ```shell
 mkdir build
+cd build
 cmake ..
 make
 ```
