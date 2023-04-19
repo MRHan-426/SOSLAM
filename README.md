@@ -58,7 +58,7 @@ set(GTSAM_USE_SYSTEM_EIGEN ON)
 Then:
 
 ```shell
-mkdir build
+mkdir build && cd build
 cmake ..
 make check
 sudo make install
