@@ -6,7 +6,7 @@
 </p>
      
 ![build passing](https://img.shields.io/badge/build-passing-brightgreen)
-[![License](https://img.shields.io/github/license/MRHan-426/SOSLAM)](./LICENSE.txt)
+![License](https://img.shields.io/badge/license-MIT-green)
 ![Primary language](https://img.shields.io/github/languages/top/MRHan-426/SOSLAM)
 ![ROB530](https://img.shields.io/badge/ROB530-group6-orange)
 
