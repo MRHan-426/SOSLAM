@@ -56,10 +56,11 @@ namespace gtsam_soslam {
     }
 
     void run(DataSource &data_source, BaseAssociator &associator, BaseDetector &detector, \
-        const gtsam::Pose3 &initial_pose, const bool &use_3D_visualization, const bool &optimizer_batch) {
+        const gtsam::Pose3 &initial_pose, const string example_type, const bool &use_3D_visualization, \
+        const bool &optimizer_batch) {
         Map* mMap = new Map();
         string YamlFile = "../config.yaml";
-        auto* state = new SoSlamState(mMap, initial_pose, optimizer_batch);
+        auto* state = new SoSlamState(example_type, mMap, initial_pose, optimizer_batch);
         auto *q = new SoSlam(
                 data_source, //DataSource
                 associator,//BaseAssociator
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]) {
         gtsam_soslam::DummyData data_source;
         gtsam_soslam::DummyAssociator associator;
         gtsam_soslam::DummyDetector detector;
-        gtsam_soslam::run(data_source, associator, detector, initial_pose, use_3D_visualization, true);
+        gtsam_soslam::run(data_source, associator, detector, initial_pose, example_type, use_3D_visualization, true);
     } else {
         const std::string &img_path = "../input/img/";
         const std::string &dep_path = "../input/depth/";
@@ -123,7 +124,7 @@ int main(int argc, char *argv[]) {
         gtsam_soslam::HandMadeDetector detector(xml_path);
         gtsam_soslam::HandMadeData data_source(img_path, dep_path, xml_path, calib_file, odom_file);
         const gtsam::Pose3 &initial_pose = gtsam_soslam::get_initial_pose(odom_file);
-        gtsam_soslam::run(data_source, associator, detector, initial_pose, use_3D_visualization, false);
+        gtsam_soslam::run(data_source, associator, detector, initial_pose, example_type, use_3D_visualization, false);
     }
 
     return 0;

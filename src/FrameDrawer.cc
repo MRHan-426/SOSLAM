@@ -72,7 +72,7 @@ namespace gtsam_soslam {
             }
         }
         if(menuShowGroundTruth) {
-            std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
+            std::vector<ConstrainedDualQuadric> groundTruthQuad = s->groundTruthes[s->dataset];
             for (auto &Obj: groundTruthQuad) {
                 gtsam::Vector3 radii = Obj.radii();
                 double lenth = radii[0];

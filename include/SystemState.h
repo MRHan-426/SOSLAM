@@ -26,7 +26,7 @@
 #include <gtsam/geometry/Cal3.h>
 
 namespace gtsam_soslam {
-
+    typedef std::unordered_map<std::string, std::vector<ConstrainedDualQuadric>> GroundTruthSet;
     class Detection {
     public:
         std::string label;
@@ -122,12 +122,17 @@ namespace gtsam_soslam {
         gtsam::Cal3_S2 calib_rgb_;
         StepState prev_step;
         StepState this_step;
+        GroundTruthSet groundTruthes;
+        string dataset;
 
 
-        explicit SoSlamState(Map *mMap, const gtsam::Pose3 &initial_pose = Constants::POSES[0], const bool &optimizer_batch = true)
-                :   mpMap(mMap),
+        explicit SoSlamState(const string dataset, Map *mMap, const gtsam::Pose3 &initial_pose = Constants::POSES[0], \
+        const bool &optimizer_batch = true, const GroundTruthSet gTruthes = Constants::groundTruthes())
+                :   dataset(dataset),
+                    mpMap(mMap),
                     initial_pose_(initial_pose),
-                    optimizer_batch_(optimizer_batch) {
+                    optimizer_batch_(optimizer_batch),
+                    groundTruthes(gTruthes){
 
             isam_params_.relinearizeThreshold = 0.05;
             isam_params_.relinearizeSkip = 10;

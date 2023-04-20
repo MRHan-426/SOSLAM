@@ -299,32 +299,62 @@ namespace gtsam_soslam {
 //            updateInitialEstimates(s.graph_, s.estimates_);
 
             //IOU
-
+            static vector<vector<double>> IoUErrors(20, vector<double>(2,0)); //count, error
             //Rot
-            std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
-            static vector<vector<double>> error(groundTruthQuad.size(), vector<double>(3,0));
+            std::vector<ConstrainedDualQuadric> groundTruthQuad = s.groundTruthes[s.dataset];
+            static vector<vector<double>> angleErrors(20, vector<double>(4, 0)); //count, error y p r
             const gtsam::Values vEstimates = s.estimates_;
             auto current_ps_qs = utils::ps_and_qs_from_values(vEstimates);
             std::map<gtsam::Key, ConstrainedDualQuadric> cqs = current_ps_qs.second;
             for (auto &Obj: cqs) {
                 gtsam::Key key = Obj.first;
+                bool pass=true;
+                auto dets = s.this_step.detections;
+                for(auto &det : dets){
+                    if(key == det.quadric_key)
+                        pass=false;
+                }
+                if(pass)
+                    continue;
+
                 int idx = gtsam::Symbol(key).index();
                 auto ypr = Obj.second.pose().rotation().ypr();
                 auto groundTruthYpr = groundTruthQuad[idx-1].pose().rotation().ypr();
-                cout<<"quad "<<idx<<endl;
-                for(int i =0; i<3; i++){
-                    double angleError=fabs(ypr[i]-groundTruthYpr[i])*180.0/M_PI;
+
+                angleErrors[idx - 1][0]++;
+                for(int i =1; i<4; i++){
+                    double angleError=fabs(ypr[i-1]-groundTruthYpr[i-1])*180.0/M_PI;
                     double smallestAngleError = angleError <= 90.0 ? angleError : 180.0 - angleError;
-                    if(count==1){ //init error
-                        error[idx-1][i] = smallestAngleError;
+                    if(angleErrors[idx - 1][0]==1){ //init angleErrors
+                        angleErrors[idx - 1][i] = smallestAngleError;
                     }
                     else{
-                        int cur_count=count/5;
-                        error[idx-1][i] = error[idx-1][i]*(cur_count-1)/cur_count+smallestAngleError/cur_count;
+                        int cur_count = angleErrors[idx - 1][0];
+                        angleErrors[idx - 1][i] = angleErrors[idx - 1][i] * (cur_count - 1) / cur_count + smallestAngleError / cur_count;
                     }
-                    cout << smallestAngleError << " " << error[idx-1][i] << endl;
+//                    cout << smallestAngleError << " " << angleErrors[idx - 1][i] << endl;
                 }
-                Obj.second.calculateIntersectionError(groundTruthQuad[idx-1],Obj.second);
+                IoUErrors[idx - 1][0]++;
+                double ioUError=Obj.second.calculateIntersectionError(groundTruthQuad[idx-1],Obj.second);
+                if(IoUErrors[idx - 1][0]==1){ //init angleErrors
+                    IoUErrors[idx - 1][1] = ioUError;
+                }
+                else{
+                    int cur_count=IoUErrors[idx - 1][0];
+                    IoUErrors[idx - 1][1] = IoUErrors[idx - 1][1] * (cur_count - 1) / cur_count + ioUError / cur_count;
+                }
+//                cout<<"average IoU "<<IoUErrors[idx - 1][1]<<endl;
+            }
+            for (auto &Obj: cqs) {
+                gtsam::Key key = Obj.first;
+                int idx = gtsam::Symbol(key).index();
+                cout<<"quad "<<idx<<endl;
+                cout<<"average Rot: "<<endl;
+                for(int i =1; i<4; i++){
+                    cout<< angleErrors[idx - 1][i]<<" " ;
+                }
+                cout << endl;
+                cout<<"average IoU: "<<IoUErrors[idx - 1][1]<<endl;
             }
         }
         s.prev_step = *n;

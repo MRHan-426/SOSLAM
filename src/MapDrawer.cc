@@ -386,7 +386,7 @@ namespace gtsam_soslam {
     } // draw objects END ----------------------------------------------------------------------------
     void MapDrawer::DrawGroundTruthObject()
     {
-        std::vector<ConstrainedDualQuadric> groundTruthQuad = Constants::groundTruthQuadrics();
+        std::vector<ConstrainedDualQuadric> groundTruthQuad = s->groundTruthes[s->dataset];
         vector<cv::Mat> object_cen;
 
         int i = -1;
