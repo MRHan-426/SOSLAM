@@ -9,7 +9,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Primary language](https://img.shields.io/github/languages/top/MRHan-426/SOSLAM)
 ![ROB530](https://img.shields.io/badge/ROB530-group6-orange)
-![Visitors](https://api.visitorbadge.io/api/daily?path=https%3A%2F%2Fgithub.com%2FMRHan-426%2FSOSLAM&label=visitors&countColor=%232ccce4&style=flat)
+![Visitors](https://api.visitorbadge.io/api/daily?path=https%3A%2F%2Fgithub.com%2FMRHan-426%2FSOSLAM&label=VISITORS%20TODAY&countColor=%232ccce4&style=flat)
 
 This is Team 6's final project git repository for ROB530: Mobile Robotics. 
 
@@ -298,4 +298,4 @@ Thanks for the great work:
 
 - [x] 8. Doing experiments, Record Video. 
 - [ ] 9. Write final report.
-- [ ] 10. Modify code, make it clear.
+- [x] 10. Modify code, make it clear.
