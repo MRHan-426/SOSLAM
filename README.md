@@ -162,7 +162,7 @@ There are detailed configurations in **config.yaml**, please change if you need.
 
 
 
-+ Project Document: [**[PDF]**](TODO)
++ Project Document: [**[PDF]**](https://github.com/MRHan-426/SOSLAM/blob/master/.assets/rob530_group6_final_report.pdf)
 
 
 
@@ -297,5 +297,5 @@ Thanks for the great work:
 4.14 ~ 4.16 TODO list
 
 - [x] 8. Doing experiments, Record Video. 
-- [ ] 9. Write final report.
+- [x] 9. Write final report.
 - [x] 10. Modify code, make it clear.
