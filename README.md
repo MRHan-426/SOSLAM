@@ -9,7 +9,6 @@
 ![Primary language](https://img.shields.io/github/languages/top/MRHan-426/SOSLAM)
 ![build passing](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Visitors](https://api.visitorbadge.io/api/daily?path=https%3A%2F%2Fgithub.com%2FMRHan-426%2FSOSLAM&label=VISITORS%20TODAY&countColor=%232ccce4&style=flat)
 
 This is Team 6's final project git repository for ROB530: Mobile Robotics. 
 
